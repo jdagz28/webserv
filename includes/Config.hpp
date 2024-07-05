@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 22:38:46 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/07/05 20:30:25 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/07/05 22:27:32 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 #include <string>
 #include <exception>
+#include <utility>
 
 #define DEFAULT_CONFIG "./conf/default.conf"
 
@@ -22,9 +23,9 @@
 class Config
 {
     private:
-        bool            error;
-        std::string     errorMsg;
-
+        std::pair<int, std::string>     error;
+        
+        bool    validPath(const std::string &configPath);
         bool    validExtension(const std::string &configPath);
         void    checkFile(const std::string &configPath);
     
