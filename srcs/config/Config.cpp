@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 22:38:59 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/07/05 03:35:14 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/07/05 20:29:26 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,10 +16,15 @@
 Config::Config(const std::string &configPath)
     : error(false), errorMsg("")
 {
-    if (configPath != DEFAULT_CONFIG)
-        checkFile(configPath);
-    if (isError()) //!
-        std::cerr << errorMsg << std::endl;
+    try
+    {
+        if (configPath != DEFAULT_CONFIG)
+            checkFile(configPath);
+    }
+    catch (const configException &e)
+    {
+        std::cerr << e.what() << std::endl;
+    } 
 }
 
 Config::Config(const Config &copy)
@@ -56,13 +61,13 @@ void    Config::checkFile(const std::string &configPath)
     {
         error = true;
         errorMsg = "No configuration file provided.";
-        return ;
+        throw configException(errorMsg);
     }
     if (validExtension(configPath) == false)
     {
         error = true;
         errorMsg = "Invalid configuration file type.";
-        return ;
+        throw configException(errorMsg);
     }
     
 }
@@ -70,4 +75,9 @@ void    Config::checkFile(const std::string &configPath)
 bool    Config::isError() const
 {
     return (error);
+}
+
+const char *Config::configException::what() const throw()
+{
+    return (exceptMsg.c_str());
 }
