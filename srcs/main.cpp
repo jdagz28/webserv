@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/05 00:23:30 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/07/05 03:24:41 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/07/07 02:23:56 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include <cstdlib>
 #include <string>
 #include "Config.hpp"
+#include "debug.hpp"
 
 
 std::string getConfigPath(int argc, char **argv)
@@ -34,9 +35,11 @@ int main(int argc, char **argv)
     }
 
     std::string configPath = getConfigPath(argc, argv);
-    
-    
+      
     Config  config(configPath);
+    
+    printConfigData(config);
+    
     return (EXIT_SUCCESS);
 }
 

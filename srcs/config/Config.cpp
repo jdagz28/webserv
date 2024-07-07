@@ -6,22 +6,26 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 22:38:59 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/07/05 22:27:31 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/07/07 03:02:26 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Config.hpp"
+#include "webserv.hpp"
 #include <iostream>
 #include <fstream>
+#include <sstream>
 
 Config::Config(const std::string &configPath)
-    : error(std::make_pair(0, ""))
+    : _error(std::make_pair(0, "")), _serverCount(0)
 {
     try
     {
         if (configPath != DEFAULT_CONFIG)
             checkFile(configPath);
-        parseConfig(configPath);        
+        parseConfig(configPath);
+
+        
     }
     catch (const configException &e)
     {
@@ -70,47 +74,112 @@ void    Config::checkFile(const std::string &configPath)
 {
     if (configPath.empty())
     {
-        error = std::make_pair(1, "No configuration file provided.");
-        throw configException(error.second);
+        _error = std::make_pair(1, "No configuration file provided.");
+        throw configException(_error.second);
     }
     else if (validExtension(configPath) == false)
     {
-        error = std::make_pair(2, "Invalid configuration file type.");
-        throw configException(error.second);
+        _error = std::make_pair(2, "Invalid configuration file type.");
+        throw configException(_error.second);
     }
     else if (validPath(configPath) == false)
     {
-        error = std::make_pair(3, "Configuration file is not accessible.");
-        throw configException(error.second);
+        _error = std::make_pair(3, "Configuration file is not accessible.");
+        throw configException(_error.second);
     }
 
 }
 
-bool    Config::isError() const
+void    Config::parseLocationBlock(std::ifstream &infile, LocationConfig &locationConfig)
 {
-    if (error.first)
-        return (true);
-    return (false);
+    std::string line;
+    while(std::getline(infile, line))
+    {
+        if (line.find("}") != std::string::npos)
+            break;
+        
+        std::istringstream iss(line);
+        std::string token;
+        iss >> token;
+        if (!token.empty())
+        {
+            std::string directive = token;
+            std::string value;
+            std::getline(iss, value);
+            trimWhitespaces(value);
+            locationConfig.setDirective(directive, value);
+            if (directive == "root")
+                locationConfig.setPath(value);
+        }
+    }
 }
 
-/**
-    * parseConfig flow (with map)
-    * - parse the whole config 
-    * - parse per block: server, http, location (in their own class?)
-*/
+void    Config::parseServerBlock(std::ifstream &infile, ServerConfig &serverConfig)
+{
+    std::string line;
+    while (std::getline(infile, line))
+    {
+        if (line.find("}") != std::string::npos)
+            break;
+
+        std::istringstream iss(line);
+        std::string token;
+        iss >> token;
+        if (token == "Location")
+        {
+            LocationConfig locationConfig;
+            parseLocationBlock(infile, locationConfig);
+            serverConfig.setLocationConfig(locationConfig);
+        }
+        else
+        {
+            if (!token.empty())
+            {
+                std::string directive = token;
+                std::string value;
+                std::getline(iss, value);
+                trimWhitespaces(value);
+                serverConfig.setDirective(directive, value);
+                if (directive == "listen")
+                    serverConfig.setPort(value);
+                else if (directive == "server_name")
+                    serverConfig.setServerName(value);
+            }
+        }
+    }
+}
 
 void    Config::parseConfig(const std::string &configFile)
 {
-    std::ifstream   infile(configFile);
+    std::ifstream   infile(configFile.c_str());
 
     if (infile.fail())
     {
-        error = std::make_pair(3, "Configuration file is not accessible.");
-        throw configException(error.second);
+        _error = std::make_pair(3, "Configuration file is not accessible.");
+        throw configException(_error.second);
+    }
+
+    std::string line;
+    while (std::getline(infile, line))
+    {
+        std::istringstream iss(line);
+        std::string token;
+        iss >> token;
+        if (token == "server")
+        {
+            ServerConfig    serverConfig;
+            parseServerBlock(infile, serverConfig);
+            _serverConfig.push_back(serverConfig);
+            _serverCount++;
+        }
     }
        
 }
 
+const std::vector<ServerConfig>& Config::getServerConfig() const
+{
+    return (_serverConfig);
+}
 
 const char *Config::configException::what() const throw()
 {
