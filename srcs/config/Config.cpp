@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 22:38:59 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/07/07 03:02:26 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/07/08 02:23:45 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,9 +107,14 @@ void    Config::parseLocationBlock(std::ifstream &infile, LocationConfig &locati
             std::string value;
             std::getline(iss, value);
             trimWhitespaces(value);
-            locationConfig.setDirective(directive, value);
             if (directive == "root")
                 locationConfig.setPath(value);
+            if (directive != "{" && directive != "}")
+            {
+                std::vector<std::string> values = splitBySpaces(value);
+                for (size_t i = 0; i < values.size(); i++)
+                    locationConfig.setDirective(directive, values[i]);
+            }
         }
     }
 }
@@ -125,7 +130,7 @@ void    Config::parseServerBlock(std::ifstream &infile, ServerConfig &serverConf
         std::istringstream iss(line);
         std::string token;
         iss >> token;
-        if (token == "Location")
+        if (token == "location")
         {
             LocationConfig locationConfig;
             parseLocationBlock(infile, locationConfig);
@@ -139,11 +144,30 @@ void    Config::parseServerBlock(std::ifstream &infile, ServerConfig &serverConf
                 std::string value;
                 std::getline(iss, value);
                 trimWhitespaces(value);
-                serverConfig.setDirective(directive, value);
                 if (directive == "listen")
                     serverConfig.setPort(value);
                 else if (directive == "server_name")
                     serverConfig.setServerName(value);
+                if (directive != "{" && directive != "}")
+                {
+                    std::vector<std::string> values = splitBySpaces(value);
+                    if (directive == "error_page")
+                    {
+                        for (size_t i = 0; i < values.size(); i++)
+                        {
+                            if (i + 1 < values.size())
+                            {
+                                std::string errorCode = values[i];
+                                std::string errorPage = values[i + 1];
+                                serverConfig.setDirective(directive, errorCode + " " + errorPage);
+                            }
+                            i++;
+                        }
+                    }
+                    else
+                        for (size_t i = 0; i < values.size(); i++)
+                            serverConfig.setDirective(directive, values[i]);
+                }
             }
         }
     }
