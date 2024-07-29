@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/07 01:23:08 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/07/08 02:32:47 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/07/29 05:17:11 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,8 +52,7 @@ void    printConfigData(const Config &config)
             std::map<std::string, std::vector<std::string> >::const_iterator it;
             for (it = locationDirectives.begin(); it != locationDirectives.end(); it++)
             {
-                std::cout << "\t";
-                std::cout << "\t";
+                std::cout << "\t" << "\t";
                 std::cout << it->first << std::endl;
                 const std::vector<std::string> &values = it->second;
                 for (size_t j = 0; j < values.size(); j++)
