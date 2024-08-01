@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:18:22 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/08/01 01:56:53 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/08/01 04:39:53 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,29 +16,18 @@
 #include <sstream>
 #include <iostream>
 
-HttpRequest::HttpRequest()
-    : _method(""), _uri(""), _version(""), _body(""), _status(0)
+HttpRequest::HttpRequest(int client_socket)
+    : _request(), _body(""), _status(0), _error(0), _client_socket(client_socket)
 {
-    // parseHttpRequest();
-}
+    requestToBuffer();
+    printBuffer();
+    parseHttpRequest();
 
-HttpRequest::HttpRequest(const HttpRequest &copy)
-{
-    *this = copy;
-}
-
-HttpRequest &HttpRequest::operator=(const HttpRequest &copy)
-{
-    if (this != &copy)
-    {
-        _method = copy._method;
-        _uri = copy._uri;
-        _version = copy._version;
-        _headers = copy._headers;
-        _body = copy._body;
-        _status = copy._status;
-    }
-    return (*this);
+    std::cout << "===== REQUEST LINE =====" << std::endl;
+    std::cout << "Method:" << _request.getMethod() << std::endl;
+    std::cout << "URI: " << _request.getUri() << std::endl;
+    std::cout << "Version: " << _request.getVersion() << std::endl;
+    std::cout << "========================\n" << std::endl;
 }
 
 HttpRequest::~HttpRequest()
@@ -47,21 +36,70 @@ HttpRequest::~HttpRequest()
 
 void HttpRequest::parseHttpRequest()
 {
-    while (true)
+    while (!_buffer.empty())
     {
         std::string line = getLineAndPopFromBuffer();
-        if (line.empty())
-            break; //! Handle more errors; header size, bad request etc
-        std::cout << "Parsing lines" << std::endl;
+        // if (line.empty())
+        //     break; //! Handle more errors; header size, bad request etc
+        std::cout << "===== PARSING LINES =====\n" << std::endl;
 
-        // parseRequestLine()
+        parseRequestLine(line);
+        break ;
     }
 }
 
-// void HttpRequest::parseRequestLine()
-// {
-//     std::stringstream   
-// }
+std::string    HttpRequest::extract_token(const std::string &line, size_t &pos, char del)
+{
+    size_t  end = line.find(del, pos);
+    if (end == std::string::npos)
+        end = line.length();
+    std::string token = line.substr(pos, end - pos);
+    pos = end + 1;
+    return (token);
+}
+
+
+
+void    HttpRequest::parseRequestLine(const std::string &line)
+{
+    size_t  pos = 0;
+    
+    // parse method
+    if (_request.getMethod().empty())
+    {
+        std::string method = extract_token(line, pos, ' '); 
+        if (method.empty())
+        {
+            std::cerr << "Error: failed to parse method." << std::endl;
+            return ;
+        }
+        _request.setMethod(method);
+    }
+
+    // parse request-target
+    if (_request.getUri().empty())
+    {
+        std::string uri = extract_token(line, pos, ' ');
+        if (uri.empty())
+        {
+            std::cerr << "Error: failed to parse uri" << std::endl;
+            return ;
+        }
+        _request.setUri(uri);
+    }
+
+    // parse http-version
+    if (_request.getVersion().empty())
+    {
+        std::string version = extract_token(line, pos, ' ');
+        if (version.empty())
+        {
+            std::cerr << "Error: failed to parse version" << std::endl;
+            return ;
+        }
+        _request.setVersion(version);
+    }
+}
 
 // void HttpRequest::parseRequestHeader()
 // {
@@ -73,12 +111,12 @@ void HttpRequest::parseHttpRequest()
     
 // }
 
-void    HttpRequest::requestToBuffer(int client_socket)
+void    HttpRequest::requestToBuffer()
 {
     char    buffer[1024];
     int     bytes_read;
 
-    while ((bytes_read = recv(client_socket, buffer, sizeof(buffer) - 1, 0)) > 0)
+    while ((bytes_read = recv(_client_socket, buffer, sizeof(buffer) - 1, 0)) > 0)
     {
         buffer[bytes_read] = '\0';
         for (int i = 0; i < bytes_read; i++)
@@ -113,4 +151,9 @@ std::string HttpRequest::get_line(const std::vector<unsigned char> &buffer,
     if (*end == buffer.end())
         return ("");
     return (std::string(start, *end));
+}
+
+void    HttpRequest::setClientSocket(int client_socket)
+{
+    _client_socket = client_socket;
 }

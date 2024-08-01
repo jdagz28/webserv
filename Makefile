@@ -6,7 +6,7 @@
 #    By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/05 02:06:08 by jdagoy            #+#    #+#              #
-#    Updated: 2024/08/01 01:33:10 by jdagoy           ###   ########.fr        #
+#    Updated: 2024/08/01 04:05:41 by jdagoy           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -26,7 +26,8 @@ HEADER_LIST			:= webserv.hpp \
 						Config.hpp \
 						LocationConfig.hpp \
 						ServerConfig.hpp \
-						HttpRequest.hpp
+						HttpRequest.hpp \
+						HttpRequestLine.hpp
 HEADER_FILES		:= $(addprefix $(INC_DIR), $(HEADER_LIST))
 
 
@@ -49,7 +50,8 @@ DEBUG_OBJS_LIST 	:= $(patsubst %.cpp, %.o, $(DEBUG_SRCS))
 DEBUG_OBJS			:= $(addprefix $(OBJ_DIR), $(DEBUG_OBJS_LIST))
 
 HTTPREQUEST_DIR		:= $(SRC_DIR)http_requests/
-HTTPREQUEST_SRCS	:= HttpRequest.cpp
+HTTPREQUEST_SRCS	:= HttpRequest.cpp \
+						HttpRequestLine.cpp
 HTTPREQUEST_OBJS_LIST := $(patsubst %.cpp, %.o, $(HTTPREQUEST_SRCS))
 HTTPREQUEST_OBJS	:= $(addprefix $(OBJ_DIR), $(HTTPREQUEST_OBJS_LIST))
 

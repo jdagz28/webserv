@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/05 00:23:30 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/08/01 01:57:51 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/08/01 04:37:08 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,16 +18,33 @@
 #include "debug.hpp"
 #include "webserv.hpp"
 #include "HttpRequest.hpp"
+#include <csignal>
 
 #define PORT    4242    
+
+int server_socket = -1;
+
+void    signal_handler(int signum)
+{
+    if (server_socket != -1)
+    {
+        std::cout << "===== Shutting down server =====" << std::endl;
+        close(server_socket);
+    }
+    exit(signum);
+}
 
 int main(int argc, char **argv)
 {   
     (void) argc;
     (void) argv;
+    
     int server_socket, client_socket;
     struct  sockaddr_in server_addr, client_addr;
     socklen_t   client_len = sizeof(client_addr);
+    
+    signal(SIGINT, signal_handler);
+    signal(SIGTERM, signal_handler);
     
     //create socket
     server_socket = socket(AF_INET, SOCK_STREAM, 0);
@@ -72,13 +89,11 @@ int main(int argc, char **argv)
             continue ; 
         }
         
-        std::cout << "Connection accepted" << std::endl;
+        std::cout << "Connection accepted\n\n" << std::endl;
         
-        HttpRequest request;
-        request.requestToBuffer(client_socket);
-        request.printBuffer();
+        HttpRequest request(client_socket);
         
-        
+        pause();
         close(client_socket);
     }
 
