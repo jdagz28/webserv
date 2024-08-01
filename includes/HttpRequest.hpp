@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:11:42 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/07/30 23:28:18 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/08/01 01:48:42 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 #include <map>
 #include <vector>
+#include <string>
 
 class HttpRequest
 {
@@ -25,16 +26,30 @@ class HttpRequest
         std::map<std::string, std::string>      _headers;
         std::string                             _body;
         int                                     _status;
+        std::vector<unsigned char>              _buffer;
+        int                                     _error;
 
-        parseHttpRequest();
+        void    parseHttpRequest();
+        // void    parseRequestLine();
+        // void    parseRequestHeader();
+        // void    parseRequestBody();
 
+        std::string     getLineAndPopFromBuffer();
+        std::string     get_line(const std::vector<unsigned char> &buffer,
+                                    std::vector<unsigned char>::const_iterator start,
+                                    std::vector<unsigned char>::const_iterator* end);
+    
     public:
         HttpRequest();
         HttpRequest(const HttpRequest &copy);
         HttpRequest &operator=(const HttpRequest &copy);
         ~HttpRequest();
 
-}
+        void    requestToBuffer(int client_socket); 
+
+        void    printBuffer() const;
+
+};
 
 
 #endif
