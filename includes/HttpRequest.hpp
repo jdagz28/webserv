@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:11:42 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/08/01 04:26:12 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/08/02 05:58:37 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,31 +18,38 @@
 #include <string>
 #include "HttpRequestLine.hpp"
 
+enum ParseStep
+{
+    REQUEST_LINE,
+    REQUEST_HEADER,
+    REQUEST_BODY
+};
+
 class HttpRequest
 {
     private:
         HttpRequestLine                         _request;
         std::map<std::string, std::string>      _headers;
-        std::string                             _body;
+        int                                     _headersN;
         int                                     _status;
         std::vector<unsigned char>              _buffer;
         int                                     _error;
+        std::string                             _errorMsg;
         int                                     _client_socket;
 
+        HttpRequest();
         HttpRequest(const HttpRequest &copy);
         HttpRequest &operator=(const HttpRequest &copy);
 
         void    parseHttpRequest();
         void    requestToBuffer(); 
         void    parseRequestLine(const std::string &line);
-        // void    parseRequestHeader();
-        // void    parseRequestBody();
+        void    parseRequestHeaders(const std::string &line);
 
         std::string     getLineAndPopFromBuffer();
-        std::string     get_line(const std::vector<unsigned char> &buffer,
-                                    std::vector<unsigned char>::const_iterator start,
-                                    std::vector<unsigned char>::const_iterator* end);
         std::string     extract_token(const std::string &line, size_t &pos, char del);
+        bool    isValidFieldName(const std::string &line);
+        bool    isValidFieldValue(const std::string &line);
     
     public:
         HttpRequest(int client_socket);

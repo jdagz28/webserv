@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/01 03:36:00 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/08/02 03:48:11 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/08/02 03:49:24 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,14 +66,14 @@ void    HttpRequestLine::validate()
     if (_method != "GET" || _method != "POST" || _method != "DELETE")
     {
         _error = 1;
-        _errormsg = "Invalid method.";
+        _errormsg = "Error: Invalid method.";
         return ;
     }
     //TODO: URI checks?
     if (_version != "HTTP/1.1")
     {
         _error = 1;
-        _errormsg = "Invalid version.";
+        _errormsg = "Error: Invalid version.";
         return ;
     }
 }

@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:18:22 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/08/02 03:47:42 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/08/02 06:01:13 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 #include <iostream>
 
 HttpRequest::HttpRequest(int client_socket)
-    : _request(), _body(""), _status(0), _error(0), _client_socket(client_socket)
+    : _request(),  _headersN(0), _status(0), _error(0), _errorMsg(""), _client_socket(client_socket)
 {
     requestToBuffer();
     printBuffer();
@@ -28,6 +28,16 @@ HttpRequest::HttpRequest(int client_socket)
     std::cout << "URI: " << _request.getUri() << std::endl;
     std::cout << "Version: " << _request.getVersion() << std::endl;
     std::cout << "========================\n" << std::endl;
+
+    std::cout << "===== HEADERS =====" << std::endl;
+    std::map<std::string, std::string>::const_iterator it;
+    for(it = _headers.begin(); it != _headers.end(); it++)
+    {
+        std::cout << "\t" << "Field Name: " << it->first << std::endl;
+        std::cout << "\t" << "Field Value " << it->second << std::endl;
+        std::cout << "-----" << std::endl;
+    }
+    std::cout << "========================\n" << std::endl;
 }
 
 HttpRequest::~HttpRequest()
@@ -36,20 +46,34 @@ HttpRequest::~HttpRequest()
 
 void HttpRequest::parseHttpRequest()
 {
+    ParseStep currentStep = REQUEST_LINE;
+    
+    std::cout << "===== PARSING LINES =====\n" << std::endl;
     while (!_buffer.empty())
     {
         std::string line = getLineAndPopFromBuffer();
-        // if (line.empty())
-        //     break; //! Handle more errors; header size, bad request etc
-        std::cout << "===== PARSING LINES =====\n" << std::endl;
-
-        parseRequestLine(line);
-        if (_request.getError() != 0)
+        std::cout << line << std::endl;
+        switch (currentStep)
         {
-            std::cerr << "Error: failed to validate request." << std::endl;
-            return ;
+            case REQUEST_LINE:
+                parseRequestLine(line);
+                if (_request.getError() != 0)
+                {
+                    std::cerr << _request.getErrormsg() << std::endl;
+                    _error = 1;
+                    return ;
+                }
+                currentStep = REQUEST_HEADER;
+                continue;
+            case REQUEST_HEADER:
+                if (line.empty())
+                    break ; 
+                parseRequestHeaders(line);
+                _headersN++;
+                continue;
+            default:
+                break;
         }
-        break ;
     }
 }
 
@@ -69,12 +93,12 @@ void    HttpRequest::parseRequestLine(const std::string &line)
 {
     size_t  pos = 0;
     
-    // parse method
     if (_request.getMethod().empty())
     {
         std::string method = extract_token(line, pos, ' '); 
         if (method.empty())
         {
+            _error = 1;
             std::cerr << "Error: failed to parse method." << std::endl;
             return ;
         }
@@ -82,12 +106,12 @@ void    HttpRequest::parseRequestLine(const std::string &line)
         _request.setMethod(method);
     }
 
-    // parse request-target
     if (_request.getUri().empty())
     {
         std::string uri = extract_token(line, pos, ' ');
         if (uri.empty())
         {
+            _error = 1;
             std::cerr << "Error: failed to parse uri" << std::endl;
             return ;
         }
@@ -95,12 +119,12 @@ void    HttpRequest::parseRequestLine(const std::string &line)
         _request.setUri(uri);
     }
 
-    // parse http-version
     if (_request.getVersion().empty())
     {
         std::string version = extract_token(line, pos, ' ');
         if (version.empty())
         {
+            _error = 1;
             std::cerr << "Error: failed to parse version" << std::endl;
             return ;
         }
@@ -109,15 +133,53 @@ void    HttpRequest::parseRequestLine(const std::string &line)
     }
 }
 
-// void HttpRequest::parseRequestHeader()
-// {
-    
-// }
+bool    HttpRequest::isValidFieldName(const std::string &line)
+{
+    if (line.empty())
+        return (false);
+    for (size_t i = 0; i < line.size(); i++)
+        if (!std::isalnum(line[i]) && line[i] != '-')
+            return (false);
+    return (true);
+}
 
-// void HttpRequest::parseRequestBody()
-// {
+bool    HttpRequest::isValidFieldValue(const std::string &line)
+{
+    if (line.empty())
+        return (false);
+    for (size_t i = 0; i < line.size(); i++)
+    {
+        if (!std::isprint(line[i]) && !std::isspace(line[i]) )
+            return (false);
+    }
+    return (true);
+}
+
+void HttpRequest::parseRequestHeaders(const std::string &line)
+{
+    size_t  colonPos = line.find (':');
+    if (colonPos == std::string::npos)
+    {
+        _error = 1;
+        std::cerr <<"Error: Bad request, missing colon in field line" << std::endl;
+        return ;
+    }
+
+    std::string fieldName = line.substr(0, colonPos);
+    std::string fieldValue = line.substr(colonPos + 1);
     
-// }
+    for (size_t i = 0; i < fieldName.size(); i++)
+        fieldName[i] = std::tolower(fieldName[i]);
+    
+    if (!isValidFieldName(fieldName) || !isValidFieldValue(fieldValue))
+    {
+        _error = 1;
+        std::cerr << "Error: Invalid field name or value" << std::endl;
+        return ;
+    }
+    _headers[fieldName] = fieldValue;
+}
+
 
 void    HttpRequest::requestToBuffer()
 {
@@ -134,14 +196,23 @@ void    HttpRequest::requestToBuffer()
 
 std::string    HttpRequest::getLineAndPopFromBuffer()
 {
+    std::string line;
+    std::string::size_type pos = 0;
+    
     if (_buffer.empty())
         return ("");
-    std::vector<unsigned char>::const_iterator it;
-    std::string result = get_line(_buffer, _buffer.begin(), &it);
-    if (result.empty())
-        return ("");
-    _buffer.erase(_buffer.begin(), _buffer.begin() + result.size());
-    return (result);
+    std::string bufferStr(_buffer.begin(), _buffer.end());
+    std::string::size_type newlinePos = bufferStr.find('\n');
+    if (newlinePos != std::string::npos)
+    {
+        line = bufferStr.substr(0, newlinePos);
+        if (!line.empty() && line[line.size() - 1] == '\r')
+            line = line.substr(0, line.size() - 1);
+        pos = newlinePos + 1;
+    }
+    _buffer.erase(_buffer.begin(), _buffer.begin() + pos);
+
+    return (line);
 }
 
 void    HttpRequest::printBuffer() const
@@ -149,16 +220,6 @@ void    HttpRequest::printBuffer() const
     std::vector<unsigned char>::const_iterator it;
     for (it = _buffer.begin(); it != _buffer.end(); it++)
         std::cout << *it;
-}
-
-std::string HttpRequest::get_line(const std::vector<unsigned char> &buffer,
-                                    std::vector<unsigned char>::const_iterator start,
-                                    std::vector<unsigned char>::const_iterator* end)
-{
-    *end = std::find(start, buffer.end(), '\n');
-    if (*end == buffer.end())
-        return ("");
-    return (std::string(start, *end));
 }
 
 void    HttpRequest::setClientSocket(int client_socket)
