@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/01 03:32:51 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/08/01 03:35:40 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/08/02 03:47:56 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,8 @@ class   HttpRequestLine
         std::string     _method;
         std::string     _uri;
         std::string     _version;    
+        int             _error;
+        std::string     _errormsg;
 
         HttpRequestLine(const HttpRequestLine &copy);
         HttpRequestLine &operator=(const HttpRequestLine &copy);
@@ -37,6 +39,10 @@ class   HttpRequestLine
         const std::string &getMethod() const;
         const std::string &getUri() const;
         const std::string &getVersion() const;
+        const std::string &getErrormsg() const;
+        int   getError() const;
+
+        void    validate();
 };
 
 

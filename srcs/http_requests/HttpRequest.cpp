@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:18:22 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/08/01 04:39:53 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/08/02 03:47:42 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,11 @@ void HttpRequest::parseHttpRequest()
         std::cout << "===== PARSING LINES =====\n" << std::endl;
 
         parseRequestLine(line);
+        if (_request.getError() != 0)
+        {
+            std::cerr << "Error: failed to validate request." << std::endl;
+            return ;
+        }
         break ;
     }
 }
@@ -73,6 +78,7 @@ void    HttpRequest::parseRequestLine(const std::string &line)
             std::cerr << "Error: failed to parse method." << std::endl;
             return ;
         }
+        trimWhitespaces(method);
         _request.setMethod(method);
     }
 
@@ -85,6 +91,7 @@ void    HttpRequest::parseRequestLine(const std::string &line)
             std::cerr << "Error: failed to parse uri" << std::endl;
             return ;
         }
+        trimWhitespaces(uri);
         _request.setUri(uri);
     }
 
@@ -97,6 +104,7 @@ void    HttpRequest::parseRequestLine(const std::string &line)
             std::cerr << "Error: failed to parse version" << std::endl;
             return ;
         }
+        trimWhitespaces(version);
         _request.setVersion(version);
     }
 }

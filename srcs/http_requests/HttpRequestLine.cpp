@@ -6,14 +6,14 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/01 03:36:00 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/08/01 03:36:39 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/08/02 03:48:11 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "HttpRequestLine.hpp"
 
 HttpRequestLine::HttpRequestLine()
-    : _method(""), _uri(""), _version("")
+    : _method(""), _uri(""), _version(""), _error(0), _errormsg("")
 {
 }
 
@@ -49,4 +49,31 @@ const std::string &HttpRequestLine::getUri() const
 const std::string &HttpRequestLine::getVersion() const
 {
     return (_version);
+}
+
+const std::string &HttpRequestLine::getErrormsg() const
+{
+    return (_errormsg);
+}
+
+int   HttpRequestLine::getError() const
+{
+    return (_error);
+}
+
+void    HttpRequestLine::validate()
+{
+    if (_method != "GET" || _method != "POST" || _method != "DELETE")
+    {
+        _error = 1;
+        _errormsg = "Invalid method.";
+        return ;
+    }
+    //TODO: URI checks?
+    if (_version != "HTTP/1.1")
+    {
+        _error = 1;
+        _errormsg = "Invalid version.";
+        return ;
+    }
 }
