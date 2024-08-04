@@ -6,36 +6,29 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:11:42 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/08/02 05:58:37 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/08/04 02:03:28 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef HTTPREQUEST_HPP
 #define HTTPRREQUEST_HPP
 
-#include <map>
 #include <vector>
 #include <string>
 #include "HttpRequestLine.hpp"
 
-enum ParseStep
-{
-    REQUEST_LINE,
-    REQUEST_HEADER,
-    REQUEST_BODY
-};
 
 class HttpRequest
 {
     private:
-        HttpRequestLine                         _request;
-        std::map<std::string, std::string>      _headers;
-        int                                     _headersN;
-        int                                     _status;
-        std::vector<unsigned char>              _buffer;
-        int                                     _error;
-        std::string                             _errorMsg;
-        int                                     _client_socket;
+        HttpRequestLine                                                     _request;
+        std::vector<std::pair<std::string, std::vector<std::string> > >     _headers;
+        int                                                                 _headersN;
+        int                                                                 _status;
+        std::vector<unsigned char>                                          _buffer;
+        int                                                                 _error;
+        std::string                                                         _errorMsg;
+        int                                                                 _client_socket;
 
         HttpRequest();
         HttpRequest(const HttpRequest &copy);
@@ -56,6 +49,10 @@ class HttpRequest
         ~HttpRequest();
 
         void    setClientSocket(int client_socket);
+        
+        const HttpRequestLine& getRequestLine() const;
+        const std::vector<std::pair<std::string, std::vector<std::string> > >& getHeaders() const;
+        
 
         void    printBuffer() const;
 

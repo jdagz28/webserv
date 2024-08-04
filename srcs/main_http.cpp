@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/05 00:23:30 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/08/01 04:37:08 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/08/04 02:05:00 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,6 +92,8 @@ int main(int argc, char **argv)
         std::cout << "Connection accepted\n\n" << std::endl;
         
         HttpRequest request(client_socket);
+        printHttpRequest(request);
+
         
         pause();
         close(client_socket);

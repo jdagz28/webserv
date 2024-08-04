@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:18:22 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/08/02 06:01:13 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/08/04 02:05:53 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,24 +20,8 @@ HttpRequest::HttpRequest(int client_socket)
     : _request(),  _headersN(0), _status(0), _error(0), _errorMsg(""), _client_socket(client_socket)
 {
     requestToBuffer();
-    printBuffer();
+    // printBuffer();
     parseHttpRequest();
-
-    std::cout << "===== REQUEST LINE =====" << std::endl;
-    std::cout << "Method:" << _request.getMethod() << std::endl;
-    std::cout << "URI: " << _request.getUri() << std::endl;
-    std::cout << "Version: " << _request.getVersion() << std::endl;
-    std::cout << "========================\n" << std::endl;
-
-    std::cout << "===== HEADERS =====" << std::endl;
-    std::map<std::string, std::string>::const_iterator it;
-    for(it = _headers.begin(); it != _headers.end(); it++)
-    {
-        std::cout << "\t" << "Field Name: " << it->first << std::endl;
-        std::cout << "\t" << "Field Value " << it->second << std::endl;
-        std::cout << "-----" << std::endl;
-    }
-    std::cout << "========================\n" << std::endl;
 }
 
 HttpRequest::~HttpRequest()
@@ -46,13 +30,12 @@ HttpRequest::~HttpRequest()
 
 void HttpRequest::parseHttpRequest()
 {
-    ParseStep currentStep = REQUEST_LINE;
+    HtmlRequestParseStep currentStep = REQUEST_LINE;
     
-    std::cout << "===== PARSING LINES =====\n" << std::endl;
     while (!_buffer.empty())
     {
         std::string line = getLineAndPopFromBuffer();
-        std::cout << line << std::endl;
+        // std::cout << line << std::endl;
         switch (currentStep)
         {
             case REQUEST_LINE:
@@ -170,14 +153,22 @@ void HttpRequest::parseRequestHeaders(const std::string &line)
     
     for (size_t i = 0; i < fieldName.size(); i++)
         fieldName[i] = std::tolower(fieldName[i]);
-    
     if (!isValidFieldName(fieldName) || !isValidFieldValue(fieldValue))
     {
         _error = 1;
         std::cerr << "Error: Invalid field name or value" << std::endl;
         return ;
+    }    
+    trimWhitespaces(fieldValue);
+    std::stringstream ss(fieldValue);
+    std::string value;
+    std::vector<std::string> values;
+    while (std::getline(ss, value, ','))
+    {
+        trimWhitespaces(value);
+        values.push_back(value);
     }
-    _headers[fieldName] = fieldValue;
+    _headers.push_back(std::make_pair(fieldName, values));
 }
 
 
@@ -211,7 +202,6 @@ std::string    HttpRequest::getLineAndPopFromBuffer()
         pos = newlinePos + 1;
     }
     _buffer.erase(_buffer.begin(), _buffer.begin() + pos);
-
     return (line);
 }
 
@@ -225,4 +215,14 @@ void    HttpRequest::printBuffer() const
 void    HttpRequest::setClientSocket(int client_socket)
 {
     _client_socket = client_socket;
+}
+
+const HttpRequestLine& HttpRequest::getRequestLine() const
+{
+    return (_request);
+}
+
+const std::vector<std::pair<std::string, std::vector<std::string> > >& HttpRequest::getHeaders() const
+{
+    return (_headers);
 }
