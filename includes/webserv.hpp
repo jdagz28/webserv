@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 22:28:27 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/07/08 02:13:13 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/08/04 01:57:41 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,17 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
+#include <sys/socket.h>
+#include <unistd.h>
+#include <netinet/in.h>
 
+enum HtmlRequestParseStep
+{
+    REQUEST_LINE,
+    REQUEST_HEADER,
+    REQUEST_BODY
+};
 
 // UTILITIES
 void    trimWhitespaces(std::string &str);

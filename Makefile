@@ -6,7 +6,7 @@
 #    By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/05 02:06:08 by jdagoy            #+#    #+#              #
-#    Updated: 2024/07/07 02:50:59 by jdagoy           ###   ########.fr        #
+#    Updated: 2024/08/04 01:53:39 by jdagoy           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -25,11 +25,13 @@ HEADER_LIST			:= webserv.hpp \
 						debug.hpp \
 						Config.hpp \
 						LocationConfig.hpp \
-						ServerConfig.hpp 
+						ServerConfig.hpp \
+						HttpRequest.hpp \
+						HttpRequestLine.hpp
 HEADER_FILES		:= $(addprefix $(INC_DIR), $(HEADER_LIST))
 
 
-SRCS_LIST			:= main.cpp \
+SRCS_LIST			:= main_http.cpp \
 						utilities.cpp
 OBJS_LIST 			:= $(patsubst %.cpp, %.o, $(SRCS_LIST))
 OBJS				:= $(addprefix $(OBJ_DIR), $(OBJS_LIST))
@@ -43,9 +45,16 @@ CONFIG_OBJS_LIST 	:= $(patsubst %.cpp, %.o, $(CONFIG_SRCS))
 CONFIG_OBJS			:= $(addprefix $(OBJ_DIR), $(CONFIG_OBJS_LIST))
 
 DEBUG_DIR			:= $(SRC_DIR)debug/
-DEBUG_SRCS			:= configDebug.cpp
+DEBUG_SRCS			:= configDebug.cpp \
+						httpRequestDebug.cpp
 DEBUG_OBJS_LIST 	:= $(patsubst %.cpp, %.o, $(DEBUG_SRCS))
 DEBUG_OBJS			:= $(addprefix $(OBJ_DIR), $(DEBUG_OBJS_LIST))
+
+HTTPREQUEST_DIR		:= $(SRC_DIR)http_requests/
+HTTPREQUEST_SRCS	:= HttpRequest.cpp \
+						HttpRequestLine.cpp
+HTTPREQUEST_OBJS_LIST := $(patsubst %.cpp, %.o, $(HTTPREQUEST_SRCS))
+HTTPREQUEST_OBJS	:= $(addprefix $(OBJ_DIR), $(HTTPREQUEST_OBJS_LIST))
 
 
 all: $(NAME) 
@@ -62,8 +71,11 @@ $(OBJ_DIR)%.o: $(CONFIG_DIR)%.cpp $(HEADER_FILES)
 $(OBJ_DIR)%.o: $(DEBUG_DIR)%.cpp $(HEADER_FILES)
 	$(CXX) $(CXXFLAGS) -c $(INCLUDES) $< -o $@
 
-$(NAME): $(OBJ_DIR) $(OBJS) $(CONFIG_OBJS) $(DEBUG_OBJS)
-	$(CXX) $(CXXFLAGS) $(OBJS) $(CONFIG_OBJS) $(DEBUG_OBJS) -o $(NAME)
+$(OBJ_DIR)%.o: $(HTTPREQUEST_DIR)%.cpp $(HEADER_FILES)
+	$(CXX) $(CXXFLAGS) -c $(INCLUDES) $< -o $@
+
+$(NAME): $(OBJ_DIR) $(OBJS) $(CONFIG_OBJS) $(DEBUG_OBJS) $(HTTPREQUEST_OBJS)
+	$(CXX) $(CXXFLAGS) $(OBJS) $(CONFIG_OBJS) $(DEBUG_OBJS) $(HTTPREQUEST_OBJS) -o $(NAME)
 
 clean:
 	$(RM) $(OBJ_DIR)
