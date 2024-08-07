@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:13:31 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/08/04 01:19:08 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/08/07 04:28:10 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,8 @@
 #define HTTPRESPONSE_HPP
 
 #include "Config.hpp"
-#include "HttpRequest.hpp"
 
+class HttpRequest;
 
 class HttpResponse
 {
@@ -31,18 +31,18 @@ class HttpResponse
         HttpResponse(const HttpResponse &copy);
         HttpResponse &operator=(const HttpResponse &copy);
 
+        int checkMethod(const std::string &method);
+
     public:
-        HttpResponse(const HttpRequest &request,
-                        const Config &config,
+        HttpResponse(HttpRequest &request,
+                        Config &config,
                         int client_socket);
         ~HttpResponse();
 
-
-        void    generateResponse();
-        void    generateResponseLine();
-        void    generateResponseHeaders();
-        void    generateResponseBody();
-        
+        void    execMethod();
     
         
-}
+};
+
+
+#endif

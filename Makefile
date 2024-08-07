@@ -6,7 +6,7 @@
 #    By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/05 02:06:08 by jdagoy            #+#    #+#              #
-#    Updated: 2024/08/04 01:53:39 by jdagoy           ###   ########.fr        #
+#    Updated: 2024/08/07 04:30:31 by jdagoy           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -27,11 +27,12 @@ HEADER_LIST			:= webserv.hpp \
 						LocationConfig.hpp \
 						ServerConfig.hpp \
 						HttpRequest.hpp \
-						HttpRequestLine.hpp
+						HttpRequestLine.hpp \
+						HttpResponse.hpp
 HEADER_FILES		:= $(addprefix $(INC_DIR), $(HEADER_LIST))
 
 
-SRCS_LIST			:= main_http.cpp \
+SRCS_LIST			:= main.cpp \
 						utilities.cpp
 OBJS_LIST 			:= $(patsubst %.cpp, %.o, $(SRCS_LIST))
 OBJS				:= $(addprefix $(OBJ_DIR), $(OBJS_LIST))
@@ -57,6 +58,12 @@ HTTPREQUEST_OBJS_LIST := $(patsubst %.cpp, %.o, $(HTTPREQUEST_SRCS))
 HTTPREQUEST_OBJS	:= $(addprefix $(OBJ_DIR), $(HTTPREQUEST_OBJS_LIST))
 
 
+HTTPRESPONSE_DIR	:= $(SRC_DIR)http_response/
+HTTPRESPONSE_SRCS	:= HttpResponse.cpp
+HTTPRESPONSE_OBJS_LIST := $(patsubst %.cpp, %.o, $(HTTPRESPONSE_SRCS))
+HTTPRESPONSE_OBJS	:= $(addprefix $(OBJ_DIR), $(HTTPRESPONSE_OBJS_LIST))
+
+
 all: $(NAME) 
 
 $(OBJ_DIR):
@@ -74,8 +81,11 @@ $(OBJ_DIR)%.o: $(DEBUG_DIR)%.cpp $(HEADER_FILES)
 $(OBJ_DIR)%.o: $(HTTPREQUEST_DIR)%.cpp $(HEADER_FILES)
 	$(CXX) $(CXXFLAGS) -c $(INCLUDES) $< -o $@
 
-$(NAME): $(OBJ_DIR) $(OBJS) $(CONFIG_OBJS) $(DEBUG_OBJS) $(HTTPREQUEST_OBJS)
-	$(CXX) $(CXXFLAGS) $(OBJS) $(CONFIG_OBJS) $(DEBUG_OBJS) $(HTTPREQUEST_OBJS) -o $(NAME)
+$(OBJ_DIR)%.o: $(HTTPRESPONSE_DIR)%.cpp $(HEADER_FILES)
+	$(CXX) $(CXXFLAGS) -c $(INCLUDES) $< -o $@
+
+$(NAME): $(OBJ_DIR) $(OBJS) $(CONFIG_OBJS) $(DEBUG_OBJS) $(HTTPREQUEST_OBJS) $(HTTPRESPONSE_OBJS)
+	$(CXX) $(CXXFLAGS) $(OBJS) $(CONFIG_OBJS) $(DEBUG_OBJS) $(HTTPREQUEST_OBJS)  $(HTTPRESPONSE_OBJS) -o $(NAME)
 
 clean:
 	$(RM) $(OBJ_DIR)
