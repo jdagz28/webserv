@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 22:38:59 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/08/08 05:09:22 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/08/08 07:02:52 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,7 +108,20 @@ void    Config::parseLocationBlock(std::ifstream &infile, LocationConfig &locati
             std::string value;
             std::getline(iss, value);
             trimWhitespaces(value);
-            if (directive != "{" && directive != "}")
+            if (directive == "allowed_methods")
+            {
+                std::vector<std::string> methods = splitBySpaces(value);
+                for (size_t i = 0; i < methods.size(); i++)
+                    locationConfig.setAllowedMethod(methods[i]);
+            }
+            else if (directive == "limit_except")
+            {
+                locationConfig.setLimitExcept(true);
+                std::vector<std::string> methods = splitBySpaces(value);
+                for (size_t i = 0; i < methods.size(); i++)
+                    locationConfig.setExcludeMethod(methods[i]);
+            }
+            else if (directive != "{" && directive != "}")
             {
                 std::vector<std::string> values = splitBySpaces(value);
                 for (size_t i = 0; i < values.size(); i++)
