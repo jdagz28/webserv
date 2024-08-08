@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 22:38:59 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/07/08 02:23:45 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/08/08 05:09:22 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,9 +97,10 @@ void    Config::parseLocationBlock(std::ifstream &infile, LocationConfig &locati
     {
         if (line.find("}") != std::string::npos)
             break;
-        
+        // std::cout << "Line: " << line << std::endl;
         std::istringstream iss(line);
         std::string token;
+        // std::cout << "Token: " << token << std::endl;
         iss >> token;
         if (!token.empty())
         {
@@ -107,8 +108,6 @@ void    Config::parseLocationBlock(std::ifstream &infile, LocationConfig &locati
             std::string value;
             std::getline(iss, value);
             trimWhitespaces(value);
-            if (directive == "root")
-                locationConfig.setPath(value);
             if (directive != "{" && directive != "}")
             {
                 std::vector<std::string> values = splitBySpaces(value);
@@ -127,13 +126,19 @@ void    Config::parseServerBlock(std::ifstream &infile, ServerConfig &serverConf
         if (line.find("}") != std::string::npos)
             break;
 
+        // std::cout << "Line: " << line << std::endl;
         std::istringstream iss(line);
         std::string token;
+        // std::cout << "Token: " << token << std::endl;
         iss >> token;
         if (token == "location")
         {
             LocationConfig locationConfig;
             parseLocationBlock(infile, locationConfig);
+            std::string value;
+            std::getline(iss, value);
+            trimWhitespaces(value);
+            locationConfig.setPath(value);
             serverConfig.setLocationConfig(locationConfig);
         }
         else

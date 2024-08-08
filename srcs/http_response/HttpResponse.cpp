@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:19:13 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/08/07 06:19:59 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/08/08 04:52:50 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,6 +61,8 @@ bool HttpResponse::isMatchingPrefix(const std::string &pattern, const std::strin
 {
     if (pattern.empty() || target.empty())
         return (false);
+    std::cout << "CONFIG LOCATION: " << pattern << std::endl;
+    std::cout << "TARGET PATH: " << target << std::endl << std::endl;
     std::string target_prefix = target.substr(0, pattern.length());
     return (pattern == target_prefix);
 }
@@ -76,15 +78,31 @@ std::string HttpResponse::comparePath(const ServerConfig &server, const HttpRequ
     {
         std::string config_location = location->getPath();
         //! check
-        std::cout << "CONFIG LOCATION: " << config_location << std::endl;
-        std::cout << "TARGET PATH: " << target_path << std::endl << std::endl;
+        // std::cout << "CONFIG LOCATION: " << config_location << std::endl;
+        // std::cout << "TARGET PATH: " << target_path << std::endl << std::endl;
 
         if (config_location == target_path)
+        {
+            std::cout << "Exact match found: " << config_location << std::endl;
             return (config_location);
-        if (isMatchingPrefix(config_location, target_path))
-            if (path.length() < config_location.length())
+        }
+        if (target_path == "/")
+        {
+            if (path.empty() || config_location == "/")
                 path = config_location;
+            std::cout << "Using config loc: " << config_location << std::endl;
+            continue;
+        }
+        if (isMatchingPrefix(config_location, target_path))
+        {
+            if (path.empty() || path.length() < config_location.length())
+            {
+                path = config_location;
+                std::cout << "Best match updated to: " << path << std::endl;
+            }
+        }
     }
+    std::cout << "Path returned: " << path << std::endl;
     return (path);
 }
 
@@ -128,11 +146,12 @@ bool HttpResponse::isMethodAllowed()
 
 void HttpResponse::getRequestBody()
 {
+    // check method
     if (!isMethodAllowed())
     {
         _error = 1;
         _errorMsg = "Method not allowed.";
     }
     
-
+    //check if redirect
 }
