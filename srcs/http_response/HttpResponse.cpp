@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:19:13 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/08/10 05:10:29 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/08/10 05:40:11 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,11 +49,11 @@ void HttpResponse::execMethod()
     {
         case GET:
             // std::cout << "Method: " << method << std::endl;
-            getRequestBody();
+            processRequestGET();
             break ;
         default:
-            std::cout << "Error: Method not implemented / unavailable." << std::endl;
-        
+            _error = 1;
+            _errorMsg = "Error: Method not implemented / unavailable.";
     }
 }
 
@@ -61,8 +61,8 @@ bool HttpResponse::isMatchingPrefix(const std::string &pattern, const std::strin
 {
     if (pattern.empty() || target.empty())
         return (false);
-    std::cout << "CONFIG LOCATION: " << pattern << std::endl;
-    std::cout << "TARGET PATH: " << target << std::endl << std::endl;
+    // std::cout << "CONFIG LOCATION: " << pattern << std::endl;
+    // std::cout << "TARGET PATH: " << target << std::endl << std::endl;
     std::string target_prefix = target.substr(0, pattern.length());
     return (pattern == target_prefix);
 }
@@ -77,9 +77,6 @@ std::string HttpResponse::comparePath(const ServerConfig &server, const HttpRequ
     for (location = locationConfigs.begin(); location != server.getLocationConfig().end(); location++)
     {
         std::string config_location = location->getPath();
-        //! check
-        // std::cout << "CONFIG LOCATION: " << config_location << std::endl;
-        // std::cout << "TARGET PATH: " << target_path << std::endl << std::endl;
 
         if (config_location == target_path)
         {
@@ -152,19 +149,26 @@ bool HttpResponse::isMethodAllowed(const ServerConfig &server, const std::string
                     return (false);
                 }
             }
+            std::cout << requestMethod << " Method is Allowed" << std::endl;
+            return (true);
         }
     }
-    std::cout << requestMethod << " Method is Allowed" << std::endl;
-    return (true);
+    _error = 1;
+    _errorMsg = "Error: Location not found or method not allowed";
+    return (false);
+    
 }
 
-void HttpResponse::getRequestBody()
+void HttpResponse::processRequestGET()
 {
     // check location and method
     if (!checkLocConfigAndRequest())
     {
-        _error = 1;
-        _errorMsg = "Error: Location not found";
+        if (!_error)
+        {
+            _error = 1;
+            _errorMsg = "Error: Location not found";
+        }
     }
     if (_error)
     {
@@ -172,5 +176,9 @@ void HttpResponse::getRequestBody()
         return ;
     }
     
-    //check if redirect
+    //check if redirect; handle if yes
+
+
+    // check if path is directory
+    
 }
