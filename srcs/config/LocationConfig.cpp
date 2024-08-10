@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/07 23:05:41 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/08/08 07:08:01 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/08/10 06:50:24 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,6 +73,17 @@ const std::map<std::string, std::vector<std::string> > &LocationConfig::getDirec
 const std::string &LocationConfig::getPath() const
 {
     return (_path);
+}
+
+const std::string LocationConfig::getRoot() const
+{
+    std::map<std::string, std::vector<std::string> >::const_iterator it;
+    for (it = _directives.begin(); it != _directives.end(); it++)
+    {
+        if (it->first == "root")
+            return (it->second[0]);
+    }
+    return (std::string());
 }
 
 const std::vector<std::string> &LocationConfig::getAllowedMethods() const

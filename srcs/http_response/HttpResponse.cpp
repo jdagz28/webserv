@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:19:13 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/08/10 05:40:11 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/08/10 06:57:21 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,6 +72,8 @@ std::string HttpResponse::comparePath(const ServerConfig &server, const HttpRequ
     std::string target_path = request.getUri();
     std::string path;
     const std::vector<LocationConfig> &locationConfigs = server.getLocationConfig();
+    if (locationConfigs.empty())
+        return(path);
     std::vector<LocationConfig>::const_iterator location;
 
     for (location = locationConfigs.begin(); location != server.getLocationConfig().end(); location++)
@@ -124,6 +126,8 @@ bool HttpResponse::isMethodAllowed(const ServerConfig &server, const std::string
     std::string requestMethod = request.getMethod();
     
     const std::vector<LocationConfig> &locationConfigs = server.getLocationConfig();
+    if (locationConfigs.empty())
+        return (false);
     std::vector<LocationConfig>::const_iterator location;
 
     for (location = locationConfigs.begin(); location != server.getLocationConfig().end(); location++)
@@ -159,6 +163,50 @@ bool HttpResponse::isMethodAllowed(const ServerConfig &server, const std::string
     
 }
 
+std::string HttpResponse::checkRoot(const ServerConfig &server, const std::string &path)
+{
+    std::string rootpath;
+    const std::vector<LocationConfig> &locationConfigs = server.getLocationConfig();
+    if (locationConfigs.empty())
+        return (rootpath);
+    std::vector<LocationConfig>::const_iterator location;
+
+    for (location = locationConfigs.begin(); location != server.getLocationConfig().end(); location++)
+    {
+        std::string config_location = location->getPath();
+        if (config_location == path)
+        {
+            rootpath = location->getRoot();
+            return (rootpath);
+        }
+    }
+    return (rootpath);
+}
+
+std::string HttpResponse::resolvePath()
+{
+    const std::vector<ServerConfig> &serverConfigs = _config.getServerConfig();
+    if (serverConfigs.empty())
+    {
+        _error = 1;
+        _errorMsg = "Error: Server Config is empty";
+        return (std::string());
+    }
+    std::vector<ServerConfig>::const_iterator server;
+    for (server = serverConfigs.begin(); server != serverConfigs.end(); server++)
+    {
+        std::string path = comparePath(*server, _request.getRequestLine());
+        if (path.empty())
+            return (std::string());
+        std::string root = checkRoot(*server, path);
+        if (!root.empty())
+            return (root + path);
+        else
+            return (path);
+    }
+    return (std::string());
+}
+
 void HttpResponse::processRequestGET()
 {
     // check location and method
@@ -179,6 +227,19 @@ void HttpResponse::processRequestGET()
     //check if redirect; handle if yes
 
 
-    // check if path is directory
+    // check if path is directory or file
+    std::string path = resolvePath();
+    if (path.empty())
+    {
+        _error = 1;
+        _errorMsg = "Error: Path not found";
+    }
+    std::cout << "Resolved path: " << path << std::endl;
     
+    // if (!isDirectory())
+    // {
+    //     _error = 1;
+    //     _errorMsg = "Error: Path is not a directory";
+    // }
+
 }
