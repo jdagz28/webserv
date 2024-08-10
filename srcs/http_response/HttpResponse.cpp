@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:19:13 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/08/08 04:52:50 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/08/10 05:10:29 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,47 +110,66 @@ bool HttpResponse::checkLocConfigAndRequest()
 {
     const std::vector<ServerConfig> &serverConfigs = _config.getServerConfig();
     if (serverConfigs.empty())
-    {
         return (false);
-    }
     std::vector<ServerConfig>::const_iterator server;
     for (server = serverConfigs.begin(); server != serverConfigs.end(); server++)
     {
-        std::string location = comparePath(*server, _request.getRequestLine());
-        if (location.empty())
+        std::string path = comparePath(*server, _request.getRequestLine());
+        if (path.empty())
+            return (false);
+        if (!isMethodAllowed(*server, path, _request.getRequestLine()))
             return (false);
     }
     return (true);
 }
-
-bool HttpResponse::getLocationConfig()
+bool HttpResponse::isMethodAllowed(const ServerConfig &server, const std::string &path, const HttpRequestLine &request)
 {
-    if (!checkLocConfigAndRequest())
-        return (false);
-    return (true);
-}
+    std::string requestMethod = request.getMethod();
+    
+    const std::vector<LocationConfig> &locationConfigs = server.getLocationConfig();
+    std::vector<LocationConfig>::const_iterator location;
 
-bool HttpResponse::checkLimitExcept()
-{
-    if (!getLocationConfig())
-        return (false);
-    return (true);
-}
-
-bool HttpResponse::isMethodAllowed()
-{
-    if (!checkLimitExcept())
-        return (false);
+    for (location = locationConfigs.begin(); location != server.getLocationConfig().end(); location++)
+    {
+        std::string config_location = location->getPath();
+        if (config_location == path)
+        {
+            if (location->isLimited())
+            {
+                if (location->isMethodExcluded(requestMethod))
+                {
+                    _error = 1;
+                    _errorMsg = "Error: Method not allowed";
+                    return (false);
+                }
+            }
+            else
+            {
+                if (!location->isMethodAllowed(requestMethod))
+                {
+                    _error = 1;
+                    _errorMsg = "Error: Method not allowed";
+                    return (false);
+                }
+            }
+        }
+    }
+    std::cout << requestMethod << " Method is Allowed" << std::endl;
     return (true);
 }
 
 void HttpResponse::getRequestBody()
 {
-    // check method
-    if (!isMethodAllowed())
+    // check location and method
+    if (!checkLocConfigAndRequest())
     {
         _error = 1;
-        _errorMsg = "Method not allowed.";
+        _errorMsg = "Error: Location not found";
+    }
+    if (_error)
+    {
+        std::cout << _errorMsg << std::endl;
+        return ;
     }
     
     //check if redirect

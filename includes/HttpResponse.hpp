@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:13:31 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/08/07 05:59:27 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/08/10 04:59:09 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,12 +36,11 @@ class HttpResponse
 
         int checkMethod(const std::string &method);
         void    getRequestBody();
-        bool    isMethodAllowed();
+        bool    isMethodAllowed(const ServerConfig &server, const std::string &path, const HttpRequestLine &request);
         bool    isMatchingPrefix(const std::string &pattern, const std::string &target);
         std::string    comparePath(const ServerConfig &server, const HttpRequestLine &request);
         bool    checkLocConfigAndRequest();
-        bool    getLocationConfig();
-        bool    checkLimitExcept();
+
 
     public:
         HttpResponse(HttpRequest &request,
