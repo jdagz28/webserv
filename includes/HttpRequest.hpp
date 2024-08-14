@@ -6,12 +6,12 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:11:42 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/08/04 02:03:28 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/08/14 05:53:20 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef HTTPREQUEST_HPP
-#define HTTPRREQUEST_HPP
+#define HTTPREQUEST_HPP
 
 #include <vector>
 #include <string>

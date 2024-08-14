@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 22:38:51 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/08/10 06:54:23 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/08/14 05:41:58 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,8 @@ class LocationConfig
         const std::string getRoot() const;
         const std::vector<std::string> &getAllowedMethods() const;
         const std::vector<std::string> &getLimitExcept() const;
+        const std::string getDefaultName() const;
+        
         bool    isMethodAllowed(const std::string &method) const;
         bool    isLimited() const;
         bool    isMethodExcluded(const std::string &method) const;

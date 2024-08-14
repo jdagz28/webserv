@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:19:13 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/08/10 06:57:21 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/08/14 06:12:19 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -207,6 +207,60 @@ std::string HttpResponse::resolvePath()
     return (std::string());
 }
 
+std::string HttpResponse::getDefaultNameLoc(const ServerConfig &server)
+{
+    const std::vector<LocationConfig> &LocationConfigs = server.getLocationConfig();
+    if (LocationConfigs.empty())
+        return (std::string());
+    std::vector<LocationConfig>::const_iterator location;
+    for (location = LocationConfigs.begin(); location != LocationConfigs.end(); location++)
+    {
+        const std::string requestUri = _request.getRequestLine().getUri();
+        if (location->getPath() == requestUri)
+            return (location->getDefaultName());
+    }
+    return (std::string());
+}
+
+
+std::string HttpResponse::getDefaultName()
+{
+    std::string defaultName;
+    const std::vector<ServerConfig> &serverConfigs = _config.getServerConfig();
+    if (serverConfigs.empty())
+        return (std::string());
+    std::vector<ServerConfig>::const_iterator server;
+    for (server = serverConfigs.begin(); server != serverConfigs.end(); server++)
+    {
+        defaultName = getDefaultNameLoc(*server);
+    }
+    return (defaultName);
+}
+
+static bool checkSlash(const std::string &defaultConfigName, const std::string &target)
+{
+    bool defaultEndsWithSlash = defaultConfigName[defaultConfigName.size() - 1] == '/';
+    bool targetStartsWithSlash = target[0] == '/';
+    if (!defaultEndsWithSlash && !targetStartsWithSlash)
+        return (false);
+    return (true);
+}
+
+void HttpResponse::getIndexPage(const std::string &target_path)
+{
+    //if URI is /images or /images/ -> redirect to index.html or whatever in config
+    std::string defaultConfigName = getDefaultName();
+    std::cout << "Default Path: " << defaultConfigName << std::endl;
+
+    std::string indexPath;
+    if (!checkSlash(defaultConfigName, target_path))
+        indexPath = target_path + '/' + defaultConfigName;
+    else
+        indexPath = target_path + defaultConfigName;
+    std::cout << "Index Path: " << indexPath << std::endl;
+
+}
+
 void HttpResponse::processRequestGET()
 {
     // check location and method
@@ -236,10 +290,10 @@ void HttpResponse::processRequestGET()
     }
     std::cout << "Resolved path: " << path << std::endl;
     
-    // if (!isDirectory())
-    // {
-    //     _error = 1;
-    //     _errorMsg = "Error: Path is not a directory";
-    // }
+    if (isDirectory(path))
+    {
+        getIndexPage(path);
+        
+    }
 
 }

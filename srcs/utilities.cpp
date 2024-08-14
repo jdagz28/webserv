@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 22:29:37 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/07/08 02:11:34 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/08/14 05:14:53 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include <sys/stat.h>
 
 
 std::vector<std::string>    splitBySpaces(const std::string &str)
@@ -39,3 +40,18 @@ void    trimWhitespaces(std::string &str)
     str.erase(std::find_if(str.rbegin(), str.rend(), isNotSpace).base(), str.end());
 }
 
+bool isDirectory(const std::string &path)
+{
+    struct stat sb;
+    if (stat(path.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode))
+        return (true);
+    return (false);
+}
+
+bool fileExists(const std::string &path)
+{
+    struct stat sb;
+    if (stat(path.c_str(), &sb) == 0 && S_ISREG(sb.st_mode))
+        return (true);
+    return (false);
+}
