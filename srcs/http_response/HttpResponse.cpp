@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:19:13 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/08/14 06:12:19 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/08/14 06:36:55 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -246,19 +246,52 @@ static bool checkSlash(const std::string &defaultConfigName, const std::string &
     return (true);
 }
 
+static std::string extractHTMLName(const std::string &uri)
+{
+    size_t  lastSlashPos = uri.find_last_of('/');
+    if (lastSlashPos != std::string::npos && lastSlashPos + 1 < uri.length())
+        return (uri.substr(lastSlashPos + 1));
+    return (std::string());
+}
+
 void HttpResponse::getIndexPage(const std::string &target_path)
 {
-    //if URI is /images or /images/ -> redirect to index.html or whatever in config
+    std::string indexPath;
     std::string defaultConfigName = getDefaultName();
     std::cout << "Default Path: " << defaultConfigName << std::endl;
-
-    std::string indexPath;
-    if (!checkSlash(defaultConfigName, target_path))
-        indexPath = target_path + '/' + defaultConfigName;
+    
+    //if URI is /images or /images/ -> redirect to index.html or whatever in config
+    std::string uri = _request.getRequestLine().getUri();
+    if (endsWith(uri, ".html"))
+    {
+        //extract after the last /
+        std::string pageName = extractHTMLName(uri);
+        std::cout << "Page Name: " << pageName << std::endl;
+        //check if file exists
+        if (!checkSlash(pageName, target_path))
+            indexPath = target_path + '/' + pageName;
+        else
+            indexPath = target_path + pageName;
+        std::cout << "Index Path: " << indexPath << std::endl;
+        if (fileExists(indexPath))
+        {
+            std::cout << "Page exists" << std::endl;
+            //send file
+        }
+        else
+        {
+            std::cout << "Page does not exist" << std::endl;
+            //send 404
+        }
+    }
     else
-        indexPath = target_path + defaultConfigName;
-    std::cout << "Index Path: " << indexPath << std::endl;
-
+    {
+        if (!checkSlash(defaultConfigName, target_path))
+            indexPath = target_path + '/' + defaultConfigName;
+        else
+            indexPath = target_path + defaultConfigName;
+        std::cout << "Index Path: " << indexPath << std::endl;
+    }
 }
 
 void HttpResponse::processRequestGET()

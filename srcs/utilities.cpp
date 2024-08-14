@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 22:29:37 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/08/14 05:14:53 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/08/14 06:33:08 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,4 +54,13 @@ bool fileExists(const std::string &path)
     if (stat(path.c_str(), &sb) == 0 && S_ISREG(sb.st_mode))
         return (true);
     return (false);
+}
+
+bool endsWith(const std::string &str, const std::string &suffix)
+{
+    size_t str_len = str.length();
+    size_t suffix_len = suffix.length();
+    if (suffix_len > str_len)
+        return (false);
+    return (str.compare(str_len - suffix_len, suffix_len, suffix) == 0);
 }
