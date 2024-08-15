@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:19:13 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/08/14 06:36:55 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/08/15 03:55:17 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,6 @@ void HttpResponse::execMethod()
     switch (checkMethod(method))
     {
         case GET:
-            // std::cout << "Method: " << method << std::endl;
             processRequestGET();
             break ;
         default:
@@ -61,8 +60,6 @@ bool HttpResponse::isMatchingPrefix(const std::string &pattern, const std::strin
 {
     if (pattern.empty() || target.empty())
         return (false);
-    // std::cout << "CONFIG LOCATION: " << pattern << std::endl;
-    // std::cout << "TARGET PATH: " << target << std::endl << std::endl;
     std::string target_prefix = target.substr(0, pattern.length());
     return (pattern == target_prefix);
 }
@@ -81,25 +78,16 @@ std::string HttpResponse::comparePath(const ServerConfig &server, const HttpRequ
         std::string config_location = location->getPath();
 
         if (config_location == target_path)
-        {
-            std::cout << "Exact match found: " << config_location << std::endl;
             return (config_location);
-        }
         if (target_path == "/")
         {
             if (path.empty() || config_location == "/")
                 path = config_location;
-            std::cout << "Using config loc: " << config_location << std::endl;
             continue;
         }
         if (isMatchingPrefix(config_location, target_path))
-        {
             if (path.empty() || path.length() < config_location.length())
-            {
                 path = config_location;
-                std::cout << "Best match updated to: " << path << std::endl;
-            }
-        }
     }
     std::cout << "Path returned: " << path << std::endl;
     return (path);
@@ -215,8 +203,10 @@ std::string HttpResponse::getDefaultNameLoc(const ServerConfig &server)
     std::vector<LocationConfig>::const_iterator location;
     for (location = LocationConfigs.begin(); location != LocationConfigs.end(); location++)
     {
-        const std::string requestUri = _request.getRequestLine().getUri();
-        if (location->getPath() == requestUri)
+        std::string path = comparePath(server, _request.getRequestLine());
+        if (path.empty())
+            return(std::string());
+        if (location->getPath() == path)
             return (location->getDefaultName());
     }
     return (std::string());
@@ -231,9 +221,7 @@ std::string HttpResponse::getDefaultName()
         return (std::string());
     std::vector<ServerConfig>::const_iterator server;
     for (server = serverConfigs.begin(); server != serverConfigs.end(); server++)
-    {
         defaultName = getDefaultNameLoc(*server);
-    }
     return (defaultName);
 }
 
@@ -258,7 +246,7 @@ void HttpResponse::getIndexPage(const std::string &target_path)
 {
     std::string indexPath;
     std::string defaultConfigName = getDefaultName();
-    std::cout << "Default Path: " << defaultConfigName << std::endl;
+    std::cout << "Default Page: " << defaultConfigName << std::endl;
     
     //if URI is /images or /images/ -> redirect to index.html or whatever in config
     std::string uri = _request.getRequestLine().getUri();
@@ -296,7 +284,6 @@ void HttpResponse::getIndexPage(const std::string &target_path)
 
 void HttpResponse::processRequestGET()
 {
-    // check location and method
     if (!checkLocConfigAndRequest())
     {
         if (!_error)
@@ -310,11 +297,6 @@ void HttpResponse::processRequestGET()
         std::cout << _errorMsg << std::endl;
         return ;
     }
-    
-    //check if redirect; handle if yes
-
-
-    // check if path is directory or file
     std::string path = resolvePath();
     if (path.empty())
     {
