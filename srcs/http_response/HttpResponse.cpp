@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:19:13 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/08/15 03:55:17 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/08/16 07:46:12 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -242,20 +242,19 @@ static std::string extractHTMLName(const std::string &uri)
     return (std::string());
 }
 
+//! check if resource is supported (other than .html)
+// constants of supported types
 void HttpResponse::getIndexPage(const std::string &target_path)
 {
     std::string indexPath;
     std::string defaultConfigName = getDefaultName();
     std::cout << "Default Page: " << defaultConfigName << std::endl;
     
-    //if URI is /images or /images/ -> redirect to index.html or whatever in config
     std::string uri = _request.getRequestLine().getUri();
     if (endsWith(uri, ".html"))
     {
-        //extract after the last /
         std::string pageName = extractHTMLName(uri);
         std::cout << "Page Name: " << pageName << std::endl;
-        //check if file exists
         if (!checkSlash(pageName, target_path))
             indexPath = target_path + '/' + pageName;
         else
@@ -265,6 +264,12 @@ void HttpResponse::getIndexPage(const std::string &target_path)
         {
             std::cout << "Page exists" << std::endl;
             //send file
+            /** 
+             * TODO: read html file and send
+             * ! HttpResponse - repsonse atrributes
+             * ? create a response class
+            */ 
+
         }
         else
         {
@@ -282,6 +287,9 @@ void HttpResponse::getIndexPage(const std::string &target_path)
     }
 }
 
+//! Remove _error and _errorMsgs
+//? Create a class Result to handle status code and message ??
+
 void HttpResponse::processRequestGET()
 {
     if (!checkLocConfigAndRequest())
@@ -297,6 +305,18 @@ void HttpResponse::processRequestGET()
         std::cout << _errorMsg << std::endl;
         return ;
     }
+
+    /** 
+     * TODO: check if redirect
+     * * check if URI is absolute or relative; a redirection can be either
+     */
+    
+    /** 
+     * TODO: check if is directory
+     * * check location config if auto index
+     * * list
+     */
+    
     std::string path = resolvePath();
     if (path.empty())
     {
