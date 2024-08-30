@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:13:31 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/08/14 05:57:06 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/08/30 10:02:26 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,9 @@ class HttpResponse
         int             _error;
         std::string     _errorMsg;
         int             _client_socket;
+        std::string     _body;
+        size_t          _contentLength;
+        
         
         
         HttpResponse(const HttpResponse &copy);
@@ -45,6 +48,7 @@ class HttpResponse
         void getIndexPage(const std::string &target_path);
         std::string getDefaultName();
         std::string getDefaultNameLoc(const ServerConfig &server);
+        void getContent(const std::string &file_path);
 
 
     public:

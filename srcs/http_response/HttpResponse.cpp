@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:19:13 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/08/16 07:46:12 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/08/30 11:06:29 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -225,11 +225,16 @@ std::string HttpResponse::getDefaultName()
     return (defaultName);
 }
 
-static bool checkSlash(const std::string &defaultConfigName, const std::string &target)
+static bool checkSlash(const std::string &defaultLoc, const std::string &page)
 {
-    bool defaultEndsWithSlash = defaultConfigName[defaultConfigName.size() - 1] == '/';
-    bool targetStartsWithSlash = target[0] == '/';
-    if (!defaultEndsWithSlash && !targetStartsWithSlash)
+    bool defaultSlash = !defaultLoc.empty() && defaultLoc[defaultLoc.length() - 1] == '/';
+    bool pageSlash = !page.empty() && page[0] == '/';
+    
+
+    std::cout << defaultLoc << ":\t " << defaultSlash << std::endl;
+    std::cout << page << ":\t" << pageSlash << std::endl;
+
+    if (!defaultSlash && !pageSlash)
         return (false);
     return (true);
 }
@@ -242,20 +247,43 @@ static std::string extractHTMLName(const std::string &uri)
     return (std::string());
 }
 
+void  HttpResponse::getContent(const std::string &file_path)
+{
+    std::ifstream   infile;
+    std::string     buffer;
+    
+    infile.open(file_path.c_str());
+    
+    if (!infile.is_open())
+    {
+        _error = 404;
+        _errorMsg = "Error: File not found";
+        //error_page;
+    }
+    else
+    {
+        while (std::getline(infile, buffer)) 
+            _body += buffer + "\n";
+        _body += '\0'; 
+        infile.close();
+    }
+    _contentLength = _body.size();
+}
+
 //! check if resource is supported (other than .html)
 // constants of supported types
 void HttpResponse::getIndexPage(const std::string &target_path)
 {
     std::string indexPath;
-    std::string defaultConfigName = getDefaultName();
-    std::cout << "Default Page: " << defaultConfigName << std::endl;
+    std::string defaultPage = getDefaultName();
+    std::cout << "Default Page: " << defaultPage << std::endl;
     
     std::string uri = _request.getRequestLine().getUri();
     if (endsWith(uri, ".html"))
     {
         std::string pageName = extractHTMLName(uri);
         std::cout << "Page Name: " << pageName << std::endl;
-        if (!checkSlash(pageName, target_path))
+        if (!checkSlash(target_path, pageName))
             indexPath = target_path + '/' + pageName;
         else
             indexPath = target_path + pageName;
@@ -269,7 +297,8 @@ void HttpResponse::getIndexPage(const std::string &target_path)
              * ! HttpResponse - repsonse atrributes
              * ? create a response class
             */ 
-
+            getContent(indexPath);
+            std::cout << "Response Body: " << _body << std::endl;
         }
         else
         {
@@ -279,11 +308,12 @@ void HttpResponse::getIndexPage(const std::string &target_path)
     }
     else
     {
-        if (!checkSlash(defaultConfigName, target_path))
-            indexPath = target_path + '/' + defaultConfigName;
+        if (!checkSlash(target_path, defaultPage))
+            indexPath = target_path + '/' + defaultPage;
         else
-            indexPath = target_path + defaultConfigName;
-        std::cout << "Index Path: " << indexPath << std::endl;
+            indexPath = target_path + defaultPage;
+        getContent(indexPath);
+        std::cout << "Response Body: " << _body << std::endl;
     }
 }
 
