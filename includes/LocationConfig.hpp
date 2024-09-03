@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 22:38:51 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/08/14 05:41:58 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/03 10:09:11 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ class LocationConfig
         
         bool    isMethodAllowed(const std::string &method) const;
         bool    isLimited() const;
-        bool    isMethodExcluded(const std::string &method) const;
+        bool    isLimitExcept(const std::string &method) const;
 };
 
 #endif

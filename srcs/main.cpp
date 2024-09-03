@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/05 00:23:30 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/03 03:53:53 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/03 10:44:18 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,6 @@
 int server_socket = -1;
 
 
-
 std::string getConfigPath(int argc, char **argv)
 {
     if (argc == 1)
@@ -38,17 +37,18 @@ std::string getConfigPath(int argc, char **argv)
 
 void    signal_handler(int signum)
 {
+    std::cout << "Received signal " << signum << std::endl;
+    std::cout << "===== Shutting down server =====" << std::endl;
     if (server_socket != -1)
     {
-        std::cout << "===== Shutting down server =====" << std::endl;
         close(server_socket);
+        std::cout << "Server socket closed." << std::endl;
     }
     exit(signum);
 }
 
 int main(int argc, char **argv)
 {   
-  
     if (argc != 1 && argc != 2)
     {
         std::cerr << "Usage: ./webserv OR ./webserv {configFile.conf}" << std::endl;
@@ -59,15 +59,12 @@ int main(int argc, char **argv)
       
     Config  config(configPath);
     
-    
-    int server_socket, client_socket;
-    struct  sockaddr_in server_addr, client_addr;
-    socklen_t   client_len = sizeof(client_addr);
-    
+    struct sockaddr_in server_addr, client_addr;
+    socklen_t client_len = sizeof(client_addr);
+
     signal(SIGINT, signal_handler);
     signal(SIGTERM, signal_handler);
-    
-    //create socket
+
     server_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (server_socket < 0)
     {
@@ -75,13 +72,20 @@ int main(int argc, char **argv)
         return (1);
     }
 
-    // configure server address
+    // Set SO_REUSEADDR to allow immediate port reuse
+    int opt = 1;
+    if (setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
+    {
+        std::cerr << "Error: setsockopt failed" << std::endl;
+        close(server_socket);
+        return 1;
+    }
+
     memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
     server_addr.sin_addr.s_addr = INADDR_ANY;
     server_addr.sin_port = htons(PORT);
 
-    // bind socket
     if (bind(server_socket, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1)
     {
         std::cerr << "Error: failed to bind socket" << std::endl;
@@ -89,7 +93,6 @@ int main(int argc, char **argv)
         return (1);
     }
     
-    // listen
     if (listen(server_socket, 5) == -1)
     {
         std::cerr << "Error: Could not listen to socket." << std::endl;
@@ -97,23 +100,19 @@ int main(int argc, char **argv)
         return (1);
     }   
     
-    std::cout << "Listining on port: " << PORT << std::endl;
-
-
-    //accept connections
+    std::cout << "Listening on port: " << PORT << std::endl;
     while (true)
     {
-        client_socket = accept(server_socket, (struct sockaddr*)&client_addr, &client_len);
+        int client_socket = accept(server_socket, (struct sockaddr*)&client_addr, &client_len);
         if (client_socket < 0)
         {
             std::cerr << "Failed to accept connection" << std::endl;
             continue ; 
         }
         
-        std::cout << "Connection accepted\n\n" << std::endl;
+        std::cout << "Connection accepted" << std::endl;
         
         HttpRequest request(client_socket);
-            
         printConfigData(config);
         printHttpRequest(request);
 
@@ -121,6 +120,8 @@ int main(int argc, char **argv)
         response.execMethod();
         response.generateHttpResponse();
         response.sendResponse();
+
+        close(client_socket); 
     }
 
     close(server_socket);

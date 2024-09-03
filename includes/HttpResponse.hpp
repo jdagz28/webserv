@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:13:31 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/03 04:20:23 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/03 10:15:59 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ class HttpResponse
 
         std::map<std::string, std::string>      _headers;
         std::string                             _body;
-        std::vector<unsigned char>               _responseMsg;
+        std::vector<unsigned char>              _responseMsg;
         
         
         

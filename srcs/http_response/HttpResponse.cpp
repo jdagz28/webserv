@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:19:13 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/03 04:21:27 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/03 10:52:27 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@
 HttpResponse::HttpResponse(HttpRequest &request,
                             Config &config,
                             int client_socket)
-    : _request(request), _config(config), _status(INIT), _client_socket(client_socket), _allowedMethods() _headers(), _body("")
+    : _request(request), _config(config), _status(INIT), _client_socket(client_socket), _allowedMethods(), _headers(), _body("")
 {
 }
 
@@ -82,7 +82,7 @@ std::string HttpResponse::comparePath(const ServerConfig &server, const HttpRequ
     std::string path;
     const std::vector<LocationConfig> &locationConfigs = server.getLocationConfig();
     if (locationConfigs.empty())
-        return(path);
+        return(std::string());
     std::vector<LocationConfig>::const_iterator location;
 
     for (location = locationConfigs.begin(); location != server.getLocationConfig().end(); location++)
@@ -124,8 +124,7 @@ bool HttpResponse::isMethodAllowed(const ServerConfig &server, const std::string
 {
     std::string requestMethod = request.getMethod();
     
-    const std::vector<LocationConf
-    ig> &locationConfigs = server.getLocationConfig();
+    const std::vector<LocationConfig> &locationConfigs = server.getLocationConfig();
     if (locationConfigs.empty())
         return (false);
     std::vector<LocationConfig>::const_iterator location;
@@ -137,7 +136,7 @@ bool HttpResponse::isMethodAllowed(const ServerConfig &server, const std::string
         {
             if (location->isLimited())
             {
-                if (location->isMethodExcluded(requestMethod))
+                if (!location->isLimitExcept(requestMethod))
                 {
                     setStatusCode(METHOD_NOT_ALLOWED);
                     return (false);
@@ -420,30 +419,62 @@ void HttpResponse::addAllowHeader()
 {
     if (getStatusCode() != METHOD_NOT_ALLOWED) 
         return ;
-    std::string allowed_method;
-    if (_locationConfig.isLimited())
+    
+    const std::vector<ServerConfig> &serverConfigs = _config.getServerConfig();
+    if (serverConfigs.empty())
     {
-        std::vector<std::string> exceptMethods = _locationConfig.getLimitExcept();
-        
-        for (size_t i = 0; i < exceptMethods.size(); i++)
-        {
-            if (i != 0)
-                allowed_method += ", ";
-            allowed_method += exceptMethods[i];
-        }
-        _headers["Allow"] = allowed_method;
+        setStatusCode(NOT_FOUND);
+        return ;
     }
-    else
+    std::vector<ServerConfig>::const_iterator server;
+    
+    for (server = serverConfigs.begin(); server != serverConfigs.end(); server++)
     {
-        std::vector<std::string> allowedMethods = _locationConfig.getallowed_method();
-
-        for (size_t i = 0; i < allowedMethods.size(); i++)
+        std::string path = comparePath(*server, _request.getRequestLine());
+        if (path.empty())
         {
-            if (i != 0)
-                allowed_method += ", ";
-            allowed_method += allowed_method[i];
+            setStatusCode(NOT_FOUND);
+            return ;
         }
-        _headers["Allow"] = allowed_method;
+        std::string target_path = _request.getRequestLine().getUri();
+        
+        const std::vector<LocationConfig> &locationConfigs = server->getLocationConfig();
+        if (locationConfigs.empty())
+        {
+            setStatusCode(NOT_FOUND);
+            return ;
+        }
+        std::vector<LocationConfig>::const_iterator location;
+        for (location = locationConfigs.begin(); location != locationConfigs.end(); location++)
+        {
+            std::string config_location = location->getPath();
+            if (config_location == target_path)
+            {
+                std::string allowed_method;
+                if (location->isLimited())
+                {
+                    std::vector<std::string> limitExceptMethods = location->getLimitExcept();
+                    for (size_t i = 0; i < limitExceptMethods.size(); i++)
+                    {
+                        if (i != 0)
+                            allowed_method += ", ";
+                        allowed_method += limitExceptMethods[i];
+                    }
+                    _headers["Allow"] = allowed_method;
+                }
+                else
+                {
+                    std::vector<std::string> allowedMethods = location->getAllowedMethods();
+                    for (size_t i = 0; i < allowedMethods.size(); i++)
+                    {
+                        if (i != 0)
+                            allowed_method += ", ";
+                        allowed_method += allowed_method[i];
+                    }
+                    _headers["Allow"] = allowed_method;
+                }
+            }
+        }
     }
 }
 
@@ -451,9 +482,10 @@ std::string HttpResponse::generateStatusLine()
 {
     std::ostringstream status_line;
     
-    status_line << HTTP/1.1 << " ";
+    status_line << "HTTP/1.1" << " ";
     status_line << static_cast<int>(getStatusCode()) << " ";
     status_line << getStatusReason(getStatusCode());
+    status_line << CRLF;
     return (status_line.str());   
 }
 
@@ -464,12 +496,12 @@ std::string HttpResponse::generateHeaderLines()
 
     for (header = _headers.begin(); header != _headers.end(); header++)
     {
-        std::string field_name = header->first();
-        std::string field_value = header->second();
+        std::string field_name = header->first;
+        std::string field_value = header->second;
 
         response_headers << field_name << ": " << field_value << CRLF;
     }
-    return (response_headers_oss.str());
+    return (response_headers.str());
 }
 
 void HttpResponse::sendResponse()
@@ -477,14 +509,24 @@ void HttpResponse::sendResponse()
     // if (!_responseMsg)
     // handle if response is empty
 
-    size_t bytesSent = send(_client_socket, _responseMsg.data(), _responseMsg.size());
-    if (bytesSent < 0)
+    std::cout << "RESPONSE MSG CONTENT" << std::endl;
+    std::string responseStr(_responseMsg.begin(), _responseMsg.end());
+    std::cout << responseStr << std::endl;
+
+    ssize_t bytesToSend = _responseMsg.size();
+    ssize_t totalBytesSent = 0;
+
+    while (totalBytesSent < bytesToSend)
     {
-        // handle error
-        return ;
+        ssize_t bytesSent = send(_client_socket, _responseMsg.data() + totalBytesSent, bytesToSend - totalBytesSent, 0);
+        if (bytesSent < 0)
+        {
+            std::cerr << "ERROR: sending bytes" << std::endl;
+            return;
+        }
+        totalBytesSent += bytesSent;
     }
-    else if (0 < bytesSent)
-    {
-        _responseMsg.erase(_responseMsg.begin(), _responseMsg.begin() + bytesSent);
-    }
+
+    std::cout << totalBytesSent << " bytes sent" << std::endl;
+    _responseMsg.erase(_responseMsg.begin(), _responseMsg.begin() + totalBytesSent);
 }

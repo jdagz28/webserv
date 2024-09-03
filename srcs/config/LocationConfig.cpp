@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/07 23:05:41 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/08/14 05:56:14 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/03 10:11:02 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,10 +123,10 @@ bool LocationConfig::isLimited() const
     return (_isLimited);
 }
 
-bool LocationConfig::isMethodExcluded(const std::string &method) const
+bool LocationConfig::isLimitExcept(const std::string &method) const
 {
     if (_limitExcept.empty())
-        return (false);
+        return (true); //if not specified - then allow all methods
     std::vector<std::string>::const_iterator it;
     for(it = _limitExcept.begin(); it != _limitExcept.end(); it++)
         if (*it == method)
