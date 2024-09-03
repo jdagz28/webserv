@@ -6,7 +6,7 @@
 #    By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/05 02:06:08 by jdagoy            #+#    #+#              #
-#    Updated: 2024/08/07 04:30:31 by jdagoy           ###   ########.fr        #
+#    Updated: 2024/09/03 03:23:41 by jdagoy           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -41,7 +41,7 @@ OBJS				:= $(addprefix $(OBJ_DIR), $(OBJS_LIST))
 CONFIG_DIR			:= $(SRC_DIR)config/
 CONFIG_SRCS			:= Config.cpp \
 						LocationConfig.cpp \
-						ServerConfig.cpp
+						ServerConfig.cpp 
 CONFIG_OBJS_LIST 	:= $(patsubst %.cpp, %.o, $(CONFIG_SRCS))
 CONFIG_OBJS			:= $(addprefix $(OBJ_DIR), $(CONFIG_OBJS_LIST))
 
@@ -59,7 +59,9 @@ HTTPREQUEST_OBJS	:= $(addprefix $(OBJ_DIR), $(HTTPREQUEST_OBJS_LIST))
 
 
 HTTPRESPONSE_DIR	:= $(SRC_DIR)http_response/
-HTTPRESPONSE_SRCS	:= HttpResponse.cpp
+HTTPRESPONSE_SRCS	:= HttpResponse.cpp \
+						MimeTypes.cpp \
+						StatusCodes.cpp
 HTTPRESPONSE_OBJS_LIST := $(patsubst %.cpp, %.o, $(HTTPRESPONSE_SRCS))
 HTTPRESPONSE_OBJS	:= $(addprefix $(OBJ_DIR), $(HTTPRESPONSE_OBJS_LIST))
 

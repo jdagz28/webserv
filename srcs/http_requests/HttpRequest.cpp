@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:18:22 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/08/04 02:05:53 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/02 07:00:38 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -225,4 +225,23 @@ const HttpRequestLine& HttpRequest::getRequestLine() const
 const std::vector<std::pair<std::string, std::vector<std::string> > >& HttpRequest::getHeaders() const
 {
     return (_headers);
+}
+
+bool HttpRequest::isConnectionClosed() const
+{
+    std::vector<std::pair<std::string, std::vector<std::string> > >::const_iterator header;
+
+    for (header = _headers.begin(); header != _headers.end(); header++)
+    {
+        if (header->first == "Connection")
+        {
+            std::vector<std::string>::const_iterator value;
+            for (value = header->second.begin(); value != header->second.end(); value++)
+            {
+                if (*value == "close")
+                    return (true);
+            }
+        }
+    }
+    return (false);
 }

@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 22:38:46 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/08/07 06:05:31 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/03 03:59:09 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@ class Config
         std::pair<int, std::string>             _error;
         std::vector<ServerConfig>               _serverConfig;
         int                                     _serverCount;
+        time_t                                  _keepAliveTimeOut;
         
         Config(const Config &copy);
         Config  &operator=(const Config &copy); 
@@ -44,6 +45,7 @@ class Config
         ~Config();
 
         const std::vector<ServerConfig>& getServerConfig() const;
+        time_t  getKeepAliveTimeout() const;
 
         class configException : public std::exception
         {

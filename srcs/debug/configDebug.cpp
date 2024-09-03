@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/07 01:23:08 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/08/08 07:19:42 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/03 03:59:37 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,9 @@
 
 void    printConfigData(const Config &config)
 {
+    if (config.getKeepAliveTimeout())
+        std::cout << "Keep-Alive timeout " << config.getKeepAliveTimeout() << std::endl;
+    
     for (size_t i = 0; i < config.getServerConfig().size(); i++)
     {
         const ServerConfig &server = config.getServerConfig()[i];

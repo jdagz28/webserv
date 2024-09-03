@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 02:19:46 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/07/07 02:12:47 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/02 22:58:34 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,16 @@ void   ServerConfig::setDirective(const std::string &directive, const std::strin
 
 void    ServerConfig::setPort(const std::string &port)
 {
-    _port = atoi(port.c_str());
+    std::string portStr = port;
+    
+    size_t colonPos = port.find(':');
+    if (colonPos != std::string::npos)
+    {
+        portStr = port.substr(colonPos + 1);
+        _port = atoi(portStr.c_str());
+    }
+    else
+        _port = atoi(port.c_str());
 }
 
 void    ServerConfig::setServerName(const std::string &name)

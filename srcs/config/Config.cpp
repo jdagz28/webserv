@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 22:38:59 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/08/08 07:02:52 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/03 03:59:17 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 #include <sstream>
 
 Config::Config(const std::string &configPath)
-    : _error(std::make_pair(0, "")), _serverCount(0)
+    : _error(std::make_pair(0, "")), _serverCount(0), _keepAliveTimeOut(0)
 {
     try
     {
@@ -207,7 +207,22 @@ void    Config::parseConfig(const std::string &configFile)
         std::istringstream iss(line);
         std::string token;
         iss >> token;
-        if (token == "server")
+        if (token == "keepalive_timeout")
+        {
+            std::string value;
+            std::getline(iss, value);
+            trimWhitespaces(value);
+            std::stringstream ss(value);
+            int timeout;
+            ss >> timeout;
+            if (ss.fail())
+            {
+                _error = std::make_pair(4, "Invalid keepalive_timeout value.");
+                throw configException(_error.second);
+            }
+            _keepAliveTimeOut = timeout;
+        }
+        else if (token == "server")
         {
             ServerConfig    serverConfig;
             parseServerBlock(infile, serverConfig);
@@ -226,4 +241,9 @@ const std::vector<ServerConfig>& Config::getServerConfig() const
 const char *Config::configException::what() const throw()
 {
     return (exceptMsg.c_str());
+}
+
+time_t  Config::getKeepAliveTimeout() const
+{
+    return (_keepAliveTimeOut);
 }

@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main_http.cpp                                      :+:      :+:    :+:   */
+/*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/05 00:23:30 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/08/07 04:29:33 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/03 03:53:53 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,9 +119,8 @@ int main(int argc, char **argv)
 
         HttpResponse response(request, config, client_socket);
         response.execMethod();
-        
-        pause();
-        close(client_socket);
+        response.generateHttpResponse();
+        response.sendResponse();
     }
 
     close(server_socket);

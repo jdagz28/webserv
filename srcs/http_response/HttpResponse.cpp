@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:19:13 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/08/30 11:06:29 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/03 04:21:27 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,17 +17,30 @@
 #include "HttpRequestLine.hpp"
 #include "LocationConfig.hpp"
 #include <string>
+#include <ctime>
+#include <sstream>
 
 HttpResponse::HttpResponse(HttpRequest &request,
                             Config &config,
                             int client_socket)
-    : _request(request), _config(config), _status(0), _error(0), _errorMsg(""), _client_socket(client_socket)
+    : _request(request), _config(config), _status(INIT), _client_socket(client_socket), _allowedMethods() _headers(), _body("")
 {
 }
 
 HttpResponse::~HttpResponse()
 {
 }
+
+void HttpResponse::setStatusCode(StatusCode status)
+{
+    _status = status;
+}
+
+StatusCode HttpResponse::getStatusCode() const
+{
+    return (_status);
+}
+
 
 int HttpResponse::checkMethod(const std::string &method)
 {
@@ -51,12 +64,11 @@ void HttpResponse::execMethod()
             processRequestGET();
             break ;
         default:
-            _error = 1;
-            _errorMsg = "Error: Method not implemented / unavailable.";
+            setStatusCode(METHOD_NOT_ALLOWED);
     }
 }
 
-bool HttpResponse::isMatchingPrefix(const std::string &pattern, const std::string &target)
+static bool isMatchingPrefix(const std::string &pattern, const std::string &target)
 {
     if (pattern.empty() || target.empty())
         return (false);
@@ -89,7 +101,6 @@ std::string HttpResponse::comparePath(const ServerConfig &server, const HttpRequ
             if (path.empty() || path.length() < config_location.length())
                 path = config_location;
     }
-    std::cout << "Path returned: " << path << std::endl;
     return (path);
 }
 
@@ -113,7 +124,8 @@ bool HttpResponse::isMethodAllowed(const ServerConfig &server, const std::string
 {
     std::string requestMethod = request.getMethod();
     
-    const std::vector<LocationConfig> &locationConfigs = server.getLocationConfig();
+    const std::vector<LocationConf
+    ig> &locationConfigs = server.getLocationConfig();
     if (locationConfigs.empty())
         return (false);
     std::vector<LocationConfig>::const_iterator location;
@@ -127,8 +139,7 @@ bool HttpResponse::isMethodAllowed(const ServerConfig &server, const std::string
             {
                 if (location->isMethodExcluded(requestMethod))
                 {
-                    _error = 1;
-                    _errorMsg = "Error: Method not allowed";
+                    setStatusCode(METHOD_NOT_ALLOWED);
                     return (false);
                 }
             }
@@ -136,17 +147,15 @@ bool HttpResponse::isMethodAllowed(const ServerConfig &server, const std::string
             {
                 if (!location->isMethodAllowed(requestMethod))
                 {
-                    _error = 1;
-                    _errorMsg = "Error: Method not allowed";
+                    setStatusCode(METHOD_NOT_ALLOWED);
                     return (false);
                 }
             }
-            std::cout << requestMethod << " Method is Allowed" << std::endl;
+            _allowedMethods = location->getAllowedMethods();
             return (true);
         }
     }
-    _error = 1;
-    _errorMsg = "Error: Location not found or method not allowed";
+    setStatusCode(METHOD_NOT_ALLOWED);
     return (false);
     
 }
@@ -156,7 +165,7 @@ std::string HttpResponse::checkRoot(const ServerConfig &server, const std::strin
     std::string rootpath;
     const std::vector<LocationConfig> &locationConfigs = server.getLocationConfig();
     if (locationConfigs.empty())
-        return (rootpath);
+        return (std::string());
     std::vector<LocationConfig>::const_iterator location;
 
     for (location = locationConfigs.begin(); location != server.getLocationConfig().end(); location++)
@@ -168,18 +177,14 @@ std::string HttpResponse::checkRoot(const ServerConfig &server, const std::strin
             return (rootpath);
         }
     }
-    return (rootpath);
+    return (std::string());
 }
 
 std::string HttpResponse::resolvePath()
 {
     const std::vector<ServerConfig> &serverConfigs = _config.getServerConfig();
     if (serverConfigs.empty())
-    {
-        _error = 1;
-        _errorMsg = "Error: Server Config is empty";
         return (std::string());
-    }
     std::vector<ServerConfig>::const_iterator server;
     for (server = serverConfigs.begin(); server != serverConfigs.end(); server++)
     {
@@ -230,10 +235,6 @@ static bool checkSlash(const std::string &defaultLoc, const std::string &page)
     bool defaultSlash = !defaultLoc.empty() && defaultLoc[defaultLoc.length() - 1] == '/';
     bool pageSlash = !page.empty() && page[0] == '/';
     
-
-    std::cout << defaultLoc << ":\t " << defaultSlash << std::endl;
-    std::cout << page << ":\t" << pageSlash << std::endl;
-
     if (!defaultSlash && !pageSlash)
         return (false);
     return (true);
@@ -247,6 +248,14 @@ static std::string extractHTMLName(const std::string &uri)
     return (std::string());
 }
 
+void HttpResponse::addContentTypeHeader(const std::string &type)
+{
+    if (type.empty())
+        _headers["Content-Type"] = "text/html";
+    else
+        _headers["Content-Type"] = getMimeType(type);
+}
+
 void  HttpResponse::getContent(const std::string &file_path)
 {
     std::ifstream   infile;
@@ -256,9 +265,8 @@ void  HttpResponse::getContent(const std::string &file_path)
     
     if (!infile.is_open())
     {
-        _error = 404;
-        _errorMsg = "Error: File not found";
-        //error_page;
+        setStatusCode(NOT_FOUND);
+        return ;
     }
     else
     {
@@ -267,47 +275,48 @@ void  HttpResponse::getContent(const std::string &file_path)
         _body += '\0'; 
         infile.close();
     }
-    _contentLength = _body.size();
+    
+    std::string contentType = getExtension(file_path);
+    if (!isSupportedMedia(contentType))
+        setStatusCode(UNSUPPORTED_MEDIA_TYPE);
+    addContentTypeHeader(contentType);
+    setStatusCode(OK);
 }
 
-//! check if resource is supported (other than .html)
-// constants of supported types
+bool HttpResponse::isSupportedMedia(const std::string &uri)
+{
+    std::string extension = getExtension(uri);
+    std::string type = getMimeType(extension);
+    return (!type.empty());    
+}
+
 void HttpResponse::getIndexPage(const std::string &target_path)
 {
     std::string indexPath;
-    std::string defaultPage = getDefaultName();
-    std::cout << "Default Page: " << defaultPage << std::endl;
-    
+        
+
     std::string uri = _request.getRequestLine().getUri();
-    if (endsWith(uri, ".html"))
+    if (isSupportedMedia(uri))
     {
+        //!Check for other supported media types
         std::string pageName = extractHTMLName(uri);
-        std::cout << "Page Name: " << pageName << std::endl;
         if (!checkSlash(target_path, pageName))
             indexPath = target_path + '/' + pageName;
         else
             indexPath = target_path + pageName;
-        std::cout << "Index Path: " << indexPath << std::endl;
         if (fileExists(indexPath))
         {
-            std::cout << "Page exists" << std::endl;
-            //send file
-            /** 
-             * TODO: read html file and send
-             * ! HttpResponse - repsonse atrributes
-             * ? create a response class
-            */ 
             getContent(indexPath);
             std::cout << "Response Body: " << _body << std::endl;
         }
         else
-        {
-            std::cout << "Page does not exist" << std::endl;
-            //send 404
-        }
+            setStatusCode(NOT_FOUND);
     }
     else
     {
+        std::string defaultPage = getDefaultName();
+        if (defaultPage.empty())
+            setStatusCode(NOT_FOUND);
         if (!checkSlash(target_path, defaultPage))
             indexPath = target_path + '/' + defaultPage;
         else
@@ -317,22 +326,12 @@ void HttpResponse::getIndexPage(const std::string &target_path)
     }
 }
 
-//! Remove _error and _errorMsgs
-//? Create a class Result to handle status code and message ??
 
 void HttpResponse::processRequestGET()
 {
     if (!checkLocConfigAndRequest())
     {
-        if (!_error)
-        {
-            _error = 1;
-            _errorMsg = "Error: Location not found";
-        }
-    }
-    if (_error)
-    {
-        std::cout << _errorMsg << std::endl;
+        setStatusCode(NOT_FOUND);
         return ;
     }
 
@@ -349,16 +348,143 @@ void HttpResponse::processRequestGET()
     
     std::string path = resolvePath();
     if (path.empty())
-    {
-        _error = 1;
-        _errorMsg = "Error: Path not found";
-    }
-    std::cout << "Resolved path: " << path << std::endl;
+        setStatusCode(NOT_FOUND);
     
     if (isDirectory(path))
     {
         getIndexPage(path);
         
     }
+}
 
+
+void HttpResponse::generateHttpResponse()
+{
+    _headers["Server"] = "webserv";
+    _headers["Date"] = getHttpDateCET();
+    _headers["Content-Length"] = toString(_body.size());
+    addKeepAliveHeader();
+    addAllowHeader();
+
+    std::string statusLine = generateStatusLine();
+    std::string headerLines = generateHeaderLines();
+    std::string empty = CRLF;
+    _responseMsg.insert(_responseMsg.end(), statusLine.begin(), statusLine.end());
+    _responseMsg.insert(_responseMsg.end(), headerLines.begin(), headerLines.end());
+    _responseMsg.insert(_responseMsg.end(), empty.begin(), empty.end());
+    _responseMsg.insert(_responseMsg.end(), _body.begin(), _body.end());
+}
+
+
+std::string HttpResponse::getHttpDateCET()
+{
+    time_t gmt_time;
+    const int kDateBufSize = 1024;
+    char date[kDateBufSize];
+    const time_t UTC_TO_CET_OFFSET = 1 * 60 * 60;  
+    const time_t UTC_TO_CEST_OFFSET = 2 * 60 * 60;
+    
+    std::time(&gmt_time);
+    struct tm *local_time = std::localtime(&gmt_time);
+    time_t cet_time = gmt_time + (local_time->tm_isdst > 0 ? UTC_TO_CEST_OFFSET : UTC_TO_CET_OFFSET);
+    const char* format = local_time->tm_isdst > 0 ? "%a, %d %b %Y %H:%M:%S CEST" : "%a, %d %b %Y %H:%M:%S CET";
+    std::strftime(date, sizeof(date), format, std::gmtime(&cet_time));
+    return (std::string(date));
+}
+
+bool HttpResponse::isKeepAlive() const
+{
+    if (_request.isConnectionClosed())
+        return (false);
+    if (_config.getKeepAliveTimeout() == 0)
+        return (false);
+    return (true);
+}
+
+
+void HttpResponse::addKeepAliveHeader()
+{
+    if (isKeepAlive())
+    {
+        _headers["Connection"] = "keep-alive";
+        std::ostringstream keepalive;
+        keepalive << "time=" << _config.getKeepAliveTimeout();
+        keepalive << ", max=100"; //! MAX connections
+        _headers["Keep-Alive"] = keepalive.str();
+    }
+    else
+        _headers["Connection"] = "close";
+}
+
+void HttpResponse::addAllowHeader()
+{
+    if (getStatusCode() != METHOD_NOT_ALLOWED) 
+        return ;
+    std::string allowed_method;
+    if (_locationConfig.isLimited())
+    {
+        std::vector<std::string> exceptMethods = _locationConfig.getLimitExcept();
+        
+        for (size_t i = 0; i < exceptMethods.size(); i++)
+        {
+            if (i != 0)
+                allowed_method += ", ";
+            allowed_method += exceptMethods[i];
+        }
+        _headers["Allow"] = allowed_method;
+    }
+    else
+    {
+        std::vector<std::string> allowedMethods = _locationConfig.getallowed_method();
+
+        for (size_t i = 0; i < allowedMethods.size(); i++)
+        {
+            if (i != 0)
+                allowed_method += ", ";
+            allowed_method += allowed_method[i];
+        }
+        _headers["Allow"] = allowed_method;
+    }
+}
+
+std::string HttpResponse::generateStatusLine()
+{
+    std::ostringstream status_line;
+    
+    status_line << HTTP/1.1 << " ";
+    status_line << static_cast<int>(getStatusCode()) << " ";
+    status_line << getStatusReason(getStatusCode());
+    return (status_line.str());   
+}
+
+std::string HttpResponse::generateHeaderLines()
+{
+    std::map<std::string, std::string>::const_iterator header;
+    std::ostringstream response_headers;
+
+    for (header = _headers.begin(); header != _headers.end(); header++)
+    {
+        std::string field_name = header->first();
+        std::string field_value = header->second();
+
+        response_headers << field_name << ": " << field_value << CRLF;
+    }
+    return (response_headers_oss.str());
+}
+
+void HttpResponse::sendResponse()
+{
+    // if (!_responseMsg)
+    // handle if response is empty
+
+    size_t bytesSent = send(_client_socket, _responseMsg.data(), _responseMsg.size());
+    if (bytesSent < 0)
+    {
+        // handle error
+        return ;
+    }
+    else if (0 < bytesSent)
+    {
+        _responseMsg.erase(_responseMsg.begin(), _responseMsg.begin() + bytesSent);
+    }
 }

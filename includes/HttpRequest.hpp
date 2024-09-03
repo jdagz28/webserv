@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:11:42 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/08/14 05:53:20 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/02 06:56:03 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ class HttpRequest
         
         const HttpRequestLine& getRequestLine() const;
         const std::vector<std::pair<std::string, std::vector<std::string> > >& getHeaders() const;
-        
+        bool    isConnectionClosed() const;
 
         void    printBuffer() const;
 

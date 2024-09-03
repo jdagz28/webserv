@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 22:29:37 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/08/14 06:33:08 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/02 05:30:20 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,4 +63,19 @@ bool endsWith(const std::string &str, const std::string &suffix)
     if (suffix_len > str_len)
         return (false);
     return (str.compare(str_len - suffix_len, suffix_len, suffix) == 0);
+}
+
+std::string getExtension(const std::string &path)
+{
+    size_t dot_pos = path.find_last_of('.');
+    if (dot_pos == std::string::npos)
+        return (std::string());
+    return (path.substr(dot_pos + 1));
+}
+
+std::string toString(int num)
+{
+    std::ostringstream oss;
+    oss << num;
+    return (oss.str());
 }
