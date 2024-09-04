@@ -6,12 +6,12 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:11:42 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/08/04 02:03:28 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/04 01:24:37 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef HTTPREQUEST_HPP
-#define HTTPRREQUEST_HPP
+#define HTTPREQUEST_HPP
 
 #include <vector>
 #include <string>
@@ -52,7 +52,7 @@ class HttpRequest
         
         const HttpRequestLine& getRequestLine() const;
         const std::vector<std::pair<std::string, std::vector<std::string> > >& getHeaders() const;
-        
+        bool    isConnectionClosed() const;
 
         void    printBuffer() const;
 

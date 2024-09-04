@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 22:38:59 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/07/08 02:23:45 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/03 03:59:17 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 #include <sstream>
 
 Config::Config(const std::string &configPath)
-    : _error(std::make_pair(0, "")), _serverCount(0)
+    : _error(std::make_pair(0, "")), _serverCount(0), _keepAliveTimeOut(0)
 {
     try
     {
@@ -97,9 +97,10 @@ void    Config::parseLocationBlock(std::ifstream &infile, LocationConfig &locati
     {
         if (line.find("}") != std::string::npos)
             break;
-        
+        // std::cout << "Line: " << line << std::endl;
         std::istringstream iss(line);
         std::string token;
+        // std::cout << "Token: " << token << std::endl;
         iss >> token;
         if (!token.empty())
         {
@@ -107,9 +108,20 @@ void    Config::parseLocationBlock(std::ifstream &infile, LocationConfig &locati
             std::string value;
             std::getline(iss, value);
             trimWhitespaces(value);
-            if (directive == "root")
-                locationConfig.setPath(value);
-            if (directive != "{" && directive != "}")
+            if (directive == "allowed_methods")
+            {
+                std::vector<std::string> methods = splitBySpaces(value);
+                for (size_t i = 0; i < methods.size(); i++)
+                    locationConfig.setAllowedMethod(methods[i]);
+            }
+            else if (directive == "limit_except")
+            {
+                locationConfig.setLimitExcept(true);
+                std::vector<std::string> methods = splitBySpaces(value);
+                for (size_t i = 0; i < methods.size(); i++)
+                    locationConfig.setExcludeMethod(methods[i]);
+            }
+            else if (directive != "{" && directive != "}")
             {
                 std::vector<std::string> values = splitBySpaces(value);
                 for (size_t i = 0; i < values.size(); i++)
@@ -127,13 +139,19 @@ void    Config::parseServerBlock(std::ifstream &infile, ServerConfig &serverConf
         if (line.find("}") != std::string::npos)
             break;
 
+        // std::cout << "Line: " << line << std::endl;
         std::istringstream iss(line);
         std::string token;
+        // std::cout << "Token: " << token << std::endl;
         iss >> token;
         if (token == "location")
         {
             LocationConfig locationConfig;
             parseLocationBlock(infile, locationConfig);
+            std::string value;
+            std::getline(iss, value);
+            trimWhitespaces(value);
+            locationConfig.setPath(value);
             serverConfig.setLocationConfig(locationConfig);
         }
         else
@@ -189,7 +207,22 @@ void    Config::parseConfig(const std::string &configFile)
         std::istringstream iss(line);
         std::string token;
         iss >> token;
-        if (token == "server")
+        if (token == "keepalive_timeout")
+        {
+            std::string value;
+            std::getline(iss, value);
+            trimWhitespaces(value);
+            std::stringstream ss(value);
+            int timeout;
+            ss >> timeout;
+            if (ss.fail())
+            {
+                _error = std::make_pair(4, "Invalid keepalive_timeout value.");
+                throw configException(_error.second);
+            }
+            _keepAliveTimeOut = timeout;
+        }
+        else if (token == "server")
         {
             ServerConfig    serverConfig;
             parseServerBlock(infile, serverConfig);
@@ -208,4 +241,9 @@ const std::vector<ServerConfig>& Config::getServerConfig() const
 const char *Config::configException::what() const throw()
 {
     return (exceptMsg.c_str());
+}
+
+time_t  Config::getKeepAliveTimeout() const
+{
+    return (_keepAliveTimeOut);
 }

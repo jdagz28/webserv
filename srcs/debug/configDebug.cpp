@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/07 01:23:08 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/07/29 05:29:30 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/03 03:59:37 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,9 @@
 
 void    printConfigData(const Config &config)
 {
+    if (config.getKeepAliveTimeout())
+        std::cout << "Keep-Alive timeout " << config.getKeepAliveTimeout() << std::endl;
+    
     for (size_t i = 0; i < config.getServerConfig().size(); i++)
     {
         const ServerConfig &server = config.getServerConfig()[i];
@@ -48,6 +51,23 @@ void    printConfigData(const Config &config)
             const LocationConfig &location = locations[i];
             std::cout << "\t";
             std::cout << "Location Path: " << location.getPath() << std::endl;
+            
+            const std::vector<std::string> &allowedMethods = location.getAllowedMethods();
+            std::vector<std::string>::const_iterator allowed;
+            if (!allowedMethods.empty())
+                std::cout << "\t\tAllowed Method: " << std::endl;
+            for (allowed = allowedMethods.begin(); allowed != allowedMethods.end(); allowed++)
+                std::cout << "\t\t\t" << *allowed << std::endl;
+            
+            const std::vector<std::string> &exceptMethods = location.getLimitExcept();
+            std::vector<std::string>::const_iterator except;
+            if (!exceptMethods.empty())
+                std::cout << "\t\tExcept Method: " << std::endl;
+            for (except = exceptMethods.begin(); except != exceptMethods.end(); except++)
+            {
+                std::cout << "\t\t\t" << *except << std::endl;
+            }
+            
             const std::map<std::string, std::vector<std::string> >&locationDirectives = location.getDirectives();
             std::map<std::string, std::vector<std::string> >::const_iterator it;
             for (it = locationDirectives.begin(); it != locationDirectives.end(); it++)

@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 22:29:37 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/07/08 02:11:34 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/02 05:30:20 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include <sys/stat.h>
 
 
 std::vector<std::string>    splitBySpaces(const std::string &str)
@@ -39,3 +40,42 @@ void    trimWhitespaces(std::string &str)
     str.erase(std::find_if(str.rbegin(), str.rend(), isNotSpace).base(), str.end());
 }
 
+bool isDirectory(const std::string &path)
+{
+    struct stat sb;
+    if (stat(path.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode))
+        return (true);
+    return (false);
+}
+
+bool fileExists(const std::string &path)
+{
+    struct stat sb;
+    if (stat(path.c_str(), &sb) == 0 && S_ISREG(sb.st_mode))
+        return (true);
+    return (false);
+}
+
+bool endsWith(const std::string &str, const std::string &suffix)
+{
+    size_t str_len = str.length();
+    size_t suffix_len = suffix.length();
+    if (suffix_len > str_len)
+        return (false);
+    return (str.compare(str_len - suffix_len, suffix_len, suffix) == 0);
+}
+
+std::string getExtension(const std::string &path)
+{
+    size_t dot_pos = path.find_last_of('.');
+    if (dot_pos == std::string::npos)
+        return (std::string());
+    return (path.substr(dot_pos + 1));
+}
+
+std::string toString(int num)
+{
+    std::ostringstream oss;
+    oss << num;
+    return (oss.str());
+}
