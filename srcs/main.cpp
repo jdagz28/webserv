@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/05 00:23:30 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/04 01:24:15 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/04 11:36:03 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,6 +100,7 @@ int main(int argc, char **argv)
         return (1);
     }   
     
+    printConfigData(config);
     std::cout << "Listening on port: " << PORT << std::endl;
     while (true)
     {
@@ -114,12 +115,14 @@ int main(int argc, char **argv)
         std::cout << "Receiving request..." << std::endl;
         HttpRequest request(client_socket);
         std::cout << "Request parsed." << std::endl;
+        printHttpRequest(request);
 
         std::cout << "Generating response..." << std::endl;
         HttpResponse response(request, config, client_socket);
         response.execMethod();
         response.generateHttpResponse();
         
+        printHttpResponse(response.getHttpResponse());
         std::cout << "Sending response..." << std::endl;
         response.sendResponse();
 

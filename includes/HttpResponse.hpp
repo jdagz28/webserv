@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:13:31 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/03 11:52:17 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/04 11:37:36 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,9 +57,9 @@ class HttpResponse
         std::string getDefaultName();
         std::string getDefaultNameLoc(const ServerConfig &server);
         
-        void getContent(const std::string &file_path);
+        void getResourceContent(const std::string &file_path);
         bool isSupportedMedia(const std::string &uri);
-        void getIndexPage(const std::string &target_path);
+        void getResource(const std::string &target_path);
 
         std::string generateStatusLine();
         void addContentTypeHeader(const std::string &type);
@@ -75,15 +75,14 @@ class HttpResponse
         ~HttpResponse();
 
         void    execMethod();
-    
         void    setStatusCode(StatusCode status);
+        void    generateHttpResponse();
+        void    sendResponse();
+
         
         StatusCode getStatusCode() const;
-
-        void generateHttpResponse();
-        void sendResponse();
-        
-        
+    
+        std::string getHttpResponse();
 };
 
 

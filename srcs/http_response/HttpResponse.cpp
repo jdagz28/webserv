@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:19:13 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/04 02:38:47 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/04 11:39:22 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -255,29 +255,28 @@ void HttpResponse::addContentTypeHeader(const std::string &type)
         _headers["Content-Type"] = getMimeType(type);
 }
 
-void  HttpResponse::getContent(const std::string &file_path)
+void  HttpResponse::getResourceContent(const std::string &file_path)
 {
     std::ifstream   infile;
     std::string     buffer;
     
-    infile.open(file_path.c_str());
-    
+    infile.open(file_path.c_str(), std::ios::binary);
     if (!infile.is_open())
     {
         setStatusCode(NOT_FOUND);
         return ;
     }
-    if (!_body.empty())
-        _body.clear();
-    while (std::getline(infile, buffer)) 
-        _body += buffer + CRLF;
-    _body += CRLF; 
-    infile.close();
-
-    
     std::string contentType = getExtension(file_path);
     if (!isSupportedMedia(contentType))
         setStatusCode(UNSUPPORTED_MEDIA_TYPE);
+    
+    // Read the binary file content manually
+    infile.seekg(0, std::ios::end);  // Move to the end of the file to get the size
+    std::streampos fileSize = infile.tellg();  // Get the size of the file
+    infile.seekg(0, std::ios::beg);  // Move back to the beginning
+    _body.resize(fileSize);
+    infile.read(&_body[0], fileSize); 
+    infile.close();
     addContentTypeHeader(contentType);
     setStatusCode(OK);
 }
@@ -289,7 +288,7 @@ bool HttpResponse::isSupportedMedia(const std::string &uri)
     return (!type.empty());    
 }
 
-void HttpResponse::getIndexPage(const std::string &target_path)
+void HttpResponse::getResource(const std::string &target_path)
 {
     std::string indexPath;
         
@@ -304,7 +303,7 @@ void HttpResponse::getIndexPage(const std::string &target_path)
         else
             indexPath = target_path + resourceName;
         if (fileExists(indexPath))
-            getContent(indexPath);
+            getResourceContent(indexPath);
         else
             setStatusCode(NOT_FOUND);
     }
@@ -317,7 +316,7 @@ void HttpResponse::getIndexPage(const std::string &target_path)
             indexPath = target_path + '/' + defaultPage;
         else
             indexPath = target_path + defaultPage;
-        getContent(indexPath);
+        getResourceContent(indexPath);
     }
 }
 
@@ -342,12 +341,13 @@ void HttpResponse::processRequestGET()
      */
     
     std::string path = resolvePath();
+
     if (path.empty())
         setStatusCode(NOT_FOUND);
     
     if (isDirectory(path))
     {
-        getIndexPage(path);
+        getResource(path);
         
     }
 }
@@ -507,23 +507,23 @@ void HttpResponse::sendResponse()
         return;
     }
 
-
-    std::string responseStr(_responseMsg.begin(), _responseMsg.end());
-    std::cout << responseStr << std::endl;
-
     ssize_t bytesSent = send(_client_socket, _responseMsg.data(), _responseMsg.size(), 0);
     if (bytesSent < 0)
     {
         std::cerr << "ERROR: sending bytes" << std::endl;
         return;
     }
-
-    std::cout << bytesSent << " bytes sent" << std::endl;
+    // std::cout << bytesSent << " bytes sent" << std::endl;
     _responseMsg.erase(_responseMsg.begin(), _responseMsg.begin() + bytesSent);
-    
     if (_headers["Connection"] != "keep-alive")
     {
         if (close(_client_socket) < 0)
             std::cerr << "ERROR: closing socket" << std::endl;
     }
+}
+
+std::string HttpResponse::getHttpResponse()
+{
+    std::string response(_responseMsg.begin(), _responseMsg.end());
+    return (response);
 }
