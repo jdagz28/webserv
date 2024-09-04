@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:19:13 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/03 10:52:27 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/04 02:38:47 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -239,7 +239,7 @@ static bool checkSlash(const std::string &defaultLoc, const std::string &page)
     return (true);
 }
 
-static std::string extractHTMLName(const std::string &uri)
+static std::string extractResourceName(const std::string &uri)
 {
     size_t  lastSlashPos = uri.find_last_of('/');
     if (lastSlashPos != std::string::npos && lastSlashPos + 1 < uri.length())
@@ -267,13 +267,13 @@ void  HttpResponse::getContent(const std::string &file_path)
         setStatusCode(NOT_FOUND);
         return ;
     }
-    else
-    {
-        while (std::getline(infile, buffer)) 
-            _body += buffer + "\n";
-        _body += '\0'; 
-        infile.close();
-    }
+    if (!_body.empty())
+        _body.clear();
+    while (std::getline(infile, buffer)) 
+        _body += buffer + CRLF;
+    _body += CRLF; 
+    infile.close();
+
     
     std::string contentType = getExtension(file_path);
     if (!isSupportedMedia(contentType))
@@ -298,16 +298,13 @@ void HttpResponse::getIndexPage(const std::string &target_path)
     if (isSupportedMedia(uri))
     {
         //!Check for other supported media types
-        std::string pageName = extractHTMLName(uri);
-        if (!checkSlash(target_path, pageName))
-            indexPath = target_path + '/' + pageName;
+        std::string resourceName = extractResourceName(uri);
+        if (!checkSlash(target_path, resourceName))
+            indexPath = target_path + '/' + resourceName;
         else
-            indexPath = target_path + pageName;
+            indexPath = target_path + resourceName;
         if (fileExists(indexPath))
-        {
             getContent(indexPath);
-            std::cout << "Response Body: " << _body << std::endl;
-        }
         else
             setStatusCode(NOT_FOUND);
     }
@@ -321,7 +318,6 @@ void HttpResponse::getIndexPage(const std::string &target_path)
         else
             indexPath = target_path + defaultPage;
         getContent(indexPath);
-        std::cout << "Response Body: " << _body << std::endl;
     }
 }
 
@@ -368,6 +364,9 @@ void HttpResponse::generateHttpResponse()
     std::string statusLine = generateStatusLine();
     std::string headerLines = generateHeaderLines();
     std::string empty = CRLF;
+
+    if (!_responseMsg.empty())
+        _responseMsg.clear();
     _responseMsg.insert(_responseMsg.end(), statusLine.begin(), statusLine.end());
     _responseMsg.insert(_responseMsg.end(), headerLines.begin(), headerLines.end());
     _responseMsg.insert(_responseMsg.end(), empty.begin(), empty.end());
@@ -377,17 +376,13 @@ void HttpResponse::generateHttpResponse()
 
 std::string HttpResponse::getHttpDateCET()
 {
-    time_t gmt_time;
+    std::time_t now = std::time(NULL);
+    std::tm *gmt_tm = std::gmtime(&now);
+    
     const int kDateBufSize = 1024;
     char date[kDateBufSize];
-    const time_t UTC_TO_CET_OFFSET = 1 * 60 * 60;  
-    const time_t UTC_TO_CEST_OFFSET = 2 * 60 * 60;
+    std::strftime(date, sizeof(date), "%a, %d %b %Y %H:%M:%S GMT", gmt_tm);
     
-    std::time(&gmt_time);
-    struct tm *local_time = std::localtime(&gmt_time);
-    time_t cet_time = gmt_time + (local_time->tm_isdst > 0 ? UTC_TO_CEST_OFFSET : UTC_TO_CET_OFFSET);
-    const char* format = local_time->tm_isdst > 0 ? "%a, %d %b %Y %H:%M:%S CEST" : "%a, %d %b %Y %H:%M:%S CET";
-    std::strftime(date, sizeof(date), format, std::gmtime(&cet_time));
     return (std::string(date));
 }
 
@@ -506,27 +501,29 @@ std::string HttpResponse::generateHeaderLines()
 
 void HttpResponse::sendResponse()
 {
-    // if (!_responseMsg)
-    // handle if response is empty
+    if (_responseMsg.empty())
+    {
+        std::cerr << "ERROR: response empty" << std::endl;
+        return;
+    }
 
-    std::cout << "RESPONSE MSG CONTENT" << std::endl;
+
     std::string responseStr(_responseMsg.begin(), _responseMsg.end());
     std::cout << responseStr << std::endl;
 
-    ssize_t bytesToSend = _responseMsg.size();
-    ssize_t totalBytesSent = 0;
-
-    while (totalBytesSent < bytesToSend)
+    ssize_t bytesSent = send(_client_socket, _responseMsg.data(), _responseMsg.size(), 0);
+    if (bytesSent < 0)
     {
-        ssize_t bytesSent = send(_client_socket, _responseMsg.data() + totalBytesSent, bytesToSend - totalBytesSent, 0);
-        if (bytesSent < 0)
-        {
-            std::cerr << "ERROR: sending bytes" << std::endl;
-            return;
-        }
-        totalBytesSent += bytesSent;
+        std::cerr << "ERROR: sending bytes" << std::endl;
+        return;
     }
 
-    std::cout << totalBytesSent << " bytes sent" << std::endl;
-    _responseMsg.erase(_responseMsg.begin(), _responseMsg.begin() + totalBytesSent);
+    std::cout << bytesSent << " bytes sent" << std::endl;
+    _responseMsg.erase(_responseMsg.begin(), _responseMsg.begin() + bytesSent);
+    
+    if (_headers["Connection"] != "keep-alive")
+    {
+        if (close(_client_socket) < 0)
+            std::cerr << "ERROR: closing socket" << std::endl;
+    }
 }

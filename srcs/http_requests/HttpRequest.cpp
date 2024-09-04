@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:18:22 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/02 07:00:38 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/04 01:28:11 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,7 @@ void HttpRequest::parseHttpRequest()
                     break ; 
                 parseRequestHeaders(line);
                 _headersN++;
+                currentStep = REQUEST_BODY;
                 continue;
             default:
                 break;
@@ -156,7 +157,7 @@ void HttpRequest::parseRequestHeaders(const std::string &line)
     if (!isValidFieldName(fieldName) || !isValidFieldValue(fieldValue))
     {
         _error = 1;
-        std::cerr << "Error: Invalid field name or value" << std::endl;
+        _errorMsg = "Error: Invalid field name or value";
         return ;
     }    
     trimWhitespaces(fieldValue);
@@ -177,11 +178,18 @@ void    HttpRequest::requestToBuffer()
     char    buffer[1024];
     int     bytes_read;
 
-    while ((bytes_read = recv(_client_socket, buffer, sizeof(buffer) - 1, 0)) > 0)
+    bytes_read = recv(_client_socket, buffer, sizeof(buffer) - 1, 0);
+    if (bytes_read > 0)
     {
         buffer[bytes_read] = '\0';
         for (int i = 0; i < bytes_read; i++)
             _buffer.push_back(buffer[i]);
+    }
+
+    if (bytes_read < 0)
+    {
+        _error = 1;
+        _errorMsg = "Error: receiving request to buffer";
     }
 }
 
@@ -191,7 +199,7 @@ std::string    HttpRequest::getLineAndPopFromBuffer()
     std::string::size_type pos = 0;
     
     if (_buffer.empty())
-        return ("");
+        return (std::string());
     std::string bufferStr(_buffer.begin(), _buffer.end());
     std::string::size_type newlinePos = bufferStr.find('\n');
     if (newlinePos != std::string::npos)
@@ -200,8 +208,8 @@ std::string    HttpRequest::getLineAndPopFromBuffer()
         if (!line.empty() && line[line.size() - 1] == '\r')
             line = line.substr(0, line.size() - 1);
         pos = newlinePos + 1;
-    }
-    _buffer.erase(_buffer.begin(), _buffer.begin() + pos);
+        _buffer.erase(_buffer.begin(), _buffer.begin() + pos);
+    }   
     return (line);
 }
 

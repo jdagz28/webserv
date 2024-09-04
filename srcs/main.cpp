@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/05 00:23:30 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/03 10:44:18 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/04 01:24:15 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,22 +106,25 @@ int main(int argc, char **argv)
         int client_socket = accept(server_socket, (struct sockaddr*)&client_addr, &client_len);
         if (client_socket < 0)
         {
-            std::cerr << "Failed to accept connection" << std::endl;
-            continue ; 
+            perror("Failed to accept connection");
+            continue;
         }
-        
         std::cout << "Connection accepted" << std::endl;
-        
-        HttpRequest request(client_socket);
-        printConfigData(config);
-        printHttpRequest(request);
 
+        std::cout << "Receiving request..." << std::endl;
+        HttpRequest request(client_socket);
+        std::cout << "Request parsed." << std::endl;
+
+        std::cout << "Generating response..." << std::endl;
         HttpResponse response(request, config, client_socket);
         response.execMethod();
         response.generateHttpResponse();
+        
+        std::cout << "Sending response..." << std::endl;
         response.sendResponse();
 
-        close(client_socket); 
+        close(client_socket);
+        std::cout << "Connection closed" << std::endl;
     }
 
     close(server_socket);
