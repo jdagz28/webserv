@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 22:28:27 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/03 03:54:13 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/04 23:50:04 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,10 @@ enum StatusCode
     NO_CONTENT                  = 204, // DELETE
     
     MOVED_PERMANENTLY           = 301,
+    TEMP_FOUND                  = 302,
+    SEE_OTHER                   = 303,
+    TEMP_REDIRECT               = 307,
+    PERMANENT_REDIRECT          = 308,
 
     BAD_REQUEST                 = 400,
     UNAUTHORIZED                = 401,

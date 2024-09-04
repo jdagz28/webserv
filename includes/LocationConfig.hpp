@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 22:38:51 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/03 10:09:11 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/04 23:42:08 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ class LocationConfig
         void    setPath(const std::string &path);
         void    setAllowedMethod(const std::string &method);
         void    setLimitExcept(bool limited);
-        void    setExcludeMethod(const std::string &method);
+        void    setLimitExcept(const std::string &method);
 
         const std::map<std::string, std::vector<std::string> > &getDirectives() const;
         const std::string &getPath() const;
@@ -47,10 +47,13 @@ class LocationConfig
         const std::vector<std::string> &getAllowedMethods() const;
         const std::vector<std::string> &getLimitExcept() const;
         const std::string getDefaultName() const;
-        
+        const std::vector<std::string>& LocationConfig::getRedirect() const
+
         bool    isMethodAllowed(const std::string &method) const;
         bool    isLimited() const;
         bool    isLimitExcept(const std::string &method) const;
+        bool    isRedirect() const;
+        
 };
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:13:31 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/04 11:37:36 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/04 23:58:54 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@ class HttpResponse
         StatusCode                              _status;
         int                                     _client_socket; //!
         std::vector<std::string>                _allowedMethods; 
+        std::vector<std::string>                _redirect;
 
         std::map<std::string, std::string>      _headers;
         std::string                             _body;
