@@ -6,7 +6,7 @@
 #    By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/05 02:06:08 by jdagoy            #+#    #+#              #
-#    Updated: 2024/09/03 03:23:41 by jdagoy           ###   ########.fr        #
+#    Updated: 2024/09/04 11:34:05 by jdagoy           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -46,8 +46,9 @@ CONFIG_OBJS_LIST 	:= $(patsubst %.cpp, %.o, $(CONFIG_SRCS))
 CONFIG_OBJS			:= $(addprefix $(OBJ_DIR), $(CONFIG_OBJS_LIST))
 
 DEBUG_DIR			:= $(SRC_DIR)debug/
-DEBUG_SRCS			:= configDebug.cpp \
-						httpRequestDebug.cpp
+DEBUG_SRCS			:= configPrint.cpp \
+						httpRequestPrint.cpp \
+						httpResponsePrint.cpp
 DEBUG_OBJS_LIST 	:= $(patsubst %.cpp, %.o, $(DEBUG_SRCS))
 DEBUG_OBJS			:= $(addprefix $(OBJ_DIR), $(DEBUG_OBJS_LIST))
 

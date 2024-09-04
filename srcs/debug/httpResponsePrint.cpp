@@ -1,26 +1,23 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   debug.hpp                                          :+:      :+:    :+:   */
+/*   httpResponsePrint.cpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/07/07 01:22:00 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/04 11:33:32 by jdagoy           ###   ########.fr       */
+/*   Created: 2024/09/04 11:31:41 by jdagoy            #+#    #+#             */
+/*   Updated: 2024/09/04 11:33:17 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef DEBUG_HPP
-#define DEBUG_HPP
-
-class HttpRequest;
-class Config;
-class HttpResponse;
-
-void    printConfigData(const Config &config);
-void    printHttpRequest(const HttpRequest &request);
-void    printHttpResponse(const std::string &response);
+#include "webserv.hpp"
+#include <iostream>
+#include <string>
 
 
-
-#endif
+void    printHttpResponse(const std::string &response)
+{
+    std::cout << "===== RESPONSE =====" << std::endl;
+    std::cout << response << std::endl;
+    std::cout << "====================" << std::endl;
+}
