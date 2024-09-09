@@ -53,6 +53,7 @@ class HttpRequest
         const HttpRequestLine& getRequestLine() const;
         const std::vector<std::pair<std::string, std::vector<std::string> > >& getHeaders() const;
         bool    isConnectionClosed() const;
+        std::string getHost() const;
 
         void    printBuffer() const;
 

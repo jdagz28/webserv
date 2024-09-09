@@ -138,7 +138,7 @@ bool LocationConfig::isRedirect() const
 {
     if (_directives.empty())
         return (false);
-    std::map<std::string, std::vector<std::string> >::const_interator directive;
+    std::map<std::string, std::vector<std::string> >::const_iterator directive;
     for (directive = _directives.begin(); directive != _directives.end(); directive++)
     {
         if (directive->first == "return")
@@ -149,11 +149,12 @@ bool LocationConfig::isRedirect() const
 
 const std::vector<std::string>& LocationConfig::getRedirect() const
 {
-    std::map<std::string, std::vector<std::string> >::const_interator directive;
+    std::map<std::string, std::vector<std::string> >::const_iterator directive;
     for (directive = _directives.begin(); directive != _directives.end(); directive++)
     {
         if (directive->first == "return")
             return (directive->second);
     }
-    return (NULL);
+    static const std::vector<std::string> empty;
+    return (empty);
 }

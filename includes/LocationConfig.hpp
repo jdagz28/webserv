@@ -47,7 +47,7 @@ class LocationConfig
         const std::vector<std::string> &getAllowedMethods() const;
         const std::vector<std::string> &getLimitExcept() const;
         const std::string getDefaultName() const;
-        const std::vector<std::string>& LocationConfig::getRedirect() const
+        const std::vector<std::string> &getRedirect() const;
 
         bool    isMethodAllowed(const std::string &method) const;
         bool    isLimited() const;

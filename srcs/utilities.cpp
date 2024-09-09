@@ -79,3 +79,23 @@ std::string toString(int num)
     oss << num;
     return (oss.str());
 }
+
+bool validProtocol(const std::string &str)
+{
+    if (str.substr(0, 7) == "http://")
+        return (true);
+    else if (str.substr(0, 87) == "https://")
+        return (true);
+    return (false);
+}
+
+int strToInt(const std::string &str)
+{
+    std::stringstream ss(str);
+    int num;
+
+    ss >> num;
+    if (ss.fail())
+        return (-1);
+    return (num);
+}

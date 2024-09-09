@@ -115,6 +115,7 @@ bool HttpResponse::checkLocConfigAndRequest()
         std::string path = comparePath(*server, _request.getRequestLine());
         if (path.empty())
             return (false);
+        _serverName = server->getServerName();
         if (!isMethodAllowed(*server, path, _request.getRequestLine()))
             return (false);
     }
@@ -340,13 +341,16 @@ void HttpResponse::processRequestGET()
         return ;
     }
 
-    /** 
-     * TODO: check if redirect
-     * * check if URI is absolute or relative; a redirection can be either
-     */
     if (isRedirect())
     {
-        
+        std::cout << "A REDIRECT DIRECTIVE" << std::endl;
+        std::cout << "REDIRECT DIRECTIVES" << std::endl;
+        std::cout << "Status Code: " << _redirectDirective[0] << std::endl;
+        std::cout << "Redirect loc: " << _redirectDirective[1] << std::endl;
+        std::cout << "===========" << std::endl;
+        getRedirectContent();
+        std::cout << "Class Status: " << _status << std::endl;
+        return;
     }
     
     /** 
@@ -370,7 +374,7 @@ void HttpResponse::processRequestGET()
 
 void HttpResponse::generateHttpResponse()
 {
-    _headers["Server"] = "webserv";
+    _headers["Server"] = _serverName;
     _headers["Date"] = getHttpDateCET();
     _headers["Content-Length"] = toString(_body.size());
     addKeepAliveHeader();
@@ -553,25 +557,86 @@ bool HttpResponse::isRedirect()
     {
         std::string path = comparePath(*server, _request.getRequestLine());
         if (path.empty())
-            return (false);
+            continue ;
         const std::vector<LocationConfig> &locationConfigs = server->getLocationConfig();
         if (locationConfigs.empty())
             return (false);
         std::vector<LocationConfig>::const_iterator location;
         for (location = locationConfigs.begin(); location != locationConfigs.end(); location++)
         {
-            std::string path = comparePath(server, _request.getRequestLine());
+            std::string path = comparePath(*server, _request.getRequestLine());
             if (path.empty())
-                return (false);
+                continue ;
             if (location->getPath() == path)
             {
                 if (location->isRedirect())
                 {
-                    _redirect = location->getRedirect();
+                    _redirectDirective = location->getRedirect();
                     return (true);
                 }
             }
         }
     }
     return (false);
+}
+
+bool HttpResponse::validateRedirect()
+{
+    if (_redirectDirective.size() != 2)
+        return (false);
+    int redirectStatus = strToInt(_redirectDirective[0]);
+    if (redirectStatus < 300 || redirectStatus > 308)
+        return (false);
+    // setStatusCode(redirectStatus);
+    _redirect = _redirectDirective[1];
+    return (false);
+}
+
+bool HttpResponse::isRedirectExternal()
+{
+    if (_redirect.empty())
+        return (false);
+    else if (!validProtocol(_redirect))
+        return (false);
+    else
+    {
+        std::string http = "http://";
+        std::string https = "https://";
+        std::string localhost = "localhost:";
+        
+        if (_redirect.substr(0, http.length()) == http)
+        {
+            if (_redirect.substr(http.length(), localhost.length()) == localhost)
+                return (false);
+        }
+        else if (_redirect.substr(0, https.length()) == https)
+        {
+            if (_redirect.substr(https.length(), localhost.length()) == localhost)
+                return (false);
+        }
+    }
+    return (true);
+}
+
+void HttpResponse::getRedirectContent()
+{
+    std::string redirectPath;
+    if (!validateRedirect())
+       return ;
+    std::cout << "Redirect Directive Validated" << std::endl;
+    if (isRedirectExternal())
+    {
+        std::cout << "Checking for External Redirection" << std::endl;
+        redirectPath = _redirect;    
+    }
+    else
+    {
+        redirectPath = "http://" + _request.getHost();
+        if (!_redirect.empty() && _redirect[0] != '/')
+            redirectPath += '/';
+        redirectPath += _redirect;
+    }
+    _headers["Location"] = redirectPath;
+    StatusCode status = static_cast<StatusCode>(strToInt(_redirectDirective[0]));
+    setStatusCode(status);
 }

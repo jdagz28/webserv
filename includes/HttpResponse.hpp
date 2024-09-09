@@ -33,7 +33,9 @@ class HttpResponse
         StatusCode                              _status;
         int                                     _client_socket; //!
         std::vector<std::string>                _allowedMethods; 
-        std::vector<std::string>                _redirect;
+        std::vector<std::string>                _redirectDirective;
+        std::string                             _redirect;
+        std::string                             _serverName;
 
         std::map<std::string, std::string>      _headers;
         std::string                             _body;
@@ -68,6 +70,11 @@ class HttpResponse
         void addKeepAliveHeader();
         void addAllowHeader();
         std::string generateHeaderLines();
+
+        bool isRedirect();
+        bool validateRedirect();
+        bool isRedirectExternal();
+        void getRedirectContent();
 
     public:
         HttpResponse(HttpRequest &request,

@@ -76,6 +76,9 @@ bool fileExists(const std::string &path);
 bool endsWith(const std::string &str, const std::string &suffix);
 std::string getExtension(const std::string &path);
 std::string toString(int num);
+bool validProtocol(const std::string &str);
+int strToInt(const std::string &str);
+
 
 // MIMETYPES.CPP
 std::string getMimeType(const std::string &extension);

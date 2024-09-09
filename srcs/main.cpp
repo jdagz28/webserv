@@ -114,8 +114,8 @@ int main(int argc, char **argv)
 
         std::cout << "Receiving request..." << std::endl;
         HttpRequest request(client_socket);
-        std::cout << "Request parsed." << std::endl;
         printHttpRequest(request);
+        std::cout << "Request parsed." << std::endl;
 
         std::cout << "Generating response..." << std::endl;
         HttpResponse response(request, config, client_socket);
