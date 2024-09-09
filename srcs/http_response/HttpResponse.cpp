@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:19:13 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/04 11:39:22 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/04 23:59:09 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,6 +115,7 @@ bool HttpResponse::checkLocConfigAndRequest()
         std::string path = comparePath(*server, _request.getRequestLine());
         if (path.empty())
             return (false);
+        _serverName = server->getServerName();
         if (!isMethodAllowed(*server, path, _request.getRequestLine()))
             return (false);
     }
@@ -296,7 +297,6 @@ void HttpResponse::getResource(const std::string &target_path)
     std::string uri = _request.getRequestLine().getUri();
     if (isSupportedMedia(uri))
     {
-        //!Check for other supported media types
         std::string resourceName = extractResourceName(uri);
         if (!checkSlash(target_path, resourceName))
             indexPath = target_path + '/' + resourceName;
@@ -320,6 +320,18 @@ void HttpResponse::getResource(const std::string &target_path)
     }
 }
 
+/* 
+    * STATIC PAGES
+    * RESOURCE/FILE (**)
+        * error
+        * redirect
+        * response (**)
+    * DIRECTORY
+        *
+        * autoindex
+        * response
+    ! error pages - wget status line ok    
+*/
 
 void HttpResponse::processRequestGET()
 {
@@ -329,10 +341,11 @@ void HttpResponse::processRequestGET()
         return ;
     }
 
-    /** 
-     * TODO: check if redirect
-     * * check if URI is absolute or relative; a redirection can be either
-     */
+    if (isRedirect())
+    {
+        getRedirectContent();
+        return ;
+    }
     
     /** 
      * TODO: check if is directory
@@ -355,7 +368,7 @@ void HttpResponse::processRequestGET()
 
 void HttpResponse::generateHttpResponse()
 {
-    _headers["Server"] = "webserv";
+    _headers["Server"] = _serverName;
     _headers["Date"] = getHttpDateCET();
     _headers["Content-Length"] = toString(_body.size());
     addKeepAliveHeader();
@@ -526,4 +539,95 @@ std::string HttpResponse::getHttpResponse()
 {
     std::string response(_responseMsg.begin(), _responseMsg.end());
     return (response);
+}
+
+bool HttpResponse::isRedirect()
+{
+    const std::vector<ServerConfig> &serverConfigs = _config.getServerConfig();
+    if (serverConfigs.empty())
+        return (false);
+    std::vector<ServerConfig>::const_iterator server;
+    for (server = serverConfigs.begin(); server != serverConfigs.end(); server++)
+    {
+        std::string path = comparePath(*server, _request.getRequestLine());
+        if (path.empty())
+            continue ;
+        const std::vector<LocationConfig> &locationConfigs = server->getLocationConfig();
+        if (locationConfigs.empty())
+            return (false);
+        std::vector<LocationConfig>::const_iterator location;
+        for (location = locationConfigs.begin(); location != locationConfigs.end(); location++)
+        {
+            std::string path = comparePath(*server, _request.getRequestLine());
+            if (path.empty())
+                continue ;
+            if (location->getPath() == path)
+            {
+                if (location->isRedirect())
+                {
+                    _redirectDirective = location->getRedirect();
+                    return (true);
+                }
+            }
+        }
+    }
+    return (false);
+}
+
+bool HttpResponse::validateRedirect()
+{
+    if (_redirectDirective.size() != 2)
+        return (false);
+    int redirectStatus = strToInt(_redirectDirective[0]);
+    if (redirectStatus < 300 || redirectStatus > 308)
+        return (false);
+    // setStatusCode(redirectStatus);
+    _redirect = _redirectDirective[1];
+    return (true);
+}
+
+bool HttpResponse::isRedirectExternal()
+{
+    if (_redirect.empty())
+        return (false);
+    else if (!validProtocol(_redirect))
+        return (false);
+    else
+    {
+        std::string http = "http://";
+        std::string https = "https://";
+        std::string localhost = "localhost:";
+        
+        if (_redirect.substr(0, http.length()) == http)
+        {
+            if (_redirect.substr(http.length(), localhost.length()) == localhost)
+                return (false);
+        }
+        else if (_redirect.substr(0, https.length()) == https)
+        {
+            if (_redirect.substr(https.length(), localhost.length()) == localhost)
+                return (false);
+        }
+    }
+    return (true);
+}
+
+void HttpResponse::getRedirectContent()
+{
+    std::string redirectPath;
+    if (!validateRedirect())
+       return ;
+    if (isRedirectExternal())
+        redirectPath = _redirect;    
+    else
+    {
+        redirectPath = "http://" + _request.getHost();
+        if (!_redirect.empty() && _redirect[0] != '/')
+            redirectPath += '/';
+        redirectPath += _redirect;
+        std::cout << "Local Redirect: " << redirectPath << std::endl;
+    }
+    _headers["Location"] = redirectPath;
+    StatusCode status = static_cast<StatusCode>(strToInt(_redirectDirective[0]));
+    setStatusCode(status);
 }

@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 01:04:16 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/03 03:24:42 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/04 23:50:43 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,14 @@ std::string getStatusReason(StatusCode code)
             return "No Content";
         case MOVED_PERMANENTLY:
             return "Moved Permanently";
+        case TEMP_FOUND:
+            return "Found";
+        case SEE_OTHER:
+            return "See Other";
+        case TEMP_REDIRECT:
+            return "Temporary Redirect";
+        case PERMANENT_REDIRECT:
+            return "Permanent Redirect";
         case BAD_REQUEST:
             return "Bad Request";
         case UNAUTHORIZED:

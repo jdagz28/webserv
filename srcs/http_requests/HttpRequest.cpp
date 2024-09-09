@@ -253,3 +253,14 @@ bool HttpRequest::isConnectionClosed() const
     }
     return (false);
 }
+
+std::string HttpRequest::getHost() const
+{
+    std::vector<std::pair<std::string, std::vector<std::string> > >::const_iterator header;
+    for (header = _headers.begin(); header != _headers.end(); header++)
+    {
+        if (header->first == "host")
+            return (header->second[0]);
+    }
+    return (std::string());
+}

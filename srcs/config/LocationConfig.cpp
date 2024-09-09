@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/07 23:05:41 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/03 10:11:02 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/04 23:41:29 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,7 @@ void    LocationConfig::setLimitExcept(bool limited)
     _isLimited = limited;
 }
 
-void    LocationConfig::setExcludeMethod(const std::string &method)
+void    LocationConfig::setLimitExcept(const std::string &method)
 {
     _limitExcept.push_back(method);
 }
@@ -132,4 +132,29 @@ bool LocationConfig::isLimitExcept(const std::string &method) const
         if (*it == method)
             return (true);
     return (false);
+}
+
+bool LocationConfig::isRedirect() const
+{
+    if (_directives.empty())
+        return (false);
+    std::map<std::string, std::vector<std::string> >::const_iterator directive;
+    for (directive = _directives.begin(); directive != _directives.end(); directive++)
+    {
+        if (directive->first == "return")
+            return (true);
+    }
+    return (false);
+}
+
+const std::vector<std::string>& LocationConfig::getRedirect() const
+{
+    std::map<std::string, std::vector<std::string> >::const_iterator directive;
+    for (directive = _directives.begin(); directive != _directives.end(); directive++)
+    {
+        if (directive->first == "return")
+            return (directive->second);
+    }
+    static const std::vector<std::string> empty;
+    return (empty);
 }
