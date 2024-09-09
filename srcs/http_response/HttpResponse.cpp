@@ -343,13 +343,7 @@ void HttpResponse::processRequestGET()
 
     if (isRedirect())
     {
-        std::cout << "A REDIRECT DIRECTIVE" << std::endl;
-        std::cout << "REDIRECT DIRECTIVES" << std::endl;
-        std::cout << "Status Code: " << _redirectDirective[0] << std::endl;
-        std::cout << "Redirect loc: " << _redirectDirective[1] << std::endl;
-        std::cout << "===========" << std::endl;
         getRedirectContent();
-        std::cout << "Class Status: " << _status << std::endl;
         return;
     }
     
@@ -589,7 +583,7 @@ bool HttpResponse::validateRedirect()
         return (false);
     // setStatusCode(redirectStatus);
     _redirect = _redirectDirective[1];
-    return (false);
+    return (true);
 }
 
 bool HttpResponse::isRedirectExternal()
@@ -623,12 +617,8 @@ void HttpResponse::getRedirectContent()
     std::string redirectPath;
     if (!validateRedirect())
        return ;
-    std::cout << "Redirect Directive Validated" << std::endl;
     if (isRedirectExternal())
-    {
-        std::cout << "Checking for External Redirection" << std::endl;
         redirectPath = _redirect;    
-    }
     else
     {
         redirectPath = "http://" + _request.getHost();
