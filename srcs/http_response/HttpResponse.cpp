@@ -344,7 +344,7 @@ void HttpResponse::processRequestGET()
     if (isRedirect())
     {
         getRedirectContent();
-        return;
+        return ;
     }
     
     /** 
@@ -625,6 +625,7 @@ void HttpResponse::getRedirectContent()
         if (!_redirect.empty() && _redirect[0] != '/')
             redirectPath += '/';
         redirectPath += _redirect;
+        std::cout << "Local Redirect: " << redirectPath << std::endl;
     }
     _headers["Location"] = redirectPath;
     StatusCode status = static_cast<StatusCode>(strToInt(_redirectDirective[0]));
