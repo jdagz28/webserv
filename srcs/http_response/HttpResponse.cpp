@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:19:13 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/11 02:21:57 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/11 11:12:49 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,8 +88,7 @@ std::string HttpResponse::comparePath(const ServerConfig &server, const HttpRequ
     for (location = locationConfigs.begin(); location != server.getLocationConfig().end(); location++)
     {
         std::string config_location = location->getPath();
-
-        if (config_location == target_path)
+        if (config_location == target_path || (target_path + "/") == config_location)
             return (config_location);
         if (target_path == "/")
         {
@@ -121,6 +120,7 @@ bool HttpResponse::checkLocConfigAndRequest()
     }
     return (true);
 }
+
 bool HttpResponse::isMethodAllowed(const ServerConfig &server, const std::string &path, const HttpRequestLine &request)
 {
     std::string requestMethod = request.getMethod();
@@ -217,6 +217,8 @@ std::string HttpResponse::getDirectiveLoc(const ServerConfig &server, const std:
                 return (location->getDefaultName());
             else if (directive == "index")
                 return (location->getIndex());
+            else if (directive == "autoindex")
+                return (location->getAutoIndex());
         }
     }
     return (std::string());

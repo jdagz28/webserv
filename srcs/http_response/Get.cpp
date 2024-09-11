@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:05:38 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/11 02:37:03 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/11 11:19:02 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 #include "HttpRequestLine.hpp"
 #include "LocationConfig.hpp"
 #include <string>
-#include <ctime>
+#include <dirent.h>
 #include <sstream>
 
 /* 
@@ -49,41 +49,57 @@ void HttpResponse::processRequestGET()
     
     std::string path = resolvePath();
     if (path.empty())
+    {
         setStatusCode(NOT_FOUND);
-    
-    /** 
-     * TODO: check if is directory
-     * * check location config if auto index
-     * * list
-     */
-
+        return ;
+    }
     if (isDirectory(path))
     {
-        //handle uri -- without trailing slash; config loc - ../directory/ -- if without redirect
-        if (checkSlash(path, std::string()))
+        //!handle uri -- without trailing slash; config loc - ../directory/ -- if without redirect
+        // if (!checkSlash(path, std::string()))
+        // {
+        //     std::string redirect = _request.getRequestLine().getUri();
+        //     if (redirect[redirect.length() - 1] != '/')
+        //         redirect += '/';
+        //     setRedirect("301", redirect);
+        //     getRedirectContent();
+        //     return ;
+        // }
+        if (checkDirIndex())
         {
-            std::string redirect = _request.getRequestLine().getUri() + '/';
-            setRedirect("301", redirect);
-            getRedirectContent();
-            return ;
-        }
-        if (checkDirIndex(path))
-        {
+            std::string redirect = _request.getRequestLine().getUri();
+            if (redirect[redirect.length() - 1] != '/')
+                redirect += '/';
             std::string index = getDirective("index");
-            std::string indexPath = path + index;
+            if (index.empty())
+            {
+                setStatusCode(NOT_FOUND);
+                return ;
+            }
+            std::string indexPath;
+            if (!checkSlash(redirect, index))
+                indexPath = redirect + '/' + index;
+            else if (redirect[redirect.length() - 1] == '/' && index[0] == '/')
+                indexPath = redirect + index.substr(1);
+             else
+                indexPath = redirect + index;
+            
+            std::cout << "Redirecting to: " << indexPath << std::endl;
             getResource(indexPath);
             return ;
         }
-        if (isAutoIndex(path))
+        if (isAutoIndex())
         {
-            //! generate indexed page
+            std::cout << "Autoindexing" << std::endl;
+            generateDirList(path);
+            return ;
         }
-
         getResource(path);
-        
+        return ;
     }
+    // getResource(path);
 }
-
+//! inexact locations (localhost:4242/asdsda -> reads as localhost:4242/, etc)
 void HttpResponse::getResource(const std::string &target_path)
 {
     std::string indexPath;
@@ -95,8 +111,11 @@ void HttpResponse::getResource(const std::string &target_path)
         std::string resourceName = extractResourceName(uri);
         if (!checkSlash(target_path, resourceName))
             indexPath = target_path + '/' + resourceName;
+        else if (target_path[target_path.length() - 1] == '/' && resourceName[0] == '/')
+            indexPath = target_path + resourceName.substr(1);
         else
             indexPath = target_path + resourceName;
+        
         if (fileExists(indexPath))
             getResourceContent(indexPath);
         else
@@ -152,7 +171,7 @@ bool HttpResponse::checkSlash(const std::string &defaultLoc, const std::string &
 {
     bool defaultSlash = !defaultLoc.empty() && defaultLoc[defaultLoc.length() - 1] == '/';
     bool pageSlash = !page.empty() && page[0] == '/';
-    
+
     if (!defaultSlash && !pageSlash)
         return (false);
     return (true);
@@ -166,10 +185,52 @@ bool HttpResponse::checkDirIndex()
     return (true);
 }
 
-bool HttpResponse::isAutoIndex(const std::string &path)
+bool HttpResponse::isAutoIndex()
 {
     std::string autoIndex = getDirective("autoindex");
-    if (autoIndex.empty() || autoIndex == "off" || autoIndex != "on")
+    std::cout << "Autoindex: " << autoIndex << std::endl;
+    if (autoIndex.empty() || autoIndex != "on")
         return (false);
     return (true);
+}
+
+void HttpResponse::generateDirList(const std::string &path)
+{
+    DIR *dir;
+    struct dirent *entry;
+    std::stringstream html;
+
+    std::cout <<  "Generating directory list for " << path << std::endl;
+    dir = opendir(path.c_str());
+    if (dir == NULL)
+    {
+        std::cout << "Error opening directory" << std::endl;
+        setStatusCode(FORBIDDEN);
+        return ;
+    }
+    
+    html << "<html><head><title>Index of " << path << "</title></head><body>";
+    html << "<h1>Index of " << path << "</h1>";
+    html << "<ul>";
+
+    while ((entry = readdir(dir)) != NULL) {
+        std::string entryName = entry->d_name;
+        if (entryName == "." || entryName == "..") {
+            continue;
+        }
+        std::cout << "Entry: " << entryName << std::endl;
+        html << "<li><a href=\"" << entryName << "\">" << entryName << "</a></li>";
+    }
+    closedir(dir);
+    
+    html << "</ul></body></html>";
+      try {
+        _body = html.str();
+    } catch (const std::length_error& e) {
+        std::cerr << "Length error: " << e.what() << std::endl;
+        setStatusCode(INTERNAL_SERVER_ERROR);
+        return;
+    }
+    
+    setStatusCode(OK);
 }

@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:18:22 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/04 01:28:11 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/11 10:59:11 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,10 +50,12 @@ void HttpRequest::parseHttpRequest()
                 continue;
             case REQUEST_HEADER:
                 if (line.empty())
+                {
+                    currentStep = REQUEST_BODY;
                     break ; 
+                }
                 parseRequestHeaders(line);
                 _headersN++;
-                currentStep = REQUEST_BODY;
                 continue;
             default:
                 break;

@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:13:31 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/11 02:21:39 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/11 03:30:15 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,6 +78,10 @@ class HttpResponse
         bool isRedirectExternal();
         void getRedirectContent();
         void setRedirect(std::string status, const std::string &path);
+
+        void generateDirList(const std::string &path);
+        bool isAutoIndex();
+        bool checkDirIndex();
 
     public:
         HttpResponse(HttpRequest &request,
