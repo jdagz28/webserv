@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 02:19:46 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/02 22:58:34 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/11 23:21:33 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,4 +85,34 @@ const std::string &ServerConfig::getServerName() const
 const std::vector<LocationConfig> &ServerConfig::getLocationConfig() const
 {
     return (_locationConfig);
+}
+
+const std::string ServerConfig::getErrorPage(StatusCode status) const
+{
+    std::string statusCode = toString(static_cast<int>(status));
+    
+    std::map<std::string, std::vector<std::string> >::const_iterator directive;    
+    for (directive = _directives.begin(); directive != _directives.end(); directive++)
+    {
+        if (directive->first == "error_page")
+        {
+            std::vector<std::string>::const_iterator error;
+            for (error = directive->second.begin(); error != directive->second.end(); error++)
+            {
+                std::string value = *error;
+                std::string code;
+                std::string path;
+
+                std::size_t pos = value.find(' ');
+                if (pos != std::string::npos)
+                {
+                    code = value.substr(0, pos);
+                    path = value.substr(pos + 1);
+                }
+                if (code == statusCode)
+                    return (path);
+            }
+        }
+    }
+    return (std::string());
 }

@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:13:31 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/11 03:30:15 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/11 23:09:44 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,6 +82,9 @@ class HttpResponse
         void generateDirList(const std::string &path);
         bool isAutoIndex();
         bool checkDirIndex();
+
+        void getErrorPage();
+        std::string generateErrorPage(const std::string &status, const std::string &statusMessage);
 
     public:
         HttpResponse(HttpRequest &request,

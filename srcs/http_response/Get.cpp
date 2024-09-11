@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:05:38 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/11 21:42:02 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/11 23:36:16 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -205,5 +205,6 @@ void HttpResponse::generateDirList(const std::string &path)
         html << "<li><a href=\"" << entryName << "\">" << entryName << "</a></li>";
     }
     closedir(dir);
+    _body = html.str();
     setStatusCode(OK);
 }

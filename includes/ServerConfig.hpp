@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 02:19:38 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/07/07 02:18:01 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/11 23:01:22 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include <vector>
 #include <map>
 #include "LocationConfig.hpp"
+#include "webserv.hpp"
 
 
 class ServerConfig
@@ -41,6 +42,7 @@ class ServerConfig
         int   getPort() const;
         const std::string &getServerName() const;
         const std::vector<LocationConfig> &getLocationConfig() const;
+        const std::string getErrorPage(StatusCode status) const;
 };
 
 #endif
