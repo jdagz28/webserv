@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 22:38:51 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/04 23:42:08 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/11 01:16:30 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,7 @@ class LocationConfig
         const std::vector<std::string> &getAllowedMethods() const;
         const std::vector<std::string> &getLimitExcept() const;
         const std::string getDefaultName() const;
+        const std::string getIndex() const;
         const std::vector<std::string> &getRedirect() const;
 
         bool    isMethodAllowed(const std::string &method) const;
