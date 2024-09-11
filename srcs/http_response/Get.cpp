@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:05:38 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/11 11:19:02 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/11 21:42:02 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,16 +55,6 @@ void HttpResponse::processRequestGET()
     }
     if (isDirectory(path))
     {
-        //!handle uri -- without trailing slash; config loc - ../directory/ -- if without redirect
-        // if (!checkSlash(path, std::string()))
-        // {
-        //     std::string redirect = _request.getRequestLine().getUri();
-        //     if (redirect[redirect.length() - 1] != '/')
-        //         redirect += '/';
-        //     setRedirect("301", redirect);
-        //     getRedirectContent();
-        //     return ;
-        // }
         if (checkDirIndex())
         {
             std::string redirect = _request.getRequestLine().getUri();
@@ -81,16 +71,13 @@ void HttpResponse::processRequestGET()
                 indexPath = redirect + '/' + index;
             else if (redirect[redirect.length() - 1] == '/' && index[0] == '/')
                 indexPath = redirect + index.substr(1);
-             else
+            else
                 indexPath = redirect + index;
-            
-            std::cout << "Redirecting to: " << indexPath << std::endl;
             getResource(indexPath);
             return ;
         }
         if (isAutoIndex())
         {
-            std::cout << "Autoindexing" << std::endl;
             generateDirList(path);
             return ;
         }
@@ -99,7 +86,7 @@ void HttpResponse::processRequestGET()
     }
     // getResource(path);
 }
-//! inexact locations (localhost:4242/asdsda -> reads as localhost:4242/, etc)
+
 void HttpResponse::getResource(const std::string &target_path)
 {
     std::string indexPath;
@@ -188,7 +175,6 @@ bool HttpResponse::checkDirIndex()
 bool HttpResponse::isAutoIndex()
 {
     std::string autoIndex = getDirective("autoindex");
-    std::cout << "Autoindex: " << autoIndex << std::endl;
     if (autoIndex.empty() || autoIndex != "on")
         return (false);
     return (true);
@@ -200,11 +186,9 @@ void HttpResponse::generateDirList(const std::string &path)
     struct dirent *entry;
     std::stringstream html;
 
-    std::cout <<  "Generating directory list for " << path << std::endl;
     dir = opendir(path.c_str());
     if (dir == NULL)
     {
-        std::cout << "Error opening directory" << std::endl;
         setStatusCode(FORBIDDEN);
         return ;
     }
@@ -218,19 +202,8 @@ void HttpResponse::generateDirList(const std::string &path)
         if (entryName == "." || entryName == "..") {
             continue;
         }
-        std::cout << "Entry: " << entryName << std::endl;
         html << "<li><a href=\"" << entryName << "\">" << entryName << "</a></li>";
     }
     closedir(dir);
-    
-    html << "</ul></body></html>";
-      try {
-        _body = html.str();
-    } catch (const std::length_error& e) {
-        std::cerr << "Length error: " << e.what() << std::endl;
-        setStatusCode(INTERNAL_SERVER_ERROR);
-        return;
-    }
-    
     setStatusCode(OK);
 }

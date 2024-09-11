@@ -10,8 +10,7 @@
                 "kind": "build",
                 "isDefault": true
             },
-            "problemMatcher": ["$gcc"],
-            "detail": "Generated task by Makefile."
+            "problemMatcher": []
         }
     ]
 }

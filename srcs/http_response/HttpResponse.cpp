@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:19:13 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/11 11:12:49 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/11 21:43:28 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,7 +73,13 @@ static bool isMatchingPrefix(const std::string &pattern, const std::string &targ
     if (pattern.empty() || target.empty())
         return (false);
     std::string target_prefix = target.substr(0, pattern.length());
-    return (pattern == target_prefix);
+    if (pattern == target_prefix)
+    {
+        if (pattern == "/" && target != "/")
+            return (false);
+        return (true);
+    }
+    return (false);
 }
 
 std::string HttpResponse::comparePath(const ServerConfig &server, const HttpRequestLine &request)
@@ -233,8 +239,15 @@ std::string HttpResponse::getDirective(const std::string &directive)
         return (std::string());
     std::vector<ServerConfig>::const_iterator server;
     for (server = serverConfigs.begin(); server != serverConfigs.end(); server++)
+    {
+        std::string path = comparePath(*server, _request.getRequestLine());
+        if (path.empty())
+            return (std::string());
         defaultName = getDirectiveLoc(*server, directive);
-    return (defaultName);
+        if (!defaultName.empty())
+            return (defaultName);
+    }
+    return (std::string());
 }
 
 bool HttpResponse::isSupportedMedia(const std::string &uri)
