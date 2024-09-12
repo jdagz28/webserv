@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/07 23:05:41 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/04 23:41:29 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/11 11:13:15 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,6 +102,28 @@ const std::string LocationConfig::getDefaultName() const
     for (directive = _directives.begin(); directive != _directives.end(); directive++)
     {
         if (directive->first == "default")
+            return (directive->second[0]);
+    }
+    return (std::string()); 
+}
+
+const std::string LocationConfig::getIndex() const
+{
+    std::map<std::string, std::vector<std::string> >::const_iterator directive;
+    for (directive = _directives.begin(); directive != _directives.end(); directive++)
+    {
+        if (directive->first == "index")
+            return (directive->second[0]);
+    }
+    return (std::string()); 
+}
+
+const std::string LocationConfig::getAutoIndex() const
+{
+    std::map<std::string, std::vector<std::string> >::const_iterator directive;
+    for (directive = _directives.begin(); directive != _directives.end(); directive++)
+    {
+        if (directive->first == "autoindex")
             return (directive->second[0]);
     }
     return (std::string()); 

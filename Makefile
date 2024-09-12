@@ -6,7 +6,7 @@
 #    By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/05 02:06:08 by jdagoy            #+#    #+#              #
-#    Updated: 2024/09/04 11:34:05 by jdagoy           ###   ########.fr        #
+#    Updated: 2024/09/11 23:02:51 by jdagoy           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -62,7 +62,11 @@ HTTPREQUEST_OBJS	:= $(addprefix $(OBJ_DIR), $(HTTPREQUEST_OBJS_LIST))
 HTTPRESPONSE_DIR	:= $(SRC_DIR)http_response/
 HTTPRESPONSE_SRCS	:= HttpResponse.cpp \
 						MimeTypes.cpp \
-						StatusCodes.cpp
+						StatusCodes.cpp \
+						Redirect.cpp \
+						Get.cpp \
+						generateResponse.cpp \
+						Error.cpp
 HTTPRESPONSE_OBJS_LIST := $(patsubst %.cpp, %.o, $(HTTPRESPONSE_SRCS))
 HTTPRESPONSE_OBJS	:= $(addprefix $(OBJ_DIR), $(HTTPRESPONSE_OBJS_LIST))
 

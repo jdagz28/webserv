@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:13:31 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/04 23:58:54 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/11 23:09:44 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,16 +57,18 @@ class HttpResponse
         std::string resolvePath();
         std::string checkRoot(const ServerConfig &server, const std::string &path);
         
-        std::string getDefaultName();
-        std::string getDefaultNameLoc(const ServerConfig &server);
+        std::string getDirective(const std::string &directive);
+        std::string getDirectiveLoc(const ServerConfig &server, const std::string &directive);
         
         void getResourceContent(const std::string &file_path);
         bool isSupportedMedia(const std::string &uri);
         void getResource(const std::string &target_path);
+        std::string extractResourceName(const std::string &uri);
+        bool checkSlash(const std::string &defaultLoc, const std::string &page);
 
         std::string generateStatusLine();
         void addContentTypeHeader(const std::string &type);
-        std::string getHttpDateCET();
+        std::string getHttpDateGMT();
         void addKeepAliveHeader();
         void addAllowHeader();
         std::string generateHeaderLines();
@@ -75,6 +77,14 @@ class HttpResponse
         bool validateRedirect();
         bool isRedirectExternal();
         void getRedirectContent();
+        void setRedirect(std::string status, const std::string &path);
+
+        void generateDirList(const std::string &path);
+        bool isAutoIndex();
+        bool checkDirIndex();
+
+        void getErrorPage();
+        std::string generateErrorPage(const std::string &status, const std::string &statusMessage);
 
     public:
         HttpResponse(HttpRequest &request,

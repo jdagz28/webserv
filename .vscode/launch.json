@@ -9,11 +9,12 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/webserv",
-            "args": ["conf/test.conf"],
+            "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
-            "externalConsole": true,
+            "externalConsole": false,
+            "preLaunchTask": "make",
             "MIMode": "gdb",
             "setupCommands": [
                 {
