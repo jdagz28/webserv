@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:11:42 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/12 22:44:32 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/12 22:53:49 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #define HTTPREQUEST_HPP
 
 #include <vector>
+#include <map>
 #include <string>
 #include "HttpRequestLine.hpp"
 #include "webserv.hpp"
@@ -23,7 +24,7 @@ class HttpRequest
 {
     private:
         HttpRequestLine                                                     _request;
-        std::vector<std::pair<std::string, std::vector<std::string> > >     _headers;
+        std::map<std::string, std::vector<std::string> >                    _headers;
         int                                                                 _headersN;
         std::vector<unsigned char>                                          _buffer;
         StatusCode                                                          _status;
@@ -52,7 +53,7 @@ class HttpRequest
         void    setStatusCode(StatusCode status);
 
         const HttpRequestLine& getRequestLine() const;
-        const std::vector<std::pair<std::string, std::vector<std::string> > >& getHeaders() const;
+        const std::map<std::string, std::vector<std::string> >& getHeaders() const;
         bool    isConnectionClosed() const;
         std::string getHost() const;
         StatusCode  getStatusCode() const;

@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:18:22 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/12 22:47:39 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/12 23:02:06 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ HttpRequest::HttpRequest(int client_socket)
 {
     requestToBuffer();
     // printBuffer();
-    if (errorMsg.empty())
+    if (_errorMsg.empty())
         parseHttpRequest();
 }
 
@@ -61,8 +61,8 @@ void HttpRequest::parseHttpRequest()
                 if (_status != OK)
                     return ;
                 continue;
-            case REQUEST_BODY:
-                parseRequestBody(line);
+            // case REQUEST_BODY:
+            //     parseRequestBody(line);
             default:
                 break;
         }
@@ -183,7 +183,7 @@ void HttpRequest::parseRequestHeaders(const std::string &line)
         trimWhitespaces(value);
         values.push_back(value);
     }
-    _headers.push_back(std::make_pair(fieldName, values));
+    _headers[fieldName] = values;
 }
 
 
@@ -245,38 +245,33 @@ const HttpRequestLine& HttpRequest::getRequestLine() const
     return (_request);
 }
 
-const std::vector<std::pair<std::string, std::vector<std::string> > >& HttpRequest::getHeaders() const
+const std::map<std::string, std::vector<std::string> >& HttpRequest::getHeaders() const
 {
     return (_headers);
 }
 
 bool HttpRequest::isConnectionClosed() const
 {
-    std::vector<std::pair<std::string, std::vector<std::string> > >::const_iterator header;
-
-    for (header = _headers.begin(); header != _headers.end(); header++)
+    std::map<std::string, std::vector<std::string> >::const_iterator header;
+    header = _headers.find("Connection");
+    
+    if (header == _headers.end())
+        return (false);
+    std::vector<std::string>::const_iterator value;
+    for (value = header->second.begin(); value != header->second.end(); value++)
     {
-        if (header->first == "Connection")
-        {
-            std::vector<std::string>::const_iterator value;
-            for (value = header->second.begin(); value != header->second.end(); value++)
-            {
-                if (*value == "close")
-                    return (true);
-            }
-        }
+        if (*value == "close")
+            return (true);
     }
     return (false);
 }
 
 std::string HttpRequest::getHost() const
 {
-    std::vector<std::pair<std::string, std::vector<std::string> > >::const_iterator header;
-    for (header = _headers.begin(); header != _headers.end(); header++)
-    {
-        if (header->first == "host")
-            return (header->second[0]);
-    }
+    std::map<std::string, std::vector<std::string> >::const_iterator header;
+    header =_headers.find("host");
+    if (header != _headers.end())
+        return (header->second[0]);
     return (std::string());
 }
 
@@ -295,13 +290,13 @@ const std::string &HttpRequest::getErrorMsg() const
     return (_errorMsg);
 }
 
-void HttpRequest::parseRequestBody(const std::string &line)
-{
+// void HttpRequest::parseRequestBody(const std::string &line)
+// {
     
-}
+// }
 
 
-bool HttpRequest::isSupportedMediaPOST()
-{
+// bool HttpRequest::isSupportedMediaPOST()
+// {
     
-}
+// }
