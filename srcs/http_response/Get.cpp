@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:05:38 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/11 23:36:16 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/12 11:01:02 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,10 +36,7 @@
 void HttpResponse::processRequestGET()
 {
     if (!checkLocConfigAndRequest())
-    {
-        setStatusCode(NOT_FOUND);
         return ;
-    }
 
     if (isRedirect())
     {

@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 22:28:27 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/11 21:46:02 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/12 22:31:08 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,8 @@
 #include <netinet/in.h>
 
 #define CRLF "\r\n"
+#define MAX_URI_LENGTH 1000
+#define MAX_HEADER_LENGTH 1000
 
 enum HtmlRequestParseStep
 {

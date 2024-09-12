@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:11:42 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/04 01:24:37 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/12 22:44:32 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include <vector>
 #include <string>
 #include "HttpRequestLine.hpp"
+#include "webserv.hpp"
 
 
 class HttpRequest
@@ -24,9 +25,8 @@ class HttpRequest
         HttpRequestLine                                                     _request;
         std::vector<std::pair<std::string, std::vector<std::string> > >     _headers;
         int                                                                 _headersN;
-        int                                                                 _status;
         std::vector<unsigned char>                                          _buffer;
-        int                                                                 _error;
+        StatusCode                                                          _status;
         std::string                                                         _errorMsg;
         int                                                                 _client_socket;
 
@@ -49,11 +49,14 @@ class HttpRequest
         ~HttpRequest();
 
         void    setClientSocket(int client_socket);
-        
+        void    setStatusCode(StatusCode status);
+
         const HttpRequestLine& getRequestLine() const;
         const std::vector<std::pair<std::string, std::vector<std::string> > >& getHeaders() const;
         bool    isConnectionClosed() const;
         std::string getHost() const;
+        StatusCode  getStatusCode() const;
+        const std::string &getErrorMsg() const;
 
         void    printBuffer() const;
 

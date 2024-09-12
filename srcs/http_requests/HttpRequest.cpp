@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:18:22 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/11 10:59:11 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/12 22:47:39 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,16 +17,22 @@
 #include <iostream>
 
 HttpRequest::HttpRequest(int client_socket)
-    : _request(),  _headersN(0), _status(0), _error(0), _errorMsg(""), _client_socket(client_socket)
+    : _request(),  _headersN(0), _status(OK), _errorMsg(""), _client_socket(client_socket)
 {
     requestToBuffer();
     // printBuffer();
-    parseHttpRequest();
+    if (errorMsg.empty())
+        parseHttpRequest();
 }
 
 HttpRequest::~HttpRequest()
 {
 }
+
+/**
+ *  - Validate Request Headers -> BAD REQUESST
+ */
+
 
 void HttpRequest::parseHttpRequest()
 {
@@ -40,12 +46,8 @@ void HttpRequest::parseHttpRequest()
         {
             case REQUEST_LINE:
                 parseRequestLine(line);
-                if (_request.getError() != 0)
-                {
-                    std::cerr << _request.getErrormsg() << std::endl;
-                    _error = 1;
+                if (_status != OK)
                     return ;
-                }
                 currentStep = REQUEST_HEADER;
                 continue;
             case REQUEST_HEADER:
@@ -56,7 +58,11 @@ void HttpRequest::parseHttpRequest()
                 }
                 parseRequestHeaders(line);
                 _headersN++;
+                if (_status != OK)
+                    return ;
                 continue;
+            case REQUEST_BODY:
+                parseRequestBody(line);
             default:
                 break;
         }
@@ -84,8 +90,7 @@ void    HttpRequest::parseRequestLine(const std::string &line)
         std::string method = extract_token(line, pos, ' '); 
         if (method.empty())
         {
-            _error = 1;
-            std::cerr << "Error: failed to parse method." << std::endl;
+            setStatusCode(BAD_REQUEST);
             return ;
         }
         trimWhitespaces(method);
@@ -97,8 +102,12 @@ void    HttpRequest::parseRequestLine(const std::string &line)
         std::string uri = extract_token(line, pos, ' ');
         if (uri.empty())
         {
-            _error = 1;
-            std::cerr << "Error: failed to parse uri" << std::endl;
+            setStatusCode(BAD_REQUEST);
+            return ;
+        }
+        if (uri.length() > MAX_URI_LENGTH)
+        {
+            setStatusCode(URI_TOO_LONG);
             return ;
         }
         trimWhitespaces(uri);
@@ -110,8 +119,7 @@ void    HttpRequest::parseRequestLine(const std::string &line)
         std::string version = extract_token(line, pos, ' ');
         if (version.empty())
         {
-            _error = 1;
-            std::cerr << "Error: failed to parse version" << std::endl;
+            setStatusCode(BAD_REQUEST);
             return ;
         }
         trimWhitespaces(version);
@@ -146,8 +154,7 @@ void HttpRequest::parseRequestHeaders(const std::string &line)
     size_t  colonPos = line.find (':');
     if (colonPos == std::string::npos)
     {
-        _error = 1;
-        std::cerr <<"Error: Bad request, missing colon in field line" << std::endl;
+        setStatusCode(BAD_REQUEST);
         return ;
     }
 
@@ -158,11 +165,16 @@ void HttpRequest::parseRequestHeaders(const std::string &line)
         fieldName[i] = std::tolower(fieldName[i]);
     if (!isValidFieldName(fieldName) || !isValidFieldValue(fieldValue))
     {
-        _error = 1;
-        _errorMsg = "Error: Invalid field name or value";
+        setStatusCode(BAD_REQUEST);
         return ;
     }    
     trimWhitespaces(fieldValue);
+    if (fieldValue.length() > MAX_HEADER_LENGTH)
+    {
+        setStatusCode(REQUEST_HEADER_TOO_LARGE);
+        return ;
+    }
+    
     std::stringstream ss(fieldValue);
     std::string value;
     std::vector<std::string> values;
@@ -181,18 +193,19 @@ void    HttpRequest::requestToBuffer()
     int     bytes_read;
 
     bytes_read = recv(_client_socket, buffer, sizeof(buffer) - 1, 0);
-    if (bytes_read > 0)
+    if (bytes_read == 0)
     {
-        buffer[bytes_read] = '\0';
-        for (int i = 0; i < bytes_read; i++)
-            _buffer.push_back(buffer[i]);
+        _errorMsg = "Error: Client closed the connection";
+        return ;
     }
-
     if (bytes_read < 0)
     {
-        _error = 1;
-        _errorMsg = "Error: receiving request to buffer";
+       _errorMsg = "Error: receiving request to buffer";
     }
+    
+    buffer[bytes_read] = '\0';
+    for (int i = 0; i < bytes_read; i++)
+        _buffer.push_back(buffer[i]);
 }
 
 std::string    HttpRequest::getLineAndPopFromBuffer()
@@ -265,4 +278,30 @@ std::string HttpRequest::getHost() const
             return (header->second[0]);
     }
     return (std::string());
+}
+
+void HttpRequest::setStatusCode(StatusCode status)
+{
+    _status = status;
+}
+
+StatusCode HttpRequest::getStatusCode() const
+{
+    return (_status);
+}
+
+const std::string &HttpRequest::getErrorMsg() const
+{
+    return (_errorMsg);
+}
+
+void HttpRequest::parseRequestBody(const std::string &line)
+{
+    
+}
+
+
+bool HttpRequest::isSupportedMediaPOST()
+{
+    
 }
