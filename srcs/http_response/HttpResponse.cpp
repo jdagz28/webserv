@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:19:13 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/13 09:53:38 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/13 10:23:17 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,6 +97,7 @@ std::string HttpResponse::comparePath(const ServerConfig &server, const HttpRequ
 {
     std::string target_path = request.getUri();
     std::string path;
+    
     const std::vector<LocationConfig> &locationConfigs = server.getLocationConfig();
     if (locationConfigs.empty())
         return(std::string());
@@ -107,12 +108,13 @@ std::string HttpResponse::comparePath(const ServerConfig &server, const HttpRequ
         std::string config_location = location->getPath();
         if (config_location == target_path || (target_path + "/") == config_location)
             return (config_location);
-        if (target_path == "/")
+        if (target_path == "/index.html")
         {
             if (path.empty() || config_location == "/")
                 path = config_location;
             continue;
         }
+
         if (isMatchingPrefix(config_location, target_path))
             if (path.empty() || path.length() < config_location.length())
                 path = config_location;
