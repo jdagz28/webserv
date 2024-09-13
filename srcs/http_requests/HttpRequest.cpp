@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:18:22 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/12 23:02:06 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/13 02:50:23 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,9 @@
 #include <algorithm>
 #include <sstream>
 #include <iostream>
+#include <ctime>
+#include <sys/stat.h>
+#include <fstream>
 
 HttpRequest::HttpRequest(int client_socket)
     : _request(),  _headersN(0), _status(OK), _errorMsg(""), _client_socket(client_socket)
@@ -290,13 +293,105 @@ const std::string &HttpRequest::getErrorMsg() const
     return (_errorMsg);
 }
 
-// void HttpRequest::parseRequestBody(const std::string &line)
-// {
-    
-// }
+const std::string HttpRequest::getHeader(const std::string &field) const
+{
+    std::map<std::string, std::vector<std::string> > ::const_iterator header;
+    header = _headers.find(field);
+    if (header != _headers.end())
+        return (header->second[0]);
+    return (std::string());
+}
 
 
-// bool HttpRequest::isSupportedMediaPOST()
-// {
+void HttpRequest::parseRequestBody(const std::string &line)
+{
+    std::string type = getHeader("Content-Type");
     
-// }
+    if (type.empty())
+    {
+        setStatusCode(UNSUPPORTED_MEDIA_TYPE);
+        return ;
+    }
+    if (type == "application/x-www-form-urlencoded")
+    {
+        parseFormData(line);
+        if (_status != OK)
+            return ;
+    }
+    else if (type == "image/jpeg" || type == "image/gif" || type == "image/png" || type == "image/bmp")
+    {
+        processImageUpload(line, type);
+        if (_status != OK)
+            return ;
+    }
+    else
+    {
+        setStatusCode(UNSUPPORTED_MEDIA_TYPE);
+        return ;
+    }
+}
+
+void HttpRequest::parseFormData(const std::string &line)
+{
+    std::stringstream ss(line);
+    std::string pair;
+
+    while (std::getline(ss, pair, '&'))
+    {
+        size_t equalPos = pair.find('=');
+        if (equalPos == std::string::npos)
+        {
+            setStatusCode(BAD_REQUEST);
+            return ;
+        }
+        std::string key = pair.substr(0, equalPos);
+        std::string value = pair.substr(equalPos + 1);
+        _formData[key] = value;
+    }
+}
+
+std::string HttpRequest::generateFilename(const std::string &type)
+{
+    std::time_t now = std::time(NULL);
+    std::tm *tm = std::localtime(&now);
+
+    char buffer[80];
+    std::strftime(buffer, sizeof(buffer), "%Y%m%d_%H%M%S", tm);
+    std::string timestamp(buffer);
+
+    std::string extension = type.substr(6);
+    std::string filename = "image_" + timestamp + "." + extension;
+
+    return (filename);
+}
+
+void HttpRequest::processImageUpload(const std::string &line, const std::string &type)
+{
+    std::srand(static_cast<unsigned>(std::time(0)));
+    std::string filename = generateFilename(type);
+    if (filename.empty())
+    {
+        setStatusCode(INTERNAL_SERVER_ERROR);
+        return ;
+    }
+    
+    std::string directory = "upload/";
+    struct stat st;
+    if (stat(directory.c_str(), &st) == -1 || !S_ISDIR(st.st_mode))
+    {
+        setStatusCode(INTERNAL_SERVER_ERROR);
+        return ;
+    }
+
+    std::string filepath = directory + filename;
+    std::ofstream filestream(filepath.c_str(), std::ios::binary);
+    if (!filestream)
+    {
+        setStatusCode(INTERNAL_SERVER_ERROR);
+        return ;
+    }
+    
+    filestream.write(line.c_str(), line.size());
+    filestream.close();
+    setStatusCode(CREATED);
+}

@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:05:38 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/12 11:01:02 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/13 04:47:20 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,7 +81,7 @@ void HttpResponse::processRequestGET()
         getResource(path);
         return ;
     }
-    // getResource(path);
+    getResource(path);
 }
 
 void HttpResponse::getResource(const std::string &target_path)
@@ -93,6 +93,11 @@ void HttpResponse::getResource(const std::string &target_path)
     if (isSupportedMedia(uri))
     {
         std::string resourceName = extractResourceName(uri);
+        std::cout << "=====================" << std::endl;
+        std::cout << "Getting Content" << std::endl;
+        std::cout << "Resource Name: " << resourceName << std::endl;
+        std::cout << "=====================" << std::endl;
+        
         if (!checkSlash(target_path, resourceName))
             indexPath = target_path + '/' + resourceName;
         else if (target_path[target_path.length() - 1] == '/' && resourceName[0] == '/')
@@ -139,6 +144,7 @@ void  HttpResponse::getResourceContent(const std::string &file_path)
     _body.resize(fileSize);
     infile.read(&_body[0], fileSize); 
     infile.close();
+    std::cout << "ASDSADSADAAAAAASSSSSSSSSSSSSS" << std::endl;
     addContentTypeHeader(contentType);
     setStatusCode(OK);
 }

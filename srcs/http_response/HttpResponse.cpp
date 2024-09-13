@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:19:13 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/12 23:02:16 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/13 04:49:42 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -257,6 +257,8 @@ bool HttpResponse::isSupportedMedia(const std::string &uri)
 {
     std::string extension = getExtension(uri);
     std::string type = getMimeType(extension);
+    std::cout << "Extension: " << extension << std::endl;
+    std::cout << "Type: " << type << std::endl;
     return (!type.empty());    
 }
 

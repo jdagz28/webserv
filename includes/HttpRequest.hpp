@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:11:42 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/12 22:53:49 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/13 02:48:43 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ class HttpRequest
         StatusCode                                                          _status;
         std::string                                                         _errorMsg;
         int                                                                 _client_socket;
+        std::map<std::string, std::string>                                  _formData;
 
         HttpRequest();
         HttpRequest(const HttpRequest &copy);
@@ -39,11 +40,16 @@ class HttpRequest
         void    requestToBuffer(); 
         void    parseRequestLine(const std::string &line);
         void    parseRequestHeaders(const std::string &line);
+        void    parseRequestBody(const std::string &line);
+        void parseFormData(const std::string &line);
 
         std::string     getLineAndPopFromBuffer();
         std::string     extract_token(const std::string &line, size_t &pos, char del);
         bool    isValidFieldName(const std::string &line);
         bool    isValidFieldValue(const std::string &line);
+
+        std::string generateFilename(const std::string &type);
+        void processImageUpload(const std::string &line, const std::string &type);
     
     public:
         HttpRequest(int client_socket);
@@ -58,6 +64,7 @@ class HttpRequest
         std::string getHost() const;
         StatusCode  getStatusCode() const;
         const std::string &getErrorMsg() const;
+        const std::string getHeader(const std::string &field) const;
 
         void    printBuffer() const;
 

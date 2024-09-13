@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 22:50:55 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/11 23:29:31 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/13 04:38:21 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,6 @@ void HttpResponse::getErrorPage()
     {
         ErrorPagePath = server->getErrorPage(_status);
     }
-    std::cout << "Error Page Path: " << ErrorPagePath << std::endl;
     if (!ErrorPagePath.empty())
         getResourceContent(ErrorPagePath);
     else
