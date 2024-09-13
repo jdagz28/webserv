@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:18:22 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/13 09:49:01 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/13 15:09:08 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,10 +36,16 @@ void HttpRequest::parseHttpRequest()
 {
     HtmlRequestParseStep currentStep = REQUEST_LINE;
     
+    std::cout << "Parsing request" << std::endl;
     while (!_buffer.empty())
     {
         std::string line = getLineAndPopFromBuffer();
-        // std::cout << line << std::endl;
+        std::cout << line << std::endl;
+        if (line.empty() && currentStep == REQUEST_HEADER)
+        {
+            currentStep = REQUEST_BODY;
+            continue;
+        }
         switch (currentStep)
         {
             case REQUEST_LINE:
@@ -47,20 +53,22 @@ void HttpRequest::parseHttpRequest()
                 if (_status != OK)
                     return ;
                 currentStep = REQUEST_HEADER;
-                continue;
+                break;
             case REQUEST_HEADER:
                 if (line.empty())
                 {
                     currentStep = REQUEST_BODY;
-                    break ; 
                 }
-                parseRequestHeaders(line);
-                _headersN++;
-                if (_status != OK)
-                    return ;
-                continue;
-            // case REQUEST_BODY:
-            //     parseRequestBody(line);
+                else
+                {
+                    parseRequestHeaders(line);
+                    _headersN++;
+                    if (_status != OK)
+                        return ;
+                }
+                break;
+            case REQUEST_BODY:
+                parseRequestBody(line);
             default:
                 break;
         }

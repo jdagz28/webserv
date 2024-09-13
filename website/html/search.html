@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../resources/css/styles.css">
+    <title>Search</title>
+</head>
+
+<body>
+    <nav class="navbar">
+        <ul class="nav-list">
+            <li class="nav-item"><a href="/">Home</a></li>
+            <li class="nav-item"><a href="/html/features.html">Features</a></li>
+            <li class="nav-item"><a href="/directory">Directory</a></li>
+            <li class="nav-item"><a href="/html/search.html">Search</a></li>
+            <li class="nav-item"><a href="/">About Us</a></li>
+        </ul>
+    </nav>
+
+    <div class="search-container">
+        <img src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" 
+            class="google-logo"
+            alt="Google logo" />
+        <form method="POST" action="/search">
+            <div class="search-bar">
+                <svg height="21" viewBox="0 0 21 21" width="21" xmlns="http://www.w3.org/2000/svg">
+                    <g fill="none" fill-rule="evenodd" stroke="#808080" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8.5" r="5" /><path d="m17.571 17.5-5.571-5.5" />
+                    </g>
+                </svg>
+                <input type="text" name="q" placeholder="Search...">
+            </div>
+            <div class="button-container">
+                <button type="submit" class="search-btn">Google Search</button>
+                <button type="submit" class="lucky-btn" name="lucky" value="true">I'm Feeling Lucky</button>
+            </div>
+        </form>
+    </div>
+    
+</body>
+
+</html>
