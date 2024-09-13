@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:18:22 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/13 02:50:23 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/13 09:49:01 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,11 +31,6 @@ HttpRequest::HttpRequest(int client_socket)
 HttpRequest::~HttpRequest()
 {
 }
-
-/**
- *  - Validate Request Headers -> BAD REQUESST
- */
-
 
 void HttpRequest::parseHttpRequest()
 {
@@ -329,6 +324,22 @@ void HttpRequest::parseRequestBody(const std::string &line)
         setStatusCode(UNSUPPORTED_MEDIA_TYPE);
         return ;
     }
+}
+
+bool HttpRequest::isSupportedMediaPOST()
+{
+    std::string type = getHeader("Content-Type");
+    if (type.empty())
+    {
+        setStatusCode(UNSUPPORTED_MEDIA_TYPE);
+        return (false);
+    }
+    if (type == "application/x-www-form-urlencoded" || type == "multipart/form-data")
+        return (true);
+    if (type == "image/jpeg" || type == "image/gif" || type == "image/png" || type == "image/bmp")
+        return (true);
+    setStatusCode(UNSUPPORTED_MEDIA_TYPE);
+    return (false);
 }
 
 void HttpRequest::parseFormData(const std::string &line)

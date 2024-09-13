@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:11:42 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/13 02:48:43 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/13 09:52:55 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,6 +65,7 @@ class HttpRequest
         StatusCode  getStatusCode() const;
         const std::string &getErrorMsg() const;
         const std::string getHeader(const std::string &field) const;
+        bool isSupportedMediaPOST();
 
         void    printBuffer() const;
 
