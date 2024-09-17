@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:02:29 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/11 01:03:28 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/17 03:09:35 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,15 +96,25 @@ void HttpResponse::getRedirectContent()
     std::string redirectPath;
     if (!validateRedirect())
        return ;
-    if (isRedirectExternal())
-        redirectPath = _redirect;    
+    if (_request.getHeader("content-type") == "application/x-www-form-urlencoded")
+    {
+        redirectPath = _redirect;
+        redirectPath += '?';
+        std::map<std::string, std::string>::const_iterator value;
+        for (value = _request.getFormData().begin(); value != _request.getFormData().end(); value++)
+        {
+            redirectPath += value->first + "=" + value->second + "&";
+        }
+        std::cout <<  redirectPath << std::endl;
+    }
+    else if (isRedirectExternal())
+        redirectPath = _redirect; 
     else
     {
         redirectPath = "http://" + _request.getHost();
         if (!_redirect.empty() && _redirect[0] != '/')
             redirectPath += '/';
         redirectPath += _redirect;
-        std::cout << "Local Redirect: " << redirectPath << std::endl;
     }
     _headers["Location"] = redirectPath;
     StatusCode status = static_cast<StatusCode>(strToInt(_redirectDirective[0]));

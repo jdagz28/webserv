@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/05 00:23:30 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/17 01:16:04 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/17 03:11:28 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,7 +122,7 @@ int main(int argc, char **argv)
         response.execMethod();
         response.generateHttpResponse();
         
-        // printHttpResponse(response.getHttpResponse());
+        printHttpResponse(response.getHttpResponse());
         std::cout << "Sending response..." << std::endl;
         response.sendResponse();
 

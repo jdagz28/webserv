@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:19:13 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/14 09:11:16 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/17 02:53:20 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,7 +72,7 @@ void HttpResponse::execMethod()
             processRequestGET();
             break ;
         case POST:
-            // processRequestPOST();
+            processRequestPOST();
             break ;
         default:
             setStatusCode(METHOD_NOT_ALLOWED);

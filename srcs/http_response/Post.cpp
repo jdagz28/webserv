@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:57:50 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/12 22:12:51 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/17 03:04:09 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,5 +40,18 @@ void    HttpResponse::processRequestPOST()
     {
         setStatusCode(UNSUPPORTED_MEDIA_TYPE);
         return ;
+    }
+    if (_request.getHeaders().find("content-length") == _request.getHeaders().end())
+    {
+        setStatusCode(BAD_REQUEST);
+        return ;
+    }
+    if (_request.getHeader("content-type") == "application/x-www-form-urlencoded")
+    {
+        if (isRedirect())
+        {
+            getRedirectContent();
+            return ;
+        }
     }
 }

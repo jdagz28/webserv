@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:18:22 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/17 02:11:15 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/17 03:01:47 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -340,17 +340,14 @@ void HttpRequest::parseRequestBody(const std::string &line)
         setStatusCode(BAD_REQUEST);
         return ;
     }
-    std::cout << "Content-Length: " << contentLen << std::endl;
     std::string type = getHeader("content-type");
     if (type.empty())
     {
         setStatusCode(UNSUPPORTED_MEDIA_TYPE);
         return ;
     }
-    std::cout << "Content-Type: " << type << std::endl;
     if (type == "application/x-www-form-urlencoded")
     {
-        std::cout << "Parsing form data" << std::endl;
         parseFormData(line);
         if (_status != OK)
             return ;
@@ -370,7 +367,7 @@ void HttpRequest::parseRequestBody(const std::string &line)
 
 bool HttpRequest::isSupportedMediaPOST()
 {
-    std::string type = getHeader("content-Type");
+    std::string type = getHeader("content-type");
     if (type.empty())
     {
         setStatusCode(UNSUPPORTED_MEDIA_TYPE);
