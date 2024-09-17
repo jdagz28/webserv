@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:11:06 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/11 23:28:25 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/16 10:16:27 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,8 @@ void HttpResponse::generateHttpResponse()
     
     _headers["Server"] = _serverName;
     _headers["Date"] = getHttpDateGMT();
-    _headers["Content-Length"] = toString(_body.size());
+    if (!_body.empty())
+        _headers["Content-Length"] = toString(_body.size());
     addKeepAliveHeader();
     addAllowHeader();
 

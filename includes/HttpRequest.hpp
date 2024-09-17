@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:11:42 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/13 09:52:55 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/17 01:08:58 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ class HttpRequest
         std::string                                                         _errorMsg;
         int                                                                 _client_socket;
         std::map<std::string, std::string>                                  _formData;
+        
 
         HttpRequest();
         HttpRequest(const HttpRequest &copy);
@@ -47,6 +48,7 @@ class HttpRequest
         std::string     extract_token(const std::string &line, size_t &pos, char del);
         bool    isValidFieldName(const std::string &line);
         bool    isValidFieldValue(const std::string &line);
+        std::vector<unsigned char>::iterator findBufferCRLF();
 
         std::string generateFilename(const std::string &type);
         void processImageUpload(const std::string &line, const std::string &type);
@@ -66,6 +68,7 @@ class HttpRequest
         const std::string &getErrorMsg() const;
         const std::string getHeader(const std::string &field) const;
         bool isSupportedMediaPOST();
+        const std::map<std::string, std::string>& getFormData() const; //!
 
         void    printBuffer() const;
 

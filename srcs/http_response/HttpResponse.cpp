@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:19:13 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/13 10:23:17 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/14 09:11:16 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,6 +132,7 @@ bool HttpResponse::checkLocConfigAndRequest()
     std::vector<ServerConfig>::const_iterator server;
     for (server = serverConfigs.begin(); server != serverConfigs.end(); server++)
     {
+        //! checkport -> config list and request port
         std::string path = comparePath(*server, _request.getRequestLine());
         if (path.empty())
             return (false);

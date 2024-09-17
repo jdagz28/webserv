@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:18:22 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/13 15:09:08 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/17 02:11:15 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,12 +40,7 @@ void HttpRequest::parseHttpRequest()
     while (!_buffer.empty())
     {
         std::string line = getLineAndPopFromBuffer();
-        std::cout << line << std::endl;
-        if (line.empty() && currentStep == REQUEST_HEADER)
-        {
-            currentStep = REQUEST_BODY;
-            continue;
-        }
+
         switch (currentStep)
         {
             case REQUEST_LINE:
@@ -58,6 +53,7 @@ void HttpRequest::parseHttpRequest()
                 if (line.empty())
                 {
                     currentStep = REQUEST_BODY;
+                    break;
                 }
                 else
                 {
@@ -68,7 +64,11 @@ void HttpRequest::parseHttpRequest()
                 }
                 break;
             case REQUEST_BODY:
+                // printBuffer();
+                std::cout << "Line: " << line << std::endl;
                 parseRequestBody(line);
+                if (_status != OK)
+                    return ;
             default:
                 break;
         }
@@ -214,23 +214,47 @@ void    HttpRequest::requestToBuffer()
         _buffer.push_back(buffer[i]);
 }
 
+std::vector<unsigned char>::iterator HttpRequest::findBufferCRLF()
+{
+    std::vector<unsigned char>::iterator it;
+    for (it = _buffer.begin(); it != _buffer.end(); it++)
+    {
+        if (*it == '\r' && *(it + 1) == '\n')
+            return (it);
+    }
+    return (_buffer.end());
+}
+
 std::string    HttpRequest::getLineAndPopFromBuffer()
 {
     std::string line;
-    std::string::size_type pos = 0;
+    // std::string::size_type pos = 0;
     
     if (_buffer.empty())
         return (std::string());
-    std::string bufferStr(_buffer.begin(), _buffer.end());
-    std::string::size_type newlinePos = bufferStr.find('\n');
-    if (newlinePos != std::string::npos)
+    // std::string bufferStr(_buffer.begin(), _buffer.end());
+    // std::string::size_type newlinePos = bufferStr.find('\n');
+    // if (newlinePos != std::string::npos)
+    // {
+    //     line = bufferStr.substr(0, newlinePos);
+    //     if (!line.empty() && line[line.size() - 1] == '\r')
+    //         line = line.substr(0, line.size() - 1);
+    //     pos = newlinePos + 1;
+    //     _buffer.erase(_buffer.begin(), _buffer.begin() + pos);
+    // }
+    std::vector<unsigned char>::iterator crlf_pos = findBufferCRLF();
+    if (crlf_pos != _buffer.end())
     {
-        line = bufferStr.substr(0, newlinePos);
-        if (!line.empty() && line[line.size() - 1] == '\r')
-            line = line.substr(0, line.size() - 1);
-        pos = newlinePos + 1;
-        _buffer.erase(_buffer.begin(), _buffer.begin() + pos);
-    }   
+        line = std::string(_buffer.begin(), crlf_pos);
+        _buffer.erase(_buffer.begin(), crlf_pos + 2);
+    }
+    else
+    {
+        line = std::string(_buffer.begin(), _buffer.end());
+        _buffer.clear();
+    }
+    if (!line.empty() && line[line.size() - 1] == '\r')
+        line = line.substr(0, line.size() - 1);
     return (line);
 }
 
@@ -239,6 +263,7 @@ void    HttpRequest::printBuffer() const
     std::vector<unsigned char>::const_iterator it;
     for (it = _buffer.begin(); it != _buffer.end(); it++)
         std::cout << *it;
+    std::cout << std::endl;
 }
 
 void    HttpRequest::setClientSocket(int client_socket)
@@ -253,13 +278,14 @@ const HttpRequestLine& HttpRequest::getRequestLine() const
 
 const std::map<std::string, std::vector<std::string> >& HttpRequest::getHeaders() const
 {
+    
     return (_headers);
 }
 
 bool HttpRequest::isConnectionClosed() const
 {
     std::map<std::string, std::vector<std::string> >::const_iterator header;
-    header = _headers.find("Connection");
+    header = _headers.find("connection");
     
     if (header == _headers.end())
         return (false);
@@ -308,15 +334,23 @@ const std::string HttpRequest::getHeader(const std::string &field) const
 
 void HttpRequest::parseRequestBody(const std::string &line)
 {
-    std::string type = getHeader("Content-Type");
-    
+    std::string contentLen = getHeader("content-length");
+    if (contentLen.empty())
+    {
+        setStatusCode(BAD_REQUEST);
+        return ;
+    }
+    std::cout << "Content-Length: " << contentLen << std::endl;
+    std::string type = getHeader("content-type");
     if (type.empty())
     {
         setStatusCode(UNSUPPORTED_MEDIA_TYPE);
         return ;
     }
+    std::cout << "Content-Type: " << type << std::endl;
     if (type == "application/x-www-form-urlencoded")
     {
+        std::cout << "Parsing form data" << std::endl;
         parseFormData(line);
         if (_status != OK)
             return ;
@@ -336,7 +370,7 @@ void HttpRequest::parseRequestBody(const std::string &line)
 
 bool HttpRequest::isSupportedMediaPOST()
 {
-    std::string type = getHeader("Content-Type");
+    std::string type = getHeader("content-Type");
     if (type.empty())
     {
         setStatusCode(UNSUPPORTED_MEDIA_TYPE);
@@ -413,4 +447,9 @@ void HttpRequest::processImageUpload(const std::string &line, const std::string 
     filestream.write(line.c_str(), line.size());
     filestream.close();
     setStatusCode(CREATED);
+}
+
+const std::map<std::string, std::string> &HttpRequest::getFormData() const
+{
+    return (_formData);
 }
