@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:11:42 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/19 02:59:36 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/19 21:07:06 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,14 @@
 #include "HttpRequestLine.hpp"
 #include "webserv.hpp"
 
+struct MultiFormData
+{
+    std::string name;
+    std::string type;
+    std::string disposition;
+    std::string filename;
+    std::vector<unsigned char> binary;
+};
 
 class HttpRequest
 {
@@ -31,6 +39,8 @@ class HttpRequest
         std::string                                                         _errorMsg;
         int                                                                 _client_socket;
         std::map<std::string, std::string>                                  _formData;
+        HtmlRequestParseStep                                                _parseStep;
+        std::map<std::string, MultiFormData>                                _multiFormData;
         
 
         HttpRequest();
@@ -41,7 +51,6 @@ class HttpRequest
         void    requestToBuffer(); 
         void    parseRequestLine(const std::string &line);
         void    parseRequestHeaders(const std::string &line);
-        void    parseRequestBody(const std::string &line);
         void parseFormData(const std::string &line);
 
         std::string     getLineAndPopFromBuffer();
@@ -50,8 +59,12 @@ class HttpRequest
         bool    isValidFieldValue(const std::string &line);
         std::vector<unsigned char>::iterator findBufferCRLF();
 
-        std::string generateFilename(const std::string &type);
-        void processImageUpload(const std::string &line, const std::string &type);
+        std::string parseFieldname(const std::string &line, size_t *pos);
+        std::string parseFieldValue(const std::string &line, size_t *pos);
+        void splitFormLine(const std::string &line, MultiFormData *form);
+        void parseUntilBinary(const std::string &boundary);
+        void parseMultipartForm(const std::string &boundary);
+        
     
     public:
         HttpRequest(int client_socket);
@@ -68,10 +81,10 @@ class HttpRequest
         const std::string &getErrorMsg() const;
         const std::string getHeader(const std::string &field) const;
         bool isSupportedMediaPOST();
-        const std::map<std::string, std::string>& getFormData() const; //!
+        const std::map<std::string, std::string> &getFormData() const; //!
+        bool    isMultiPartFormData(std::string *boundary);
 
-        bool    isBufferEmpty();
-        std::vector <unsigned char> getBuffer() const;
+        void    parseRequestBody();
 
         void    printBuffer() const;
 

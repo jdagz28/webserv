@@ -25,7 +25,7 @@ $(document).ready(function() {
 
             $.ajax({
                 type: 'POST',
-                url: '/upload',
+                url: '/uploads',
                 data: formData,
                 contentType: false,
                 processData: false,

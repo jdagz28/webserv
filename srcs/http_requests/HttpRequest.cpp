@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:18:22 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/19 03:04:18 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/19 21:31:22 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,10 +20,10 @@
 #include <fstream>
 
 HttpRequest::HttpRequest(int client_socket)
-    : _request(),  _headersN(0), _status(OK), _errorMsg(""), _client_socket(client_socket)
+    : _request(),  _headersN(0), _status(OK), _errorMsg(""), _client_socket(client_socket), _parseStep(REQUEST_INIT)
 {
     requestToBuffer();
-    printBuffer();
+    // printBuffer();
     if (_errorMsg.empty())
         parseHttpRequest();
 }
@@ -34,25 +34,25 @@ HttpRequest::~HttpRequest()
 
 void HttpRequest::parseHttpRequest()
 {
-    HtmlRequestParseStep currentStep = REQUEST_LINE;
-    
-    while (!_buffer.empty())
+    if (_parseStep == REQUEST_INIT)
+        _parseStep = REQUEST_LINE;
+    while (true)
     {
         std::string line = getLineAndPopFromBuffer();
 
-        switch (currentStep)
+        switch (_parseStep)
         {
             case REQUEST_LINE:
                 parseRequestLine(line);
                 if (_status != OK)
                     return ;
-                currentStep = REQUEST_HEADER;
+                _parseStep = REQUEST_HEADER;
                 break;
             case REQUEST_HEADER:
                 if (line.empty())
                 {
-                    currentStep = REQUEST_BODY;
-                    break;
+                    _parseStep = REQUEST_BODY;
+                    return;
                 }
                 else
                 {
@@ -62,10 +62,6 @@ void HttpRequest::parseHttpRequest()
                         return ;
                 }
                 break;
-            case REQUEST_BODY:
-                parseRequestBody(line);
-                if (_status != OK)
-                    return ;
             default:
                 break;
         }
@@ -164,8 +160,9 @@ void HttpRequest::parseRequestHeaders(const std::string &line)
     std::string fieldName = line.substr(0, colonPos);
     std::string fieldValue = line.substr(colonPos + 1);
     
-    for (size_t i = 0; i < fieldName.size(); i++)
-        fieldName[i] = std::tolower(fieldName[i]);
+    fieldName = toLower(fieldName);
+    // for (size_t i = 0; i < fieldName.size(); i++)
+    //     fieldName[i] = std::tolower(fieldName[i]);
     if (!isValidFieldName(fieldName) || !isValidFieldValue(fieldValue))
     {
         setStatusCode(BAD_REQUEST);
@@ -361,9 +358,157 @@ const std::string HttpRequest::getHeader(const std::string &field) const
     return (std::string());
 }
 
-
-void HttpRequest::parseRequestBody(const std::string &line)
+const std::map<std::string, std::string> &HttpRequest::getFormData() const
 {
+    return (_formData);
+}
+
+std::string HttpRequest::parseFieldname(const std::string &line, size_t *pos)
+{
+    if (!pos)
+        return (std::string());
+    size_t head_pos = *pos;
+    size_t end_pos = line.find(':', head_pos); 
+
+    if (end_pos == std::string::npos || end_pos <= head_pos) {
+        return (std::string()); 
+    }
+    std::string fieldname = line.substr(head_pos, end_pos - head_pos);
+    *pos = end_pos + 1;
+    std::cout << "parseFieldName: " << fieldname << std::endl;
+    return (fieldname); 
+}
+
+std::string HttpRequest::parseFieldValue(const std::string &line, size_t *pos)
+{
+    if (!pos)
+        return (std::string());
+    size_t len = 0;
+    size_t ws_len = 0;
+    while (isSpace(line[*pos]))
+        (*pos)++;
+    while (line[*pos + len])
+    {
+        while (line[*pos + len] && !isSpace(line[*pos + len]))
+            len++;
+        while (line[*pos + len + ws_len] && isSpace(line[*pos + len + ws_len]))
+            ws_len++;
+        if (line[*pos + len + ws_len] == '\0')
+            break ;
+        len += ws_len;
+    }
+    std::string fieldvalue = line.substr(*pos, len);
+    *pos += len;
+    std::cout << "parseFieldValue: " << fieldvalue << std::endl;
+    return (fieldvalue);
+}
+
+void HttpRequest::splitFormLine(const std::string &line, MultiFormData *form)
+{
+    //extract field name
+    size_t pos = 0;
+    std::string fieldname = parseFieldname(line, &pos);
+    if (fieldname.empty())
+    {
+        setStatusCode(BAD_REQUEST);
+        return ;   
+    }
+    //check if ':' is not skipped
+    if (line[pos] == ':')
+        pos++;
+    //check for OWS optional whitespace
+    while (isSpace(line[pos]))
+        pos++;
+    //extract field value
+    std::string fieldvalue = parseFieldValue(line, &pos);
+    if (fieldvalue.empty())
+    {
+        setStatusCode(BAD_REQUEST);
+        return ;   
+    }
+    //check extracted fieldvalue if there are more info
+    std::stringstream ss(fieldvalue);
+    std::string token;
+    fieldname = toLower(fieldname);
+    while (std::getline(ss, token, ';'))
+    {
+        size_t equalPos = token.find('=');
+        if (equalPos != std::string::npos)
+        {
+            std::string key = token.substr(0, equalPos);
+            std::string value = token.substr(equalPos + 1);
+            
+            if (value[0] == '"' && value[value.size() - 1] == '"')
+                value = value.substr(1, value.size() - 2);
+            key = toLower(key);
+            if (key == "name")
+                form->name = value;
+            else if (key == "filename")
+                form->filename = value;
+            else if (key == "type")
+                form->type = value;
+        }
+        else if (equalPos == std::string::npos)
+        {
+            if (fieldname == "content-disposition")
+                form->disposition = token;
+            else if (fieldname == "content-type")
+                form->type = token;
+        }
+    }
+    if (fieldname == "content-type")
+        form->type = fieldvalue;
+}
+
+
+void HttpRequest::parseUntilBinary(const std::string &boundary)
+{
+    const std::string separator = "--" + boundary;
+    
+    MultiFormData form;
+    while (true && !_buffer.empty())
+    {
+        std::string line = getLineAndPopFromBuffer();
+        
+        if (line == separator || line.empty())
+            continue ;
+        splitFormLine(line, &form);
+        if (_status != OK || _status != INIT)
+            return ;
+    }
+    _multiFormData[form.name] = form;
+}
+
+
+void HttpRequest::parseMultipartForm(const std::string &boundary)
+{
+    if (_buffer.empty() || boundary.empty())
+    {
+        setStatusCode(INTERNAL_SERVER_ERROR);
+        return ;
+    }
+    parseUntilBinary(boundary);
+    std::cout << "================================" << std::endl;
+    std::cout << "Multipart Form Data" << std::endl;
+    std::cout << "================================" << std::endl;
+    
+    std::map<std::string, MultiFormData>::iterator it;
+    for (it = _multiFormData.begin(); it != _multiFormData.end(); it++)
+    {
+        const MultiFormData &form = it->second;
+        std::cout << "name: " << form.name << std::endl;
+        std::cout << "type: " << form.type << std::endl;
+        std::cout << "disposition: " << form.disposition << std::endl;
+        std::cout << "filename: " << form.filename << std::endl;
+    }
+}
+
+void HttpRequest::parseRequestBody()
+{
+    std::cout << "================================" << std::endl;
+    std::cout << "parsing request body" << std::endl;
+    printBuffer();
+    std::cout << "================================" << std::endl;
     std::string contentLen = getHeader("content-length");
     if (contentLen.empty())
     {
@@ -376,11 +521,40 @@ void HttpRequest::parseRequestBody(const std::string &line)
         setStatusCode(UNSUPPORTED_MEDIA_TYPE);
         return ;
     }
-    if (type == "application/x-www-form-urlencoded")
+    while (true)
     {
-        parseFormData(line);
-        if (_status != OK)
-            return ;
+        std::string line = getLineAndPopFromBuffer();
+        if (_buffer.empty())
+            break;
+        if (line.empty())
+            continue ;
+        std::cout << "================================" << std::endl;
+        std::cout << "line: " << line << std::endl;
+        switch(_parseStep)
+        {
+            case REQUEST_BODY:
+            {
+                if (getHeader("content-type") == "application/x-www-form-urlencoded")
+                {
+                    parseFormData(line);
+                    if (_status != OK)
+                        return ;
+                }
+                std::string boundary;
+                if (isMultiPartFormData(&boundary))
+                {
+                    std::cout << "boundary: " << boundary << std::endl;
+                    parseMultipartForm(boundary);
+                }
+                else
+                {
+                    setStatusCode(BAD_REQUEST);
+                    break ;
+                }
+            }
+            default:
+                break ;
+        }
     }
 }
 
@@ -419,65 +593,16 @@ void HttpRequest::parseFormData(const std::string &line)
     }
 }
 
-std::string HttpRequest::generateFilename(const std::string &type)
+
+bool    HttpRequest::isMultiPartFormData(std::string *boundary)
 {
-    std::time_t now = std::time(NULL);
-    std::tm *tm = std::localtime(&now);
-
-    char buffer[80];
-    std::strftime(buffer, sizeof(buffer), "%Y%m%d_%H%M%S", tm);
-    std::string timestamp(buffer);
-
-    std::string extension = type.substr(6);
-    std::string filename = "image_" + timestamp + "." + extension;
-
-    return (filename);
-}
-
-void HttpRequest::processImageUpload(const std::string &line, const std::string &type)
-{
-    std::srand(static_cast<unsigned>(std::time(0)));
-    std::string filename = generateFilename(type);
-    if (filename.empty())
-    {
-        setStatusCode(INTERNAL_SERVER_ERROR);
-        return ;
-    }
-    
-    std::string directory = "upload/";
-    struct stat st;
-    if (stat(directory.c_str(), &st) == -1 || !S_ISDIR(st.st_mode))
-    {
-        setStatusCode(INTERNAL_SERVER_ERROR);
-        return ;
-    }
-
-    std::string filepath = directory + filename;
-    std::ofstream filestream(filepath.c_str(), std::ios::binary);
-    if (!filestream)
-    {
-        setStatusCode(INTERNAL_SERVER_ERROR);
-        return ;
-    }
-    
-    filestream.write(line.c_str(), line.size());
-    filestream.close();
-    setStatusCode(CREATED);
-}
-
-const std::map<std::string, std::string> &HttpRequest::getFormData() const
-{
-    return (_formData);
-}
-
-bool HttpRequest::isBufferEmpty()
-{
-    if (_buffer.empty())
-        return (true);
-    return (false);
-}
-
-std::vector<unsigned char> HttpRequest::getBuffer() const
-{
-    return (_buffer);
+    std::string type = getHeader("content-type");
+    size_t pos = type.find("multipart/form-data");
+    if (pos == std::string::npos)
+        return (false);
+    pos = type.find("boundary=");
+    if (pos == std::string::npos)
+        return (false);
+    *boundary = type.substr(pos + 9);
+    return (true);
 }

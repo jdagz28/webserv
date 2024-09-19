@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:57:50 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/19 02:52:54 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/19 09:19:12 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,12 @@ void    HttpResponse::processRequestPOST()
 {
     if (!checkLocConfigAndRequest())
         return ;
-    if (!_request.isSupportedMediaPOST())
+    _request.parseRequestBody();
+    if (_request.getStatusCode() != OK || _request.getStatusCode() != INIT)
+    {
+        setStatusCode(_request.getStatusCode());
+        return ;
+    }
     {
         setStatusCode(UNSUPPORTED_MEDIA_TYPE);
         return ;
@@ -57,31 +62,56 @@ void    HttpResponse::processRequestPOST()
         }
     }
     std::string boundary;
-    else if (isMultiPartFormData(&boundary))
+    // else if (isMultiPartFormData(&boundary))
+    // {
+    //     uploadMultipartForm(boundary);
+    // }
+}
+
+/*
+std::string HttpRequest::generateFilename(const std::string &type)
+{
+    std::time_t now = std::time(NULL);
+    std::tm *tm = std::localtime(&now);
+
+    char buffer[80];
+    std::strftime(buffer, sizeof(buffer), "%Y%m%d_%H%M%S", tm);
+    std::string timestamp(buffer);
+
+    std::string extension = type.substr(6);
+    std::string filename = "image_" + timestamp + "." + extension;
+
+    return (filename);
+}
+
+void HttpRequest::processImageUpload(const std::string &line, const std::string &type)
+{
+    std::srand(static_cast<unsigned>(std::time(0)));
+    std::string filename = generateFilename(type);
+    if (filename.empty())
     {
-        uploadMultipartForm(boundary);
+        setStatusCode(INTERNAL_SERVER_ERROR);
+        return ;
     }
-}
+    
+    std::string directory = "upload/";
+    struct stat st;
+    if (stat(directory.c_str(), &st) == -1 || !S_ISDIR(st.st_mode))
+    {
+        setStatusCode(INTERNAL_SERVER_ERROR);
+        return ;
+    }
 
-void    HttpResponse::parseMultipartForm(const std::string &boundary)
-{
-    if (_request.)
+    std::string filepath = directory + filename;
+    std::ofstream filestream(filepath.c_str(), std::ios::binary);
+    if (!filestream)
+    {
+        setStatusCode(INTERNAL_SERVER_ERROR);
+        return ;
+    }
+    
+    filestream.write(line.c_str(), line.size());
+    filestream.close();
+    setStatusCode(CREATED);
 }
-
-void    HttpResponse::uploadMultipartForm(const std::string &boundary)
-{
-    parseMultipartForm(boundary);
-}
-
-bool    HttpResponse::isMultiPartFormData(std::string *boundary)
-{
-    std::string type = _request.getHeader("content-type");
-    size_t pos = type.find("multipart/form-data");
-    if (pos == std::string::npos)
-        return (false);
-    pos = type.find("boundary=");
-    if (pos == std::string::npos)
-        return (false);
-    *boundary = type.substr(pos + 9);
-    return (true);
-}
+*/

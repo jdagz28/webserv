@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 22:28:27 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/13 02:33:56 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/19 12:34:43 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@
 
 enum HtmlRequestParseStep
 {
+    REQUEST_INIT,
     REQUEST_LINE,
     REQUEST_HEADER,
     REQUEST_BODY
@@ -80,7 +81,8 @@ std::string getExtension(const std::string &path);
 std::string toString(int num);
 bool validProtocol(const std::string &str);
 int strToInt(const std::string &str);
-
+bool isSpace(unsigned char ch);
+std::string toLower(const std::string &str);
 
 // MIMETYPES.CPP
 std::string getMimeType(const std::string &extension);

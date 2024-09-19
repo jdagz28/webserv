@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 22:29:37 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/02 05:30:20 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/19 20:54:47 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,9 +29,13 @@ std::vector<std::string>    splitBySpaces(const std::string &str)
 }
 
 
+bool isSpace(unsigned char ch)
+{
+    return (std::isspace(ch));
+}
 bool isNotSpace(unsigned char ch)
 {
-    return !std::isspace(ch);
+    return (!std::isspace(ch));
 }
 
 void    trimWhitespaces(std::string &str)
@@ -98,4 +102,15 @@ int strToInt(const std::string &str)
     if (ss.fail())
         return (-1);
     return (num);
+}
+
+std::string toLower(const std::string &str)
+{
+    if (str.empty())
+        return (std::string());
+    std::string lower;
+    lower.resize(str.size());
+    for (size_t i = 0; i < str.size(); i++)
+        lower[i] = std::tolower(static_cast<unsigned char>(str[i]));
+    return (lower);
 }

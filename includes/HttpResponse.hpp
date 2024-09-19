@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:13:31 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/19 02:51:49 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/19 08:46:11 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,13 +24,6 @@ class ServerConfig;
 class HttpRequestLine;
 class LocationConfig;
 
-struct MultiFormData
-{
-    std::string filename;
-    std::string type;
-    std::vector<unsigned char> binary;
-};
-
 
 class HttpResponse
 {
@@ -47,8 +40,6 @@ class HttpResponse
         std::map<std::string, std::string>      _headers;
         std::string                             _body;
         std::vector<unsigned char>              _responseMsg;
-        MultiFormData                           _formdata;
-        
         
         
         HttpResponse(const HttpResponse &copy);
