@@ -30,7 +30,6 @@
     padding: 10px 15px;
     display: block;
     width: calc(100% - 40px);
-    pointer-events: none;
     z-index: 20;
     height: calc(60px - 20px);
     line-height: calc(60px - 20px);

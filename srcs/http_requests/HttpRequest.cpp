@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:18:22 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/17 03:01:47 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/19 03:04:18 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ HttpRequest::HttpRequest(int client_socket)
     : _request(),  _headersN(0), _status(OK), _errorMsg(""), _client_socket(client_socket)
 {
     requestToBuffer();
-    // printBuffer();
+    printBuffer();
     if (_errorMsg.empty())
         parseHttpRequest();
 }
@@ -36,7 +36,6 @@ void HttpRequest::parseHttpRequest()
 {
     HtmlRequestParseStep currentStep = REQUEST_LINE;
     
-    std::cout << "Parsing request" << std::endl;
     while (!_buffer.empty())
     {
         std::string line = getLineAndPopFromBuffer();
@@ -64,8 +63,6 @@ void HttpRequest::parseHttpRequest()
                 }
                 break;
             case REQUEST_BODY:
-                // printBuffer();
-                std::cout << "Line: " << line << std::endl;
                 parseRequestBody(line);
                 if (_status != OK)
                     return ;
@@ -192,26 +189,65 @@ void HttpRequest::parseRequestHeaders(const std::string &line)
     _headers[fieldName] = values;
 }
 
+size_t  getContentLengthBuffer(const std::string &header)
+{
+    size_t  pos = header.find("content-length:");
+    if (pos != std::string::npos) {
+        pos += 16;
+        std::string::size_type endPos = header.find("\r\n", pos);
+        return (strToInt(header.substr(pos, endPos - pos)));
+    }
+    return (0);
+}
+
 
 void    HttpRequest::requestToBuffer()
 {
     char    buffer[1024];
     int     bytes_read;
+    size_t  totalBytesRead = 0;
+    size_t  contentLen = 0;
 
-    bytes_read = recv(_client_socket, buffer, sizeof(buffer) - 1, 0);
-    if (bytes_read == 0)
+    _buffer.clear();
+    while (true) 
     {
-        _errorMsg = "Error: Client closed the connection";
-        return ;
+        bytes_read = recv(_client_socket, buffer, sizeof(buffer) - 1, 0);
+        if (bytes_read <= 0)
+        {
+            _errorMsg = "Error: receiving request to buffer";
+            return ;
+        }
+        buffer[bytes_read] = '\0';
+        for (int i = 0; i < bytes_read; i++)
+            _buffer.push_back(buffer[i]);
+        
+        std::string currentData(_buffer.begin(), _buffer.end());
+        size_t headerEnd = currentData.find("\r\n\r\n");
+        if (headerEnd != std::string::npos)
+        {
+            contentLen = getContentLengthBuffer(currentData.substr(0, headerEnd));
+            totalBytesRead = _buffer.size();
+            break ;
+        }
+
+        if (contentLen > 0)
+        {
+            size_t remainingBytes = contentLen - totalBytesRead;
+            while(remainingBytes > 0)
+            {
+                bytes_read = recv(_client_socket, buffer, std::min(sizeof(buffer) - 1, remainingBytes), 0);
+                if (bytes_read <= 0)
+                {
+                    _errorMsg = "Error: receiving request to buffer";
+                    return ;
+                }
+                buffer[bytes_read] = '\0';
+                for (int i = 0; i < bytes_read; i++)
+                    _buffer.push_back(buffer[i]);
+                remainingBytes -= bytes_read;
+            }
+        }
     }
-    if (bytes_read < 0)
-    {
-       _errorMsg = "Error: receiving request to buffer";
-    }
-    
-    buffer[bytes_read] = '\0';
-    for (int i = 0; i < bytes_read; i++)
-        _buffer.push_back(buffer[i]);
 }
 
 std::vector<unsigned char>::iterator HttpRequest::findBufferCRLF()
@@ -228,20 +264,9 @@ std::vector<unsigned char>::iterator HttpRequest::findBufferCRLF()
 std::string    HttpRequest::getLineAndPopFromBuffer()
 {
     std::string line;
-    // std::string::size_type pos = 0;
     
     if (_buffer.empty())
         return (std::string());
-    // std::string bufferStr(_buffer.begin(), _buffer.end());
-    // std::string::size_type newlinePos = bufferStr.find('\n');
-    // if (newlinePos != std::string::npos)
-    // {
-    //     line = bufferStr.substr(0, newlinePos);
-    //     if (!line.empty() && line[line.size() - 1] == '\r')
-    //         line = line.substr(0, line.size() - 1);
-    //     pos = newlinePos + 1;
-    //     _buffer.erase(_buffer.begin(), _buffer.begin() + pos);
-    // }
     std::vector<unsigned char>::iterator crlf_pos = findBufferCRLF();
     if (crlf_pos != _buffer.end())
     {
@@ -325,9 +350,14 @@ const std::string &HttpRequest::getErrorMsg() const
 const std::string HttpRequest::getHeader(const std::string &field) const
 {
     std::map<std::string, std::vector<std::string> > ::const_iterator header;
+    
     header = _headers.find(field);
     if (header != _headers.end())
+    {
+        if (header->second[0].substr(0, 18) == "multipart/form-data")
+            return ("multipart/form-data");
         return (header->second[0]);
+    }
     return (std::string());
 }
 
@@ -352,17 +382,6 @@ void HttpRequest::parseRequestBody(const std::string &line)
         if (_status != OK)
             return ;
     }
-    else if (type == "image/jpeg" || type == "image/gif" || type == "image/png" || type == "image/bmp")
-    {
-        processImageUpload(line, type);
-        if (_status != OK)
-            return ;
-    }
-    else
-    {
-        setStatusCode(UNSUPPORTED_MEDIA_TYPE);
-        return ;
-    }
 }
 
 bool HttpRequest::isSupportedMediaPOST()
@@ -373,9 +392,9 @@ bool HttpRequest::isSupportedMediaPOST()
         setStatusCode(UNSUPPORTED_MEDIA_TYPE);
         return (false);
     }
-    if (type == "application/x-www-form-urlencoded" || type == "multipart/form-data")
+    if (type == "application/x-www-form-urlencoded" || type.substr(0, 19) == "multipart/form-data")
         return (true);
-    if (type == "image/jpeg" || type == "image/gif" || type == "image/png" || type == "image/bmp")
+    if (type == "image/jpeg" || type == "image/jpg" || type == "image/gif" || type == "image/png" || type == "image/bmp")
         return (true);
     setStatusCode(UNSUPPORTED_MEDIA_TYPE);
     return (false);
@@ -449,4 +468,16 @@ void HttpRequest::processImageUpload(const std::string &line, const std::string 
 const std::map<std::string, std::string> &HttpRequest::getFormData() const
 {
     return (_formData);
+}
+
+bool HttpRequest::isBufferEmpty()
+{
+    if (_buffer.empty())
+        return (true);
+    return (false);
+}
+
+std::vector<unsigned char> HttpRequest::getBuffer() const
+{
+    return (_buffer);
 }

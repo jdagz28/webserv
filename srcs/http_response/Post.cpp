@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:57:50 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/17 03:04:09 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/19 02:52:54 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,9 @@ void    HttpResponse::processRequestPOST()
         setStatusCode(BAD_REQUEST);
         return ;
     }
-    if (_request.getHeader("content-type") == "application/x-www-form-urlencoded")
+    
+    std::string type = _request.getHeader("content-type");
+    if (type == "application/x-www-form-urlencoded")
     {
         if (isRedirect())
         {
@@ -54,4 +56,32 @@ void    HttpResponse::processRequestPOST()
             return ;
         }
     }
+    std::string boundary;
+    else if (isMultiPartFormData(&boundary))
+    {
+        uploadMultipartForm(boundary);
+    }
+}
+
+void    HttpResponse::parseMultipartForm(const std::string &boundary)
+{
+    if (_request.)
+}
+
+void    HttpResponse::uploadMultipartForm(const std::string &boundary)
+{
+    parseMultipartForm(boundary);
+}
+
+bool    HttpResponse::isMultiPartFormData(std::string *boundary)
+{
+    std::string type = _request.getHeader("content-type");
+    size_t pos = type.find("multipart/form-data");
+    if (pos == std::string::npos)
+        return (false);
+    pos = type.find("boundary=");
+    if (pos == std::string::npos)
+        return (false);
+    *boundary = type.substr(pos + 9);
+    return (true);
 }

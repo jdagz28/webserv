@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:02:29 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/17 03:09:35 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/19 03:04:48 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,6 @@ bool HttpResponse::validateRedirect()
     int redirectStatus = strToInt(_redirectDirective[0]);
     if (redirectStatus < 300 || redirectStatus > 308)
         return (false);
-    // setStatusCode(redirectStatus);
     _redirect = _redirectDirective[1];
     return (true);
 }
@@ -105,7 +104,6 @@ void HttpResponse::getRedirectContent()
         {
             redirectPath += value->first + "=" + value->second + "&";
         }
-        std::cout <<  redirectPath << std::endl;
     }
     else if (isRedirectExternal())
         redirectPath = _redirect; 

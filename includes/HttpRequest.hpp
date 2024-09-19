@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:11:42 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/17 01:08:58 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/19 02:59:36 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,6 +69,9 @@ class HttpRequest
         const std::string getHeader(const std::string &field) const;
         bool isSupportedMediaPOST();
         const std::map<std::string, std::string>& getFormData() const; //!
+
+        bool    isBufferEmpty();
+        std::vector <unsigned char> getBuffer() const;
 
         void    printBuffer() const;
 
