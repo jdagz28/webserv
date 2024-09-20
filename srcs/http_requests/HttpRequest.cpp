@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:18:22 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/19 21:31:22 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/20 11:04:01 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -369,7 +369,6 @@ std::string HttpRequest::parseFieldname(const std::string &line, size_t *pos)
         return (std::string());
     size_t head_pos = *pos;
     size_t end_pos = line.find(':', head_pos); 
-
     if (end_pos == std::string::npos || end_pos <= head_pos) {
         return (std::string()); 
     }
@@ -382,24 +381,17 @@ std::string HttpRequest::parseFieldname(const std::string &line, size_t *pos)
 std::string HttpRequest::parseFieldValue(const std::string &line, size_t *pos)
 {
     if (!pos)
-        return (std::string());
-    size_t len = 0;
-    size_t ws_len = 0;
+        return std::string();
     while (isSpace(line[*pos]))
         (*pos)++;
-    while (line[*pos + len])
-    {
-        while (line[*pos + len] && !isSpace(line[*pos + len]))
-            len++;
-        while (line[*pos + len + ws_len] && isSpace(line[*pos + len + ws_len]))
-            ws_len++;
-        if (line[*pos + len + ws_len] == '\0')
-            break ;
-        len += ws_len;
-    }
-    std::string fieldvalue = line.substr(*pos, len);
+    size_t start = *pos; 
+    size_t len = 0;
+    while (line[*pos + len] && !isSpace(line[*pos + len]) && line[*pos + len] != ';')
+        len++;
+    std::string fieldvalue = line.substr(start, len);
     *pos += len;
-    std::cout << "parseFieldValue: " << fieldvalue << std::endl;
+    while (isSpace(line[*pos]))
+        (*pos)++;
     return (fieldvalue);
 }
 
@@ -427,7 +419,7 @@ void HttpRequest::splitFormLine(const std::string &line, MultiFormData *form)
         return ;   
     }
     //check extracted fieldvalue if there are more info
-    std::stringstream ss(fieldvalue);
+    std::stringstream ss(line);
     std::string token;
     fieldname = toLower(fieldname);
     while (std::getline(ss, token, ';'))
@@ -440,43 +432,46 @@ void HttpRequest::splitFormLine(const std::string &line, MultiFormData *form)
             
             if (value[0] == '"' && value[value.size() - 1] == '"')
                 value = value.substr(1, value.size() - 2);
+            trimWhitespaces(key);
             key = toLower(key);
-            if (key == "name")
-                form->name = value;
-            else if (key == "filename")
-                form->filename = value;
-            else if (key == "type")
-                form->type = value;
-        }
-        else if (equalPos == std::string::npos)
-        {
-            if (fieldname == "content-disposition")
-                form->disposition = token;
-            else if (fieldname == "content-type")
-                form->type = token;
+            if (!key.empty() && !value.empty())
+                form->fields[key] = value;
         }
     }
-    if (fieldname == "content-type")
-        form->type = fieldvalue;
+    if (!fieldname.empty() && !fieldvalue.empty())
+        form->fields[fieldname] = fieldvalue;
 }
 
 
 void HttpRequest::parseUntilBinary(const std::string &boundary)
 {
     const std::string separator = "--" + boundary;
-    
+    bool isBinaryData = false;
+
     MultiFormData form;
-    while (true && !_buffer.empty())
+    while (!_buffer.empty())
     {
         std::string line = getLineAndPopFromBuffer();
         
-        if (line == separator || line.empty())
+        if (line == separator)
+        {
+            isBinaryData = false;
             continue ;
+        }
+        if (line.empty())
+        {
+            isBinaryData = true;
+            break ;
+        }
+        if (isBinaryData)
+        {
+            break ;
+        }
         splitFormLine(line, &form);
-        if (_status != OK || _status != INIT)
+        if (_status != OK)
             return ;
     }
-    _multiFormData[form.name] = form;
+    _multiFormData[form.fields["name"]] = form;
 }
 
 
@@ -491,15 +486,17 @@ void HttpRequest::parseMultipartForm(const std::string &boundary)
     std::cout << "================================" << std::endl;
     std::cout << "Multipart Form Data" << std::endl;
     std::cout << "================================" << std::endl;
-    
+    std::cout << "_multiFormData size: " << _multiFormData.size() << std::endl;
     std::map<std::string, MultiFormData>::iterator it;
     for (it = _multiFormData.begin(); it != _multiFormData.end(); it++)
     {
-        const MultiFormData &form = it->second;
-        std::cout << "name: " << form.name << std::endl;
-        std::cout << "type: " << form.type << std::endl;
-        std::cout << "disposition: " << form.disposition << std::endl;
-        std::cout << "filename: " << form.filename << std::endl;
+        std::cout << "MultiFormData key: " << it->first << std::endl;
+        std::cout << "fields size: " << it->second.fields.size() << std::endl;
+        std::map<std::string, std::string>::iterator field;
+        for (field = it->second.fields.begin(); field != it->second.fields.end(); field++)
+        {
+            std::cout << field->first << ": " << field->second << std::endl;
+        }
     }
 }
 

@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:11:42 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/19 21:07:06 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/19 23:27:13 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,10 +21,7 @@
 
 struct MultiFormData
 {
-    std::string name;
-    std::string type;
-    std::string disposition;
-    std::string filename;
+    std::map<std::string, std::string> fields;
     std::vector<unsigned char> binary;
 };
 
