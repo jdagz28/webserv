@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:18:22 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/20 11:04:01 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/20 15:39:58 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -374,7 +374,6 @@ std::string HttpRequest::parseFieldname(const std::string &line, size_t *pos)
     }
     std::string fieldname = line.substr(head_pos, end_pos - head_pos);
     *pos = end_pos + 1;
-    std::cout << "parseFieldName: " << fieldname << std::endl;
     return (fieldname); 
 }
 
@@ -443,35 +442,49 @@ void HttpRequest::splitFormLine(const std::string &line, MultiFormData *form)
 }
 
 
-void HttpRequest::parseUntilBinary(const std::string &boundary)
+void HttpRequest::parseUntilBinary(const std::string &boundary, MultiFormData *form)
 {
     const std::string separator = "--" + boundary;
-    bool isBinaryData = false;
 
-    MultiFormData form;
-    while (!_buffer.empty())
+    while (true)
     {
         std::string line = getLineAndPopFromBuffer();
         
         if (line == separator)
-        {
-            isBinaryData = false;
             continue ;
-        }
         if (line.empty())
-        {
-            isBinaryData = true;
             break ;
-        }
-        if (isBinaryData)
-        {
-            break ;
-        }
-        splitFormLine(line, &form);
+        splitFormLine(line, form);
         if (_status != OK)
             return ;
     }
-    _multiFormData[form.fields["name"]] = form;
+    std::string type = form->fields["content-type"];
+    if (type != "image/jpeg" && type != "image/jpg" && type != "image/gif" && type != "image/png" && type != "image/bmp")
+    {
+        setStatusCode(UNSUPPORTED_MEDIA_TYPE);
+        return ;
+    }
+}
+
+void HttpRequest::parseBinary(const std::string &boundary, MultiFormData *form)
+{
+    if (_buffer.empty())
+    {
+        setStatusCode(INTERNAL_SERVER_ERROR);
+        return ;
+    }
+
+    while (true)
+    {
+        if (_buffer.empty())
+            return ;
+        std::string line = getLineAndPopFromBuffer();
+        if (line.empty())
+            continue ;
+        if ((line == "--" + boundary + "--") || line == "--" + boundary)
+            break ;
+        form->binary.insert(form->binary.end(), line.begin(), line.end());
+    }
 }
 
 
@@ -482,7 +495,16 @@ void HttpRequest::parseMultipartForm(const std::string &boundary)
         setStatusCode(INTERNAL_SERVER_ERROR);
         return ;
     }
-    parseUntilBinary(boundary);
+    MultiFormData form;
+    
+    parseUntilBinary(boundary, &form);
+    if (_status != OK)
+        return ;
+    parseBinary(boundary, &form);
+    if (_status != OK)
+        return ;
+    _multiFormData[form.fields["name"]] = form;
+    
     std::cout << "================================" << std::endl;
     std::cout << "Multipart Form Data" << std::endl;
     std::cout << "================================" << std::endl;
@@ -496,6 +518,12 @@ void HttpRequest::parseMultipartForm(const std::string &boundary)
         for (field = it->second.fields.begin(); field != it->second.fields.end(); field++)
         {
             std::cout << field->first << ": " << field->second << std::endl;
+        }
+        std::cout << "binary size: " << it->second.binary.size() << std::endl;
+        std::vector<unsigned char>::iterator binary;
+        for (binary = it->second.binary.begin(); binary != it->second.binary.end(); binary++)
+        {
+            std::cout << *binary;
         }
     }
 }
@@ -525,8 +553,6 @@ void HttpRequest::parseRequestBody()
             break;
         if (line.empty())
             continue ;
-        std::cout << "================================" << std::endl;
-        std::cout << "line: " << line << std::endl;
         switch(_parseStep)
         {
             case REQUEST_BODY:
@@ -539,10 +565,7 @@ void HttpRequest::parseRequestBody()
                 }
                 std::string boundary;
                 if (isMultiPartFormData(&boundary))
-                {
-                    std::cout << "boundary: " << boundary << std::endl;
                     parseMultipartForm(boundary);
-                }
                 else
                 {
                     setStatusCode(BAD_REQUEST);
