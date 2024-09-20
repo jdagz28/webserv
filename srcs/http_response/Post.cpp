@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:57:50 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/19 09:19:12 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/20 15:51:16 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,13 +37,9 @@ void    HttpResponse::processRequestPOST()
     if (!checkLocConfigAndRequest())
         return ;
     _request.parseRequestBody();
-    if (_request.getStatusCode() != OK || _request.getStatusCode() != INIT)
+    if (_request.getStatusCode() >= 400)
     {
         setStatusCode(_request.getStatusCode());
-        return ;
-    }
-    {
-        setStatusCode(UNSUPPORTED_MEDIA_TYPE);
         return ;
     }
     if (_request.getHeaders().find("content-length") == _request.getHeaders().end())
@@ -51,7 +47,6 @@ void    HttpResponse::processRequestPOST()
         setStatusCode(BAD_REQUEST);
         return ;
     }
-    
     std::string type = _request.getHeader("content-type");
     if (type == "application/x-www-form-urlencoded")
     {

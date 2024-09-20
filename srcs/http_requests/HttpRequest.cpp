@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:18:22 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/20 15:39:58 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/20 16:03:52 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -497,13 +497,16 @@ void HttpRequest::parseMultipartForm(const std::string &boundary)
     }
     MultiFormData form;
     
-    parseUntilBinary(boundary, &form);
-    if (_status != OK)
-        return ;
-    parseBinary(boundary, &form);
-    if (_status != OK)
-        return ;
-    _multiFormData[form.fields["name"]] = form;
+    while (!_buffer.empty())
+    {
+        parseUntilBinary(boundary, &form);
+        if (_status != OK)
+            return ;
+        parseBinary(boundary, &form);
+        if (_status != OK)
+            return ;
+        _multiFormData[form.fields["name"]] = form;
+    }
     
     std::cout << "================================" << std::endl;
     std::cout << "Multipart Form Data" << std::endl;
@@ -530,10 +533,6 @@ void HttpRequest::parseMultipartForm(const std::string &boundary)
 
 void HttpRequest::parseRequestBody()
 {
-    std::cout << "================================" << std::endl;
-    std::cout << "parsing request body" << std::endl;
-    printBuffer();
-    std::cout << "================================" << std::endl;
     std::string contentLen = getHeader("content-length");
     if (contentLen.empty())
     {
@@ -548,16 +547,16 @@ void HttpRequest::parseRequestBody()
     }
     while (true)
     {
-        std::string line = getLineAndPopFromBuffer();
         if (_buffer.empty())
             break;
+        std::string line = getLineAndPopFromBuffer();
         if (line.empty())
             continue ;
         switch(_parseStep)
         {
             case REQUEST_BODY:
             {
-                if (getHeader("content-type") == "application/x-www-form-urlencoded")
+                if (type == "application/x-www-form-urlencoded")
                 {
                     parseFormData(line);
                     if (_status != OK)
@@ -566,11 +565,8 @@ void HttpRequest::parseRequestBody()
                 std::string boundary;
                 if (isMultiPartFormData(&boundary))
                     parseMultipartForm(boundary);
-                else
-                {
-                    setStatusCode(BAD_REQUEST);
-                    break ;
-                }
+                _parseStep = REQUEST_DONE;
+
             }
             default:
                 break ;

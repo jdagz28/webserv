@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 22:28:27 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/19 12:34:43 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/20 16:03:28 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,8 @@ enum HtmlRequestParseStep
     REQUEST_INIT,
     REQUEST_LINE,
     REQUEST_HEADER,
-    REQUEST_BODY
+    REQUEST_BODY,
+    REQUEST_DONE
 };
 
 enum Methods

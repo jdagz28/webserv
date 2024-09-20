@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:11:42 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/20 15:36:32 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/20 15:53:37 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,7 @@ class HttpRequest
         void    requestToBuffer(); 
         void    parseRequestLine(const std::string &line);
         void    parseRequestHeaders(const std::string &line);
-        void parseFormData(const std::string &line);
+        void    parseFormData(const std::string &line);
 
         std::string     getLineAndPopFromBuffer();
         std::string     extract_token(const std::string &line, size_t &pos, char del);

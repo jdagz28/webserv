@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:02:29 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/19 03:04:48 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/20 16:04:23 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,9 +101,7 @@ void HttpResponse::getRedirectContent()
         redirectPath += '?';
         std::map<std::string, std::string>::const_iterator value;
         for (value = _request.getFormData().begin(); value != _request.getFormData().end(); value++)
-        {
             redirectPath += value->first + "=" + value->second + "&";
-        }
     }
     else if (isRedirectExternal())
         redirectPath = _redirect; 
