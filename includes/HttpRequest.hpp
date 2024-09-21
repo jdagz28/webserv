@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:11:42 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/20 15:53:37 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/21 23:00:35 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,8 +79,12 @@ class HttpRequest
         const std::string &getErrorMsg() const;
         const std::string getHeader(const std::string &field) const;
         bool isSupportedMediaPOST();
+        bool isSupportedMediaPOST(const std::string &type);
         const std::map<std::string, std::string> &getFormData() const; //!
         bool    isMultiPartFormData(std::string *boundary);
+        bool    isMultiPartFormData();
+        bool    isForUpload();
+        const std::map<std::string, MultiFormData> &getMultiFormData() const;
 
         void    parseRequestBody();
 

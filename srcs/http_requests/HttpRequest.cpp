@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:18:22 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/20 16:03:52 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/21 23:14:05 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -508,27 +508,27 @@ void HttpRequest::parseMultipartForm(const std::string &boundary)
         _multiFormData[form.fields["name"]] = form;
     }
     
-    std::cout << "================================" << std::endl;
-    std::cout << "Multipart Form Data" << std::endl;
-    std::cout << "================================" << std::endl;
-    std::cout << "_multiFormData size: " << _multiFormData.size() << std::endl;
-    std::map<std::string, MultiFormData>::iterator it;
-    for (it = _multiFormData.begin(); it != _multiFormData.end(); it++)
-    {
-        std::cout << "MultiFormData key: " << it->first << std::endl;
-        std::cout << "fields size: " << it->second.fields.size() << std::endl;
-        std::map<std::string, std::string>::iterator field;
-        for (field = it->second.fields.begin(); field != it->second.fields.end(); field++)
-        {
-            std::cout << field->first << ": " << field->second << std::endl;
-        }
-        std::cout << "binary size: " << it->second.binary.size() << std::endl;
-        std::vector<unsigned char>::iterator binary;
-        for (binary = it->second.binary.begin(); binary != it->second.binary.end(); binary++)
-        {
-            std::cout << *binary;
-        }
-    }
+    // std::cout << "================================" << std::endl;
+    // std::cout << "Multipart Form Data" << std::endl;
+    // std::cout << "================================" << std::endl;
+    // std::cout << "_multiFormData size: " << _multiFormData.size() << std::endl;
+    // std::map<std::string, MultiFormData>::iterator it;
+    // for (it = _multiFormData.begin(); it != _multiFormData.end(); it++)
+    // {
+    //     std::cout << "MultiFormData key: " << it->first << std::endl;
+    //     std::cout << "fields size: " << it->second.fields.size() << std::endl;
+    //     std::map<std::string, std::string>::iterator field;
+    //     for (field = it->second.fields.begin(); field != it->second.fields.end(); field++)
+    //     {
+    //         std::cout << field->first << ": " << field->second << std::endl;
+    //     }
+    //     std::cout << "binary size: " << it->second.binary.size() << std::endl;
+    //     std::vector<unsigned char>::iterator binary;
+    //     for (binary = it->second.binary.begin(); binary != it->second.binary.end(); binary++)
+    //     {
+    //         std::cout << *binary;
+    //     }
+    // }
 }
 
 void HttpRequest::parseRequestBody()
@@ -590,6 +590,17 @@ bool HttpRequest::isSupportedMediaPOST()
     return (false);
 }
 
+bool HttpRequest::isSupportedMediaPOST(const std::string &type)
+{
+    if (type.empty())
+        return (false);
+    if (type == "image/jpeg" || type == "image/jpg" || type == "image/gif" || type == "image/png" || type == "image/bmp")
+        return (true);
+    return (false);
+}
+
+
+
 void HttpRequest::parseFormData(const std::string &line)
 {
     std::stringstream ss(line);
@@ -621,4 +632,31 @@ bool    HttpRequest::isMultiPartFormData(std::string *boundary)
         return (false);
     *boundary = type.substr(pos + 9);
     return (true);
+}
+
+bool    HttpRequest::isMultiPartFormData()
+{
+    std::string type = getHeader("content-type");
+    size_t pos = type.find("multipart/form-data");
+    if (pos == std::string::npos)
+        return (false);
+    return (true);
+}
+
+bool    HttpRequest::isForUpload()
+{
+    if (_multiFormData.empty())
+        return (false);
+    std::map<std::string, MultiFormData>::iterator form;
+    for (form = _multiFormData.begin(); form != _multiFormData.end(); form++)
+    {
+        if (form->second.fields["content-type"] == "image/jpeg" || form->second.fields["content-type"] == "image/jpg" || form->second.fields["content-type"] == "image/png" || form->second.fields["content-type"] == "image/gif" || form->second.fields["content-type"] == "image/bmp")
+            return (true);
+    }
+    return (false);
+}
+
+const std::map<std::string, MultiFormData> &HttpRequest::getMultiFormData() const
+{
+    return (_multiFormData);
 }

@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:13:31 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/19 08:46:11 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/21 22:53:09 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,8 +87,8 @@ class HttpResponse
 
         
         void    processRequestPOST();
-        bool    isMultiPartFormData(std::string *boundary);
-        void    uploadMultipartForm(const std::string &boundary);
+        std::string generateFilename(const std::string &extension);
+        void processImageUpload();
     public:
         HttpResponse(HttpRequest &request,
                         Config &config,

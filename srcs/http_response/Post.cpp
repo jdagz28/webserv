@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:57:50 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/20 15:51:16 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/21 23:12:20 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,11 @@
 #include "HttpRequestLine.hpp"
 #include "LocationConfig.hpp"
 #include <string>
+#include <ctime>
+#include <cstdlib>
+#include <fstream>
+#include <sys/stat.h>
+
 
 /**
  *  STATIC
@@ -56,15 +61,17 @@ void    HttpResponse::processRequestPOST()
             return ;
         }
     }
-    std::string boundary;
-    // else if (isMultiPartFormData(&boundary))
-    // {
-    //     uploadMultipartForm(boundary);
-    // }
+    else if (_request.isMultiPartFormData())
+    {
+        if (_request.isForUpload())
+        {
+            processImageUpload();
+        }
+    }
 }
 
-/*
-std::string HttpRequest::generateFilename(const std::string &type)
+
+std::string HttpResponse::generateFilename(const std::string &extension)
 {
     std::time_t now = std::time(NULL);
     std::tm *tm = std::localtime(&now);
@@ -73,23 +80,17 @@ std::string HttpRequest::generateFilename(const std::string &type)
     std::strftime(buffer, sizeof(buffer), "%Y%m%d_%H%M%S", tm);
     std::string timestamp(buffer);
 
-    std::string extension = type.substr(6);
     std::string filename = "image_" + timestamp + "." + extension;
 
     return (filename);
 }
 
-void HttpRequest::processImageUpload(const std::string &line, const std::string &type)
+
+void HttpResponse::processImageUpload()
 {
     std::srand(static_cast<unsigned>(std::time(0)));
-    std::string filename = generateFilename(type);
-    if (filename.empty())
-    {
-        setStatusCode(INTERNAL_SERVER_ERROR);
-        return ;
-    }
     
-    std::string directory = "upload/";
+    std::string directory = "./website/uploads/";
     struct stat st;
     if (stat(directory.c_str(), &st) == -1 || !S_ISDIR(st.st_mode))
     {
@@ -97,16 +98,39 @@ void HttpRequest::processImageUpload(const std::string &line, const std::string 
         return ;
     }
 
-    std::string filepath = directory + filename;
-    std::ofstream filestream(filepath.c_str(), std::ios::binary);
-    if (!filestream)
+    std::cout << "test" << std::endl;
+    std::map<std::string, MultiFormData> formData = _request.getMultiFormData();
+    std::map<std::string, MultiFormData>::iterator it;
+    for (it = formData.begin(); it != formData.end(); it++)
     {
-        setStatusCode(INTERNAL_SERVER_ERROR);
-        return ;
+        std::string type = it->second.fields["content-type"];
+        if (type.empty())
+            break ;
+        if (_request.isSupportedMediaPOST(type))
+        {
+            size_t slashPos = type.find("/");
+            if (slashPos == std::string::npos)
+                return ;
+            std::string extension = type.substr(slashPos + 1);
+            std::string filename = generateFilename(extension);
+            if (filename.empty())
+            {
+                setStatusCode(INTERNAL_SERVER_ERROR);
+                return ;
+            }
+            
+            std::string filepath = directory + filename;
+            std::ofstream filestream(filepath.c_str(), std::ios::binary);
+            if (!filestream)
+            {
+                setStatusCode(INTERNAL_SERVER_ERROR);
+                return ;
+            }
+            std::cout << "UPLOADING." << std::endl;
+            filestream.write(reinterpret_cast<const char *>(&it->second.binary[0]), it->second.binary.size());
+            filestream.close();
+            setStatusCode(CREATED);
+            return ;
+        }
     }
-    
-    filestream.write(line.c_str(), line.size());
-    filestream.close();
-    setStatusCode(CREATED);
 }
-*/
