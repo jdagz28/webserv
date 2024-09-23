@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:18:22 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/23 20:43:22 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/23 23:38:32 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ HttpRequest::HttpRequest(int client_socket)
     : _request(),  _headersN(0), _status(OK), _errorMsg(""), _client_socket(client_socket), _parseStep(REQUEST_INIT)
 {
     requestToBuffer();
-    printBuffer();
+    // printBuffer();
     if (_errorMsg.empty())
         parseHttpRequest();
 }
@@ -187,13 +187,15 @@ void HttpRequest::parseRequestHeaders(const std::string &line)
     _headers[fieldName] = values;
 }
 
+
 size_t  getContentLengthBuffer(const std::string &header)
 {
-    size_t  pos = header.find("content-length:");
+    std::string lowerHeader = toLower(header);
+    size_t  pos = lowerHeader.find("content-length:");
     if (pos != std::string::npos) {
         pos += 16;
-        std::string::size_type endPos = header.find("\r\n", pos);
-        return (strToInt(header.substr(pos, endPos - pos)));
+        std::string::size_type endPos = lowerHeader.find("\r\n", pos);
+        return (strToInt(lowerHeader.substr(pos, endPos - pos)));
     }
     return (0);
 }
@@ -201,51 +203,42 @@ size_t  getContentLengthBuffer(const std::string &header)
 
 void    HttpRequest::requestToBuffer()
 {
-    char    buffer[1024];
-    int     bytes_read;
-    size_t  totalBytesRead = 0;
-    size_t  contentLen = 0;
-
-    _buffer.clear();
-    while (true) 
+    std::vector<unsigned char> buffer(1024);
+    
+    ssize_t bytesRead = recv(_client_socket, &buffer[0], buffer.size(), 0);
+    if (bytesRead == -1)
     {
-        bytes_read = recv(_client_socket, buffer, sizeof(buffer) - 1, 0);
-        if (bytes_read <= 0)
+        _errorMsg = "Error: recv failed";
+        return ;
+    }
+    if (0 < bytesRead)
+    {
+        _buffer.insert(_buffer.end(), buffer.begin(), buffer.begin() + bytesRead);
+    }
+    ssize_t contentLength = getContentLengthBuffer(std::string(buffer.begin(), buffer.end()));
+    std::cout << contentLength << std::endl;
+    if (contentLength == 0)
+        return ;
+    contentLength -= bytesRead;
+    while (contentLength)
+    {
+        std::cout << contentLength << std::endl;
+        bytesRead = recv(_client_socket, &buffer[0], buffer.size(), 0);
+        if (bytesRead == -1)
         {
-            _errorMsg = "Error: receiving request to buffer";
+            _errorMsg = "Error: recv failed";
             return ;
         }
-        buffer[bytes_read] = '\0';
-        for (int i = 0; i < bytes_read; i++)
-            _buffer.push_back(buffer[i]);
-        
-        std::string currentData(_buffer.begin(), _buffer.end());
-        size_t headerEnd = currentData.find("\r\n\r\n");
-        if (headerEnd != std::string::npos)
+        if (0 < bytesRead)
         {
-            contentLen = getContentLengthBuffer(currentData.substr(0, headerEnd));
-            totalBytesRead = _buffer.size();
-            break ;
+            _buffer.insert(_buffer.end(), buffer.begin(), buffer.begin() + bytesRead);
         }
-
-        if (contentLen > 0)
-        {
-            size_t remainingBytes = contentLen - totalBytesRead;
-            while(remainingBytes > 0)
-            {
-                bytes_read = recv(_client_socket, buffer, std::min(sizeof(buffer) - 1, remainingBytes), 0);
-                if (bytes_read <= 0)
-                {
-                    _errorMsg = "Error: receiving request to buffer";
-                    return ;
-                }
-                buffer[bytes_read] = '\0';
-                for (int i = 0; i < bytes_read; i++)
-                    _buffer.push_back(buffer[i]);
-                remainingBytes -= bytes_read;
-            }
-        }
-    }
+        if (bytesRead > contentLength)
+            contentLength -= contentLength;
+        else
+            contentLength -= bytesRead;
+    }    
+    // std::cout << "Bytes read: " << bytesRead << std::endl;
 }
 
 std::vector<unsigned char>::iterator HttpRequest::findBufferCRLF()
@@ -589,7 +582,6 @@ void HttpRequest::parseRequestBody()
                 std::string boundary;
                 if (isMultiPartFormData(&boundary)) 
                 {
-                    std::cout << "is multipart form data" << std::endl;
                     parseMultipartForm(boundary);
                 }
                 _parseStep = REQUEST_DONE;
