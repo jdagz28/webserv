@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:57:50 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/21 23:12:20 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/23 11:10:14 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <sys/stat.h>
+#include <iterator>
 
 
 /**
@@ -98,7 +99,6 @@ void HttpResponse::processImageUpload()
         return ;
     }
 
-    std::cout << "test" << std::endl;
     std::map<std::string, MultiFormData> formData = _request.getMultiFormData();
     std::map<std::string, MultiFormData>::iterator it;
     for (it = formData.begin(); it != formData.end(); it++)
@@ -121,16 +121,32 @@ void HttpResponse::processImageUpload()
             
             std::string filepath = directory + filename;
             std::ofstream filestream(filepath.c_str(), std::ios::binary);
-            if (!filestream)
+            if (!filestream.is_open())
             {
                 setStatusCode(INTERNAL_SERVER_ERROR);
                 return ;
             }
             std::cout << "UPLOADING." << std::endl;
-            filestream.write(reinterpret_cast<const char *>(&it->second.binary[0]), it->second.binary.size());
+            std::cout << "Binary data size: " << it->second.binary.size() << std::endl;
+            if (it->second.binary.empty())
+            {
+                std::cout << "Binary empty" << std::endl;
+                setStatusCode(BAD_REQUEST);
+                return ;
+            }
+            filestream.write(reinterpret_cast<const char*>(&it->second.binary[0]), it->second.binary.size());
+            // std::copy(it->second.binary.begin(), it->second.binary.end(), std::ostream_iterator<unsigned char>(filestream));
+            if (filestream.fail())
+            {
+                std::cout << "FAIL" << _status << std::endl;
+                setStatusCode(INTERNAL_SERVER_ERROR);
+                return ;
+            }
             filestream.close();
             setStatusCode(CREATED);
-            return ;
+            struct stat fileInfo;
+            if (stat(filepath.c_str(), &fileInfo) == 0)
+                std::cout << "File size: " << fileInfo.st_size << std::endl;
         }
     }
 }
