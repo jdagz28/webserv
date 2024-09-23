@@ -6,9 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../resources/css/styles.css">
     <link rel="stylesheet" href="../resources/css/upload.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="../resources/js/upload.js"></script>
-    <title>Search</title>
+    <title>Image Upload</title>
 </head>
 
 <body>
@@ -23,10 +21,9 @@
     </nav>
 
     <div class="container">
-        <form method="POST" class="form">
-          <div class="file-upload-wrapper" data-text="Select your file!">
-            <input name="file-upload-field" type="file" class="file-upload-field" value="">
-          </div>
+        <form method="POST" class="form" action="/uploads" enctype="multipart/form-data">
+            <input class="file-upload-wrapper" name="file_name" type="file">
+            <input  class="file-upload-button" name="submit_name" type="submit" value="upload">
         </form>
     </div>
     

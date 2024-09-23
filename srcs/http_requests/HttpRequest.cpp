@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:18:22 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/23 11:36:57 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/23 20:43:22 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -556,6 +556,7 @@ void HttpRequest::parseMultipartForm(const std::string &boundary)
 
 void HttpRequest::parseRequestBody()
 {
+    printBuffer();
     std::string contentLen = getHeader("content-length");
     if (contentLen.empty())
     {
