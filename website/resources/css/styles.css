@@ -49,3 +49,26 @@ body {
     height: 100vh;
     object-fit: contain;
 }
+
+.directory {
+    display: flex;
+    flex-direction: column; 
+    justify-content: center;
+    align-items: center; 
+    text-align: center;
+    margin-top: 1rem; 
+}
+
+.directory h1 {
+    margin-bottom: 1rem; 
+}
+
+.directory ul {
+    list-style-type: none; 
+    font-size: 18px;
+    padding: 0; 
+}
+
+.directory li {
+    margin: 0.5rem 0; 
+}

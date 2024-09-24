@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:05:38 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/13 09:40:17 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/24 02:24:08 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -194,7 +194,26 @@ void HttpResponse::generateDirList(const std::string &path)
         return ;
     }
     
-    html << "<html><head><title>Index of " << path << "</title></head><body>";
+    html << "<!DOCTYPE html>";
+    html << "<html lang=\"en\">";
+    
+    html << "<head>";
+    html << "<meta charset=\"UTF-8\">";
+    html << "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">";
+    html << "<link rel=\"stylesheet\" href=\"/resources/css/styles.css\">";
+    html << "<title>Index of " << path << "</title>";
+    html << "</head><body>";
+
+    html << "<nav class=\"navbar\">";
+    html << "<ul class=\"nav-list\">";
+    html << "<li class=\"nav-item\"><a href=\"/\">Home</a></li>";
+    html << "<li class=\"nav-item\"><a href=\"/html/features.html\">Features</a></li>";
+    html << "<li class=\"nav-item\"><a href=\"/directory\">Directory</a></li>";
+    html << "<li class=\"nav-item\"><a href=\"/html/search.html\">Search</a></li>";
+    html << "<li class=\"nav-item\"><a href=\"/\">About Us</a></li>";
+    html << "</ul>";
+    html << "</nav><div class=\"directory\">";
+    
     html << "<h1>Index of " << path << "</h1>";
     html << "<ul>";
 
@@ -205,6 +224,8 @@ void HttpResponse::generateDirList(const std::string &path)
         }
         html << "<li><a href=\"" << entryName << "\">" << entryName << "</a></li>";
     }
+    html << "</ul>";
+    html << "</div></body></html>";
     closedir(dir);
     _body = html.str();
     setStatusCode(OK);
