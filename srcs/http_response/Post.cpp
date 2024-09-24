@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:57:50 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/23 11:10:14 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/24 10:48:14 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,19 +72,19 @@ void    HttpResponse::processRequestPOST()
 }
 
 
-std::string HttpResponse::generateFilename(const std::string &extension)
-{
-    std::time_t now = std::time(NULL);
-    std::tm *tm = std::localtime(&now);
+// std::string HttpResponse::generateFilename(const std::string &extension)
+// {
+//     std::time_t now = std::time(NULL);
+//     std::tm *tm = std::localtime(&now);
 
-    char buffer[80];
-    std::strftime(buffer, sizeof(buffer), "%Y%m%d_%H%M%S", tm);
-    std::string timestamp(buffer);
+//     char buffer[80];
+//     std::strftime(buffer, sizeof(buffer), "%Y%m%d_%H%M%S", tm);
+//     std::string timestamp(buffer);
 
-    std::string filename = "image_" + timestamp + "." + extension;
+//     std::string filename = "image_" + timestamp + "." + extension;
 
-    return (filename);
-}
+//     return (filename);
+// }
 
 
 void HttpResponse::processImageUpload()
@@ -112,7 +112,8 @@ void HttpResponse::processImageUpload()
             if (slashPos == std::string::npos)
                 return ;
             std::string extension = type.substr(slashPos + 1);
-            std::string filename = generateFilename(extension);
+            // std::string filename = generateFilename(extension);
+            std::string filename = it->second.fields["filename"];
             if (filename.empty())
             {
                 setStatusCode(INTERNAL_SERVER_ERROR);
@@ -126,11 +127,11 @@ void HttpResponse::processImageUpload()
                 setStatusCode(INTERNAL_SERVER_ERROR);
                 return ;
             }
-            std::cout << "UPLOADING." << std::endl;
-            std::cout << "Binary data size: " << it->second.binary.size() << std::endl;
+            // std::cout << "UPLOADING." << std::endl;
+            // std::cout << "Binary data size: " << it->second.binary.size() << std::endl;
             if (it->second.binary.empty())
             {
-                std::cout << "Binary empty" << std::endl;
+                // std::cout << "Binary empty" << std::endl;
                 setStatusCode(BAD_REQUEST);
                 return ;
             }

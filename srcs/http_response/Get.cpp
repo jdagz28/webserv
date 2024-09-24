@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:05:38 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/24 05:01:34 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/24 12:23:05 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,11 @@
 #include "HttpRequestLine.hpp"
 #include "LocationConfig.hpp"
 #include <string>
+#include <sys/stat.h>
 #include <dirent.h>
+#include <ctime>
 #include <sstream>
+#include <set>
 
 /* 
     * STATIC PAGES
@@ -181,18 +184,81 @@ bool HttpResponse::isAutoIndex()
     return (true);
 }
 
+std::string getTimeStamp(time_t time)
+{
+    char formatedTime[30];
+    struct tm *time_info;
+
+    time_info = std::localtime(&time); 
+    
+    if (time_info->tm_isdst > 0)
+    {
+        std::strftime(formatedTime, 30, "%Y-%m-%d %H:%M CEST", time_info);
+        time_info->tm_hour += 2;
+    }
+    else
+    {
+        std::strftime(formatedTime, 30, "%Y-%m-%d %H:%M CET", time_info);
+        time_info->tm_hour += 1;
+    }
+    
+    return (std::string(formatedTime));
+}
+
 void HttpResponse::generateDirList(const std::string &path)
 {
+    std::set<FileData> directories;
+    std::set<FileData> files;
     DIR *dir;
-    struct dirent *entry;
-    std::stringstream html;
-
+    struct dirent *dirEntry_ptr;
+    struct stat statbuf;
+    struct FileData fileInfo;
+    
+    //OpenDir
     dir = opendir(path.c_str());
     if (dir == NULL)
     {
-        setStatusCode(FORBIDDEN);
+        setStatusCode(INTERNAL_SERVER_ERROR);
         return ;
     }
+    
+    //ReadDir
+    while (true)
+    {
+        dirEntry_ptr = readdir(dir);
+        if (dirEntry_ptr == NULL)
+        {
+            setStatusCode(INTERNAL_SERVER_ERROR);
+            break ;
+        }
+        std::string filename = dirEntry_ptr->d_name;
+        if (filename == "." || filename == "..")
+            continue ;
+        std::string filepath = path + "/" + filename;
+        
+        int statRes = stat(filepath.c_str(), &statbuf);
+        if (statRes == -1)
+        {
+            setStatusCode(INTERNAL_SERVER_ERROR);
+            break ;
+        }
+        fileInfo.filename = filename;
+        fileInfo.size = statbuf.st_size;
+        fileInfo.lastModified = getTimeStamp(statbuf.st_mtime);
+        if (S_ISDIR(statbuf.st_mode))
+        {
+            fileInfo.contentType = "directory";
+            directories.insert(fileInfo);
+        }
+        else
+        {
+            fileInfo.contentType = getExtension(filename);
+            files.insert(fileInfo);
+        } 
+    }
+    closedir(dir);
+
+    std::stringstream html;
     
     html << "<!DOCTYPE html>";
     html << "<html lang=\"en\">";
@@ -201,6 +267,7 @@ void HttpResponse::generateDirList(const std::string &path)
     html << "<meta charset=\"UTF-8\">";
     html << "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">";
     html << "<link rel=\"stylesheet\" href=\"/resources/css/styles.css\">";
+    html << "<link rel=\"stylesheet\" href=\"/resources/css/directory.css\">";
     html << "<title>Index of " << path << "</title>";
     html << "</head><body>";
 
@@ -215,18 +282,38 @@ void HttpResponse::generateDirList(const std::string &path)
     html << "</nav><div class=\"directory\">";
     
     html << "<h1>Index of " << path << "</h1>";
-    html << "<ul>";
 
-    while ((entry = readdir(dir)) != NULL) {
-        std::string entryName = entry->d_name;
-        if (entryName == "." || entryName == "..") {
-            continue;
-        }
-        html << "<li><a href=\"" << entryName << "\">" << entryName << "</a></li>";
+    // Table with headers
+    html << "<table class=\"table\">";  // Using the "table" class from the stylesheet
+    html << "<thead>";
+    html << "<tr><th>Name</th><th>Size</th><th>Last Modified</th></tr>";
+    html << "</thead><tbody>";
+
+    // List directories (first)
+    std::set<FileData>::iterator itDir;
+    for (itDir = directories.begin(); itDir != directories.end(); ++itDir)
+    {
+        html << "<tr>";
+        html << "<td><a href=\"" + _request.getRequestLine().getUri() + "/" + itDir->filename + "/\">" + itDir->filename + "</a></td>";
+        html << "<td>--</td>";  
+        html << "<td>" + itDir->lastModified + "</td>";
+        html << "</tr>";
     }
-    html << "</ul>";
+
+    // List files
+    std::set<FileData>::iterator itFiles;
+    for (itFiles = files.begin(); itFiles != files.end(); ++itFiles)
+    {
+        html << "<tr>";
+        html << "<td><a href=\"" + _request.getRequestLine().getUri() + "/" + itFiles->filename + "\">" + itFiles->filename + "</a></td>";
+        html << "<td>" + toString(itFiles->size) + " bytes</td>"; 
+        html << "<td>" + itFiles->lastModified + "</td>";
+        html << "</tr>";
+    }
+
+    html << "</tbody></table>";
     html << "</div></body></html>";
-    closedir(dir);
+    
     _body = html.str();
     setStatusCode(OK);
 }

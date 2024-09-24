@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:13:31 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/21 22:53:09 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/24 12:13:48 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,19 @@ class HttpRequest;
 class ServerConfig;
 class HttpRequestLine;
 class LocationConfig;
+
+struct FileData
+{
+    std::string     filename;
+    std::string     contentType;
+    off_t           size;
+    std::string     lastModified;
+
+    bool operator<(const FileData& other) const
+    {
+        return (filename < other.filename);
+    }
+};
 
 
 class HttpResponse
@@ -87,7 +100,7 @@ class HttpResponse
 
         
         void    processRequestPOST();
-        std::string generateFilename(const std::string &extension);
+        // std::string generateFilename(const std::string &extension);
         void processImageUpload();
     public:
         HttpResponse(HttpRequest &request,
