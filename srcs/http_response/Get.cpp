@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:05:38 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/25 11:42:34 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/25 12:01:45 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,19 +22,6 @@
 #include <ctime>
 #include <sstream>
 #include <set>
-
-/* 
-    * STATIC PAGES
-    * RESOURCE/FILE (**)
-        * error
-        * redirect (**)
-        * response (**)
-    * DIRECTORY
-        * error
-        * autoindex
-        * response
-    ! error pages - wget status line ok    
-*/
 
 void HttpResponse::processRequestGET()
 {
