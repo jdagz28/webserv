@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:05:38 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/24 12:23:05 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/25 11:42:34 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,7 @@ void HttpResponse::processRequestGET()
         setStatusCode(NOT_FOUND);
         return ;
     }
+
     if (isDirectory(path))
     {
         if (checkDirIndex())
@@ -80,6 +81,20 @@ void HttpResponse::processRequestGET()
             getResource(indexPath);
             return ;
         }
+        
+        if (path.find("directory") != std::string::npos)
+        {
+            std::string uri = _request.getRequestLine().getUri();
+            size_t pos = uri.find("directory/");
+            std::string checkPath = path + uri.substr(pos + 10);
+            while (checkPath.find("//") != std::string::npos)
+                checkPath.erase(checkPath.find("//"), 1);
+            if (fileExists(checkPath))
+            {
+                getResourceContent(checkPath);
+            }
+        }
+        
         if (isAutoIndex())
         {
             generateDirList(path);
@@ -205,7 +220,7 @@ std::string getTimeStamp(time_t time)
     return (std::string(formatedTime));
 }
 
-void HttpResponse::generateDirList(const std::string &path)
+void HttpResponse::generateDirList(std::string path)
 {
     std::set<FileData> directories;
     std::set<FileData> files;
@@ -215,13 +230,23 @@ void HttpResponse::generateDirList(const std::string &path)
     struct FileData fileInfo;
     
     //OpenDir
+    std::string uri = _request.getRequestLine().getUri();
+    while (uri.find("//") != std::string::npos)
+        uri.erase(uri.find("//"), 1);
+    if (path.find(uri) == std::string::npos)
+    {
+        size_t addPath = uri.find("directory/");
+        path = path + uri.substr(addPath + 10);
+        if (path[path.size() - 1] == '/')
+            path = path.substr(0, path.size() - 1);
+    }
     dir = opendir(path.c_str());
     if (dir == NULL)
     {
         setStatusCode(INTERNAL_SERVER_ERROR);
         return ;
     }
-    
+
     //ReadDir
     while (true)
     {
@@ -257,7 +282,8 @@ void HttpResponse::generateDirList(const std::string &path)
         } 
     }
     closedir(dir);
-
+    
+    _headers["Location"] = _request.getHost() + "/" + path;
     std::stringstream html;
     
     html << "<!DOCTYPE html>";
@@ -283,13 +309,11 @@ void HttpResponse::generateDirList(const std::string &path)
     
     html << "<h1>Index of " << path << "</h1>";
 
-    // Table with headers
-    html << "<table class=\"table\">";  // Using the "table" class from the stylesheet
+    html << "<table class=\"table\">";
     html << "<thead>";
     html << "<tr><th>Name</th><th>Size</th><th>Last Modified</th></tr>";
     html << "</thead><tbody>";
 
-    // List directories (first)
     std::set<FileData>::iterator itDir;
     for (itDir = directories.begin(); itDir != directories.end(); ++itDir)
     {
@@ -300,7 +324,6 @@ void HttpResponse::generateDirList(const std::string &path)
         html << "</tr>";
     }
 
-    // List files
     std::set<FileData>::iterator itFiles;
     for (itFiles = files.begin(); itFiles != files.end(); ++itFiles)
     {

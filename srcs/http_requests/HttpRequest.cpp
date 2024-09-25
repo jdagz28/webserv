@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:18:22 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/23 23:38:32 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/25 11:47:31 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -215,14 +215,12 @@ void    HttpRequest::requestToBuffer()
     {
         _buffer.insert(_buffer.end(), buffer.begin(), buffer.begin() + bytesRead);
     }
-    ssize_t contentLength = getContentLengthBuffer(std::string(buffer.begin(), buffer.end()));
-    std::cout << contentLength << std::endl;
+    ssize_t contentLength = getContentLengthBuffer(std::string(buffer.begin(), buffer.end()));;
     if (contentLength == 0)
         return ;
     contentLength -= bytesRead;
     while (contentLength)
     {
-        std::cout << contentLength << std::endl;
         bytesRead = recv(_client_socket, &buffer[0], buffer.size(), 0);
         if (bytesRead == -1)
         {
@@ -238,7 +236,6 @@ void    HttpRequest::requestToBuffer()
         else
             contentLength -= bytesRead;
     }    
-    // std::cout << "Bytes read: " << bytesRead << std::endl;
 }
 
 std::vector<unsigned char>::iterator HttpRequest::findBufferCRLF()
@@ -477,17 +474,14 @@ void HttpRequest::parseBinary(const std::string &boundary, MultiFormData *form)
         
         if (boundaryIt == _buffer.end())
         {
-            // No boundary found, insert all remaining binary data
             form->binary.insert(form->binary.end(), _buffer.begin(), _buffer.end());
             _buffer.clear();
             break;
         }
 
-        // Insert binary data before the boundary
         form->binary.insert(form->binary.end(), _buffer.begin(), boundaryIt);
         _buffer.erase(_buffer.begin(), boundaryIt + boundaryStr.size());
 
-        // Check if it's the closing boundary
         if (std::string(_buffer.begin(), _buffer.begin() + 2) == "--")
         {
             _buffer.erase(_buffer.begin(), _buffer.begin() + 2);
@@ -504,7 +498,6 @@ std::string byteToHex(unsigned char byte) {
 
 void HttpRequest::parseMultipartForm(const std::string &boundary)
 {
-    std::cout << "Parsing MultiPartForm" << std::endl;
     if (_buffer.empty() || boundary.empty())
     {
         setStatusCode(INTERNAL_SERVER_ERROR);
@@ -523,33 +516,32 @@ void HttpRequest::parseMultipartForm(const std::string &boundary)
         _multiFormData[form.fields["name"]] = form;
     }
     
-    std::cout << "================================" << std::endl;
-    std::cout << "Multipart Form Data" << std::endl;
-    std::cout << "================================" << std::endl;
-    std::cout << "_multiFormData size: " << _multiFormData.size() << std::endl;
-    std::map<std::string, MultiFormData>::iterator it;
-    for (it = _multiFormData.begin(); it != _multiFormData.end(); it++)
-    {
-        std::cout << "MultiFormData key: " << it->first << std::endl;
-        std::cout << "fields size: " << it->second.fields.size() << std::endl;
-        std::map<std::string, std::string>::iterator field;
-        for (field = it->second.fields.begin(); field != it->second.fields.end(); field++)
-        {
-            std::cout << field->first << ": " << field->second << std::endl;
-        }
-        std::cout << "binary size: " << it->second.binary.size() << std::endl;
-        std::vector<unsigned char>::iterator binary;
-        for (binary = it->second.binary.begin(); binary != it->second.binary.end(); binary++)
-        {
-            std::cout << byteToHex(*binary) << " ";
-        }
-        std::cout << std::endl;
-    }
+    // std::cout << "================================" << std::endl;
+    // std::cout << "Multipart Form Data" << std::endl;
+    // std::cout << "================================" << std::endl;
+    // std::cout << "_multiFormData size: " << _multiFormData.size() << std::endl;
+    // std::map<std::string, MultiFormData>::iterator it;
+    // for (it = _multiFormData.begin(); it != _multiFormData.end(); it++)
+    // {
+    //     std::cout << "MultiFormData key: " << it->first << std::endl;
+    //     std::cout << "fields size: " << it->second.fields.size() << std::endl;
+    //     std::map<std::string, std::string>::iterator field;
+    //     for (field = it->second.fields.begin(); field != it->second.fields.end(); field++)
+    //     {
+    //         std::cout << field->first << ": " << field->second << std::endl;
+    //     }
+    //     std::cout << "binary size: " << it->second.binary.size() << std::endl;
+    //     std::vector<unsigned char>::iterator binary;
+    //     for (binary = it->second.binary.begin(); binary != it->second.binary.end(); binary++)
+    //     {
+    //         std::cout << byteToHex(*binary) << " ";
+    //     }
+    //     std::cout << std::endl;
+    // }
 }
 
 void HttpRequest::parseRequestBody()
 {
-    printBuffer();
     std::string contentLen = getHeader("content-length");
     if (contentLen.empty())
     {

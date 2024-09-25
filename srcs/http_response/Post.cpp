@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:57:50 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/24 10:48:14 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/25 11:43:31 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,20 +23,6 @@
 #include <sys/stat.h>
 #include <iterator>
 
-
-/**
- *  STATIC
- *  - check Loc if POST method is allowed
- *  - check if Form
- *  - check if supported media
- */
-
-
-/**
- *  POST Media 
- *  - form data (multi-part, single form(search and redirect to Google))
- *  - image upload (jpeg, jpg, png, gif)
- */
 
 void    HttpResponse::processRequestPOST()
 {
@@ -71,22 +57,6 @@ void    HttpResponse::processRequestPOST()
     }
 }
 
-
-// std::string HttpResponse::generateFilename(const std::string &extension)
-// {
-//     std::time_t now = std::time(NULL);
-//     std::tm *tm = std::localtime(&now);
-
-//     char buffer[80];
-//     std::strftime(buffer, sizeof(buffer), "%Y%m%d_%H%M%S", tm);
-//     std::string timestamp(buffer);
-
-//     std::string filename = "image_" + timestamp + "." + extension;
-
-//     return (filename);
-// }
-
-
 void HttpResponse::processImageUpload()
 {
     std::srand(static_cast<unsigned>(std::time(0)));
@@ -112,7 +82,6 @@ void HttpResponse::processImageUpload()
             if (slashPos == std::string::npos)
                 return ;
             std::string extension = type.substr(slashPos + 1);
-            // std::string filename = generateFilename(extension);
             std::string filename = it->second.fields["filename"];
             if (filename.empty())
             {
@@ -127,27 +96,19 @@ void HttpResponse::processImageUpload()
                 setStatusCode(INTERNAL_SERVER_ERROR);
                 return ;
             }
-            // std::cout << "UPLOADING." << std::endl;
-            // std::cout << "Binary data size: " << it->second.binary.size() << std::endl;
             if (it->second.binary.empty())
             {
-                // std::cout << "Binary empty" << std::endl;
                 setStatusCode(BAD_REQUEST);
                 return ;
             }
             filestream.write(reinterpret_cast<const char*>(&it->second.binary[0]), it->second.binary.size());
-            // std::copy(it->second.binary.begin(), it->second.binary.end(), std::ostream_iterator<unsigned char>(filestream));
             if (filestream.fail())
             {
-                std::cout << "FAIL" << _status << std::endl;
                 setStatusCode(INTERNAL_SERVER_ERROR);
                 return ;
             }
             filestream.close();
             setStatusCode(CREATED);
-            struct stat fileInfo;
-            if (stat(filepath.c_str(), &fileInfo) == 0)
-                std::cout << "File size: " << fileInfo.st_size << std::endl;
         }
     }
 }
