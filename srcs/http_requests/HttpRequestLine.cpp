@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/01 03:36:00 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/08/02 03:49:24 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/25 12:49:46 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,17 +21,17 @@ HttpRequestLine::~HttpRequestLine()
 {
 }
 
-void    HttpRequestLine::setMethod(const std::string &method)
+void HttpRequestLine::setMethod(const std::string &method)
 {
     _method = method;
 }
 
-void    HttpRequestLine::setUri(const std::string &uri)
+void HttpRequestLine::setUri(const std::string &uri)
 {
     _uri = uri;
 }
 
-void    HttpRequestLine::setVersion(const std::string &version)
+void HttpRequestLine::setVersion(const std::string &version)
 {
     _version = version;
 }
@@ -56,12 +56,12 @@ const std::string &HttpRequestLine::getErrormsg() const
     return (_errormsg);
 }
 
-int   HttpRequestLine::getError() const
+int HttpRequestLine::getError() const
 {
     return (_error);
 }
 
-void    HttpRequestLine::validate()
+void HttpRequestLine::validate()
 {
     if (_method != "GET" || _method != "POST" || _method != "DELETE")
     {

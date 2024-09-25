@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:13:31 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/11 23:09:44 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/25 10:21:32 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,19 @@ class ServerConfig;
 class HttpRequestLine;
 class LocationConfig;
 
+struct FileData
+{
+    std::string     filename;
+    std::string     contentType;
+    off_t           size;
+    std::string     lastModified;
+
+    bool operator<(const FileData& other) const
+    {
+        return (filename < other.filename);
+    }
+};
+
 
 class HttpResponse
 {
@@ -40,7 +53,6 @@ class HttpResponse
         std::map<std::string, std::string>      _headers;
         std::string                             _body;
         std::vector<unsigned char>              _responseMsg;
-        
         
         
         HttpResponse(const HttpResponse &copy);
@@ -79,13 +91,17 @@ class HttpResponse
         void getRedirectContent();
         void setRedirect(std::string status, const std::string &path);
 
-        void generateDirList(const std::string &path);
+        void generateDirList(std::string path);
         bool isAutoIndex();
         bool checkDirIndex();
 
         void getErrorPage();
         std::string generateErrorPage(const std::string &status, const std::string &statusMessage);
 
+        
+        void    processRequestPOST();
+        // std::string generateFilename(const std::string &extension);
+        void processImageUpload();
     public:
         HttpResponse(HttpRequest &request,
                         Config &config,

@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 22:50:55 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/11 23:29:31 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/24 05:13:35 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,6 @@ void HttpResponse::getErrorPage()
     {
         ErrorPagePath = server->getErrorPage(_status);
     }
-    std::cout << "Error Page Path: " << ErrorPagePath << std::endl;
     if (!ErrorPagePath.empty())
         getResourceContent(ErrorPagePath);
     else
@@ -44,30 +43,29 @@ void HttpResponse::getErrorPage()
 
 std::string HttpResponse::generateErrorPage(const std::string &status, const std::string &statusMessage)
 {
-std::string page =
-        std::string("<!DOCTYPE html>\n") +
-        "<html lang=\"en\">\n" +
-        "<head>\n" +
-        "    <meta charset=\"UTF-8\">\n" +
-        "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
-        "    <title>" + status + " " + statusMessage + "</title>\n" +
-        "    <style>\n" +
-        "        body {\n" +
-        "            font-family: \"Helvetica Neue\", Helvetica, Arial, sans-serif;\n" +
-        "            text-align: center;\n" +
-        "            margin-top: 50px;\n" +
-        "        }\n" +
-        "        h1 {\n" +
-        "            color: darkslategray;\n" +
-        "        }\n" +
-        "    </style>\n" +
-        "</head>\n" +
-        "<body>\n" +
-        "    <h1>" + status + ": " + statusMessage + "</h1>\n" +
-        "</body>\n" +
-        "</html>\n";
+std::string html = std::string("<!DOCTYPE html>")
+        + "<html lang=\"en\">"
+        + "<head>"
+        + "<meta charset=\"UTF-8\">"
+        + "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">"
+        + "<link rel=\"stylesheet\" href=\"/resources/css/styles.css\">"
+        + "<title> Error " + status + "</title>"
+        + "</head><body>"
 
-    return (page);   
+        + "<nav class=\"navbar\">"
+        + "<ul class=\"nav-list\">"
+        + "<li class=\"nav-item\"><a href=\"/\">Home</a></li>"
+        + "<li class=\"nav-item\"><a href=\"/html/features.html\">Features</a></li>"
+        + "<li class=\"nav-item\"><a href=\"/directory\">Directory</a></li>"
+        + "<li class=\"nav-item\"><a href=\"/html/search.html\">Search</a></li>"
+        + "<li class=\"nav-item\"><a href=\"/\">About Us</a></li>"
+        + "</ul>"
+        + "</nav>"
+        + "<h1 class=\"landing\">" + status + ": " + statusMessage + "</h1>"
+        + "</body>\n"
+        + "</html>\n";
+
+    return (html);   
 }
 
 

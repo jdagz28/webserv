@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:19:13 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/11 22:50:31 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/23 22:50:18 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,14 @@ HttpResponse::HttpResponse(HttpRequest &request,
                             int client_socket)
     : _request(request), _config(config), _status(INIT), _client_socket(client_socket), _allowedMethods(), _headers(), _body("")
 {
+    if (_request.getStatusCode() !=  OK || _request.getStatusCode() != INIT)
+    {
+        _status = _request.getStatusCode();
+        generateHttpResponse();
+        return ;
+    }
+    execMethod();
+    generateHttpResponse();
 }
 
 HttpResponse::~HttpResponse()
@@ -63,6 +71,9 @@ void HttpResponse::execMethod()
         case GET:
             processRequestGET();
             break ;
+        case POST:
+            processRequestPOST();
+            break ;
         default:
             setStatusCode(METHOD_NOT_ALLOWED);
     }
@@ -86,6 +97,7 @@ std::string HttpResponse::comparePath(const ServerConfig &server, const HttpRequ
 {
     std::string target_path = request.getUri();
     std::string path;
+    
     const std::vector<LocationConfig> &locationConfigs = server.getLocationConfig();
     if (locationConfigs.empty())
         return(std::string());
@@ -96,16 +108,19 @@ std::string HttpResponse::comparePath(const ServerConfig &server, const HttpRequ
         std::string config_location = location->getPath();
         if (config_location == target_path || (target_path + "/") == config_location)
             return (config_location);
-        if (target_path == "/")
+        if (target_path == "/index.html")
         {
             if (path.empty() || config_location == "/")
                 path = config_location;
             continue;
         }
+
         if (isMatchingPrefix(config_location, target_path))
             if (path.empty() || path.length() < config_location.length())
                 path = config_location;
     }
+    if (path.empty())
+        setStatusCode(NOT_FOUND);
     return (path);
 }
 
@@ -117,6 +132,7 @@ bool HttpResponse::checkLocConfigAndRequest()
     std::vector<ServerConfig>::const_iterator server;
     for (server = serverConfigs.begin(); server != serverConfigs.end(); server++)
     {
+        //! checkport -> config list and request port
         std::string path = comparePath(*server, _request.getRequestLine());
         if (path.empty())
             return (false);
@@ -272,12 +288,12 @@ void HttpResponse::sendResponse()
         return;
     }
     // std::cout << bytesSent << " bytes sent" << std::endl;
-    _responseMsg.erase(_responseMsg.begin(), _responseMsg.begin() + bytesSent);
-    if (_headers["Connection"] != "keep-alive")
-    {
-        if (close(_client_socket) < 0)
-            std::cerr << "ERROR: closing socket" << std::endl;
-    }
+    // _responseMsg.erase(_responseMsg.begin(), _responseMsg.begin() + bytesSent);
+    // if (_headers["Connection"] != "keep-alive")
+    // {
+    //     if (close(_client_socket) < 0)
+    //         std::cerr << "ERROR: closing socket" << std::endl;
+    // }
 }
 
 std::string HttpResponse::getHttpResponse()

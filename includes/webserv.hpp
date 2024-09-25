@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 22:28:27 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/11 21:46:02 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/25 11:07:46 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,12 +21,16 @@
 #include <netinet/in.h>
 
 #define CRLF "\r\n"
+#define MAX_URI_LENGTH 1000
+#define MAX_HEADER_LENGTH 1000
 
 enum HtmlRequestParseStep
 {
+    REQUEST_INIT,
     REQUEST_LINE,
     REQUEST_HEADER,
-    REQUEST_BODY
+    REQUEST_BODY,
+    REQUEST_DONE
 };
 
 enum Methods
@@ -78,7 +82,8 @@ std::string getExtension(const std::string &path);
 std::string toString(int num);
 bool validProtocol(const std::string &str);
 int strToInt(const std::string &str);
-
+bool isSpace(unsigned char ch);
+std::string toLower(const std::string &str);
 
 // MIMETYPES.CPP
 std::string getMimeType(const std::string &extension);

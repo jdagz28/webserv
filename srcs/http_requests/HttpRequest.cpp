@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:18:22 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/11 10:59:11 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/25 12:47:55 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,13 +15,18 @@
 #include <algorithm>
 #include <sstream>
 #include <iostream>
+#include <ctime>
+#include <sys/stat.h>
+#include <fstream>
+#include <iomanip> 
 
 HttpRequest::HttpRequest(int client_socket)
-    : _request(),  _headersN(0), _status(0), _error(0), _errorMsg(""), _client_socket(client_socket)
+    : _request(),  _headersN(0), _status(OK), _errorMsg(""), _client_socket(client_socket), _parseStep(REQUEST_INIT)
 {
     requestToBuffer();
     // printBuffer();
-    parseHttpRequest();
+    if (_errorMsg.empty())
+        parseHttpRequest();
 }
 
 HttpRequest::~HttpRequest()
@@ -30,199 +35,132 @@ HttpRequest::~HttpRequest()
 
 void HttpRequest::parseHttpRequest()
 {
-    HtmlRequestParseStep currentStep = REQUEST_LINE;
-    
-    while (!_buffer.empty())
+    if (_parseStep == REQUEST_INIT)
+        _parseStep = REQUEST_LINE;
+    while (true)
     {
         std::string line = getLineAndPopFromBuffer();
-        // std::cout << line << std::endl;
-        switch (currentStep)
+
+        switch (_parseStep)
         {
             case REQUEST_LINE:
                 parseRequestLine(line);
-                if (_request.getError() != 0)
-                {
-                    std::cerr << _request.getErrormsg() << std::endl;
-                    _error = 1;
+                if (_status != OK)
                     return ;
-                }
-                currentStep = REQUEST_HEADER;
-                continue;
+                _parseStep = REQUEST_HEADER;
+                break;
             case REQUEST_HEADER:
                 if (line.empty())
                 {
-                    currentStep = REQUEST_BODY;
-                    break ; 
+                    _parseStep = REQUEST_BODY;
+                    return;
                 }
-                parseRequestHeaders(line);
-                _headersN++;
-                continue;
+                else
+                {
+                    parseRequestHeaders(line);
+                    _headersN++;
+                    if (_status != OK)
+                        return ;
+                }
+                break;
             default:
                 break;
         }
     }
 }
 
-std::string    HttpRequest::extract_token(const std::string &line, size_t &pos, char del)
+size_t getContentLengthBuffer(const std::string &header)
 {
-    size_t  end = line.find(del, pos);
-    if (end == std::string::npos)
-        end = line.length();
-    std::string token = line.substr(pos, end - pos);
-    pos = end + 1;
-    return (token);
+    std::string lowerHeader = toLower(header);
+    size_t  pos = lowerHeader.find("content-length:");
+    if (pos != std::string::npos) {
+        pos += 16;
+        std::string::size_type endPos = lowerHeader.find("\r\n", pos);
+        return (strToInt(lowerHeader.substr(pos, endPos - pos)));
+    }
+    return (0);
 }
 
 
-
-void    HttpRequest::parseRequestLine(const std::string &line)
+void HttpRequest::requestToBuffer()
 {
-    size_t  pos = 0;
+    std::vector<unsigned char> buffer(1024);
     
-    if (_request.getMethod().empty())
+    ssize_t bytesRead = recv(_client_socket, &buffer[0], buffer.size(), 0);
+    if (bytesRead == -1)
     {
-        std::string method = extract_token(line, pos, ' '); 
-        if (method.empty())
-        {
-            _error = 1;
-            std::cerr << "Error: failed to parse method." << std::endl;
-            return ;
-        }
-        trimWhitespaces(method);
-        _request.setMethod(method);
-    }
-
-    if (_request.getUri().empty())
-    {
-        std::string uri = extract_token(line, pos, ' ');
-        if (uri.empty())
-        {
-            _error = 1;
-            std::cerr << "Error: failed to parse uri" << std::endl;
-            return ;
-        }
-        trimWhitespaces(uri);
-        _request.setUri(uri);
-    }
-
-    if (_request.getVersion().empty())
-    {
-        std::string version = extract_token(line, pos, ' ');
-        if (version.empty())
-        {
-            _error = 1;
-            std::cerr << "Error: failed to parse version" << std::endl;
-            return ;
-        }
-        trimWhitespaces(version);
-        _request.setVersion(version);
-    }
-}
-
-bool    HttpRequest::isValidFieldName(const std::string &line)
-{
-    if (line.empty())
-        return (false);
-    for (size_t i = 0; i < line.size(); i++)
-        if (!std::isalnum(line[i]) && line[i] != '-')
-            return (false);
-    return (true);
-}
-
-bool    HttpRequest::isValidFieldValue(const std::string &line)
-{
-    if (line.empty())
-        return (false);
-    for (size_t i = 0; i < line.size(); i++)
-    {
-        if (!std::isprint(line[i]) && !std::isspace(line[i]) )
-            return (false);
-    }
-    return (true);
-}
-
-void HttpRequest::parseRequestHeaders(const std::string &line)
-{
-    size_t  colonPos = line.find (':');
-    if (colonPos == std::string::npos)
-    {
-        _error = 1;
-        std::cerr <<"Error: Bad request, missing colon in field line" << std::endl;
+        _errorMsg = "Error: recv failed";
         return ;
     }
-
-    std::string fieldName = line.substr(0, colonPos);
-    std::string fieldValue = line.substr(colonPos + 1);
-    
-    for (size_t i = 0; i < fieldName.size(); i++)
-        fieldName[i] = std::tolower(fieldName[i]);
-    if (!isValidFieldName(fieldName) || !isValidFieldValue(fieldValue))
+    if (0 < bytesRead)
     {
-        _error = 1;
-        _errorMsg = "Error: Invalid field name or value";
+        _buffer.insert(_buffer.end(), buffer.begin(), buffer.begin() + bytesRead);
+    }
+    ssize_t contentLength = getContentLengthBuffer(std::string(buffer.begin(), buffer.end()));;
+    if (static_cast<ssize_t>(_buffer.size()) >= contentLength)
         return ;
+    contentLength -= bytesRead;
+    while (contentLength)
+    {
+        bytesRead = recv(_client_socket, &buffer[0], buffer.size(), 0);
+        if (bytesRead == -1)
+        {
+            _errorMsg = "Error: recv failed";
+            return ;
+        }
+        if (0 < bytesRead)
+        {
+            _buffer.insert(_buffer.end(), buffer.begin(), buffer.begin() + bytesRead);
+        }
+        if (bytesRead >= contentLength)
+            contentLength = 0;
+        else
+            contentLength -= bytesRead;
     }    
-    trimWhitespaces(fieldValue);
-    std::stringstream ss(fieldValue);
-    std::string value;
-    std::vector<std::string> values;
-    while (std::getline(ss, value, ','))
-    {
-        trimWhitespaces(value);
-        values.push_back(value);
-    }
-    _headers.push_back(std::make_pair(fieldName, values));
 }
 
-
-void    HttpRequest::requestToBuffer()
+std::vector<unsigned char>::iterator HttpRequest::findBufferCRLF()
 {
-    char    buffer[1024];
-    int     bytes_read;
-
-    bytes_read = recv(_client_socket, buffer, sizeof(buffer) - 1, 0);
-    if (bytes_read > 0)
+    std::vector<unsigned char>::iterator it;
+    for (it = _buffer.begin(); it != _buffer.end(); it++)
     {
-        buffer[bytes_read] = '\0';
-        for (int i = 0; i < bytes_read; i++)
-            _buffer.push_back(buffer[i]);
+        if (*it == '\r' && *(it + 1) == '\n')
+            return (it);
     }
-
-    if (bytes_read < 0)
-    {
-        _error = 1;
-        _errorMsg = "Error: receiving request to buffer";
-    }
+    return (_buffer.end());
 }
 
-std::string    HttpRequest::getLineAndPopFromBuffer()
+std::string HttpRequest::getLineAndPopFromBuffer()
 {
     std::string line;
-    std::string::size_type pos = 0;
     
     if (_buffer.empty())
         return (std::string());
-    std::string bufferStr(_buffer.begin(), _buffer.end());
-    std::string::size_type newlinePos = bufferStr.find('\n');
-    if (newlinePos != std::string::npos)
+    std::vector<unsigned char>::iterator crlf_pos = findBufferCRLF();
+    if (crlf_pos != _buffer.end())
     {
-        line = bufferStr.substr(0, newlinePos);
-        if (!line.empty() && line[line.size() - 1] == '\r')
-            line = line.substr(0, line.size() - 1);
-        pos = newlinePos + 1;
-        _buffer.erase(_buffer.begin(), _buffer.begin() + pos);
-    }   
+        line = std::string(_buffer.begin(), crlf_pos);
+        _buffer.erase(_buffer.begin(), crlf_pos + 2);
+    }
+    else
+    {
+        line = std::string(_buffer.begin(), _buffer.end());
+        _buffer.clear();
+    }
+    if (!line.empty() && line[line.size() - 1] == '\r')
+        line = line.substr(0, line.size() - 1);
     return (line);
 }
 
-void    HttpRequest::printBuffer() const
+void HttpRequest::printBuffer() const
 {
     std::vector<unsigned char>::const_iterator it;
     for (it = _buffer.begin(); it != _buffer.end(); it++)
         std::cout << *it;
+    std::cout << std::endl;
 }
 
-void    HttpRequest::setClientSocket(int client_socket)
+void HttpRequest::setClientSocket(int client_socket)
 {
     _client_socket = client_socket;
 }
@@ -232,37 +170,132 @@ const HttpRequestLine& HttpRequest::getRequestLine() const
     return (_request);
 }
 
-const std::vector<std::pair<std::string, std::vector<std::string> > >& HttpRequest::getHeaders() const
+const std::map<std::string, std::vector<std::string> >& HttpRequest::getHeaders() const
 {
+    
     return (_headers);
 }
 
 bool HttpRequest::isConnectionClosed() const
 {
-    std::vector<std::pair<std::string, std::vector<std::string> > >::const_iterator header;
-
-    for (header = _headers.begin(); header != _headers.end(); header++)
+    std::map<std::string, std::vector<std::string> >::const_iterator header;
+    header = _headers.find("connection");
+    
+    if (header == _headers.end())
+        return (false);
+    std::vector<std::string>::const_iterator value;
+    for (value = header->second.begin(); value != header->second.end(); value++)
     {
-        if (header->first == "Connection")
-        {
-            std::vector<std::string>::const_iterator value;
-            for (value = header->second.begin(); value != header->second.end(); value++)
-            {
-                if (*value == "close")
-                    return (true);
-            }
-        }
+        if (*value == "close")
+            return (true);
     }
     return (false);
 }
 
 std::string HttpRequest::getHost() const
 {
-    std::vector<std::pair<std::string, std::vector<std::string> > >::const_iterator header;
-    for (header = _headers.begin(); header != _headers.end(); header++)
+    std::map<std::string, std::vector<std::string> >::const_iterator header;
+    header =_headers.find("host");
+    if (header != _headers.end())
+        return (header->second[0]);
+    return (std::string());
+}
+
+void HttpRequest::setStatusCode(StatusCode status)
+{
+    _status = status;
+}
+
+StatusCode HttpRequest::getStatusCode() const
+{
+    return (_status);
+}
+
+const std::string &HttpRequest::getErrorMsg() const
+{
+    return (_errorMsg);
+}
+
+const std::string HttpRequest::getHeader(const std::string &field) const
+{
+    std::map<std::string, std::vector<std::string> > ::const_iterator header;
+    
+    header = _headers.find(field);
+    if (header != _headers.end())
     {
-        if (header->first == "host")
-            return (header->second[0]);
+        if (header->second[0].substr(0, 18) == "multipart/form-data")
+            return ("multipart/form-data");
+        return (header->second[0]);
     }
     return (std::string());
+}
+
+const std::map<std::string, std::string> &HttpRequest::getFormData() const
+{
+    return (_formData);
+}
+
+bool HttpRequest::isSupportedMediaPOST()
+{
+    std::string type = getHeader("content-type");
+    if (type.empty())
+    {
+        setStatusCode(UNSUPPORTED_MEDIA_TYPE);
+        return (false);
+    }
+    if (type == "application/x-www-form-urlencoded" || type.substr(0, 19) == "multipart/form-data")
+        return (true);
+    if (type == "image/jpeg" || type == "image/jpg" || type == "image/gif" || type == "image/png" || type == "image/bmp")
+        return (true);
+    setStatusCode(UNSUPPORTED_MEDIA_TYPE);
+    return (false);
+}
+
+bool HttpRequest::isSupportedMediaPOST(const std::string &type)
+{
+    if (type.empty())
+        return (false);
+    if (type == "image/jpeg" || type == "image/jpg" || type == "image/gif" || type == "image/png" || type == "image/bmp")
+        return (true);
+    return (false);
+}
+
+bool HttpRequest::isMultiPartFormData(std::string *boundary)
+{
+    std::string type = getHeader("content-type");
+    size_t pos = type.find("multipart/form-data");
+    if (pos == std::string::npos)
+        return (false);
+    pos = type.find("boundary=");
+    if (pos == std::string::npos)
+        return (false);
+    *boundary = type.substr(pos + 9);
+    return (true);
+}
+
+bool HttpRequest::isMultiPartFormData()
+{
+    std::string type = getHeader("content-type");
+    size_t pos = type.find("multipart/form-data");
+    if (pos == std::string::npos)
+        return (false);
+    return (true);
+}
+
+bool HttpRequest::isForUpload()
+{
+    if (_multiFormData.empty())
+        return (false);
+    std::map<std::string, MultiFormData>::iterator form;
+    for (form = _multiFormData.begin(); form != _multiFormData.end(); form++)
+    {
+        if (form->second.fields["content-type"] == "image/jpeg" || form->second.fields["content-type"] == "image/jpg" || form->second.fields["content-type"] == "image/png" || form->second.fields["content-type"] == "image/gif" || form->second.fields["content-type"] == "image/bmp")
+            return (true);
+    }
+    return (false);
+}
+
+const std::map<std::string, MultiFormData> &HttpRequest::getMultiFormData() const
+{
+    return (_multiFormData);
 }

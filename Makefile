@@ -6,7 +6,7 @@
 #    By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/05 02:06:08 by jdagoy            #+#    #+#              #
-#    Updated: 2024/09/11 23:02:51 by jdagoy           ###   ########.fr        #
+#    Updated: 2024/09/25 12:49:16 by jdagoy           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -54,7 +54,9 @@ DEBUG_OBJS			:= $(addprefix $(OBJ_DIR), $(DEBUG_OBJS_LIST))
 
 HTTPREQUEST_DIR		:= $(SRC_DIR)http_requests/
 HTTPREQUEST_SRCS	:= HttpRequest.cpp \
-						HttpRequestLine.cpp
+						HttpRequestLine.cpp\
+						parseBody.cpp\
+						parseHeader.cpp
 HTTPREQUEST_OBJS_LIST := $(patsubst %.cpp, %.o, $(HTTPREQUEST_SRCS))
 HTTPREQUEST_OBJS	:= $(addprefix $(OBJ_DIR), $(HTTPREQUEST_OBJS_LIST))
 
@@ -66,7 +68,8 @@ HTTPRESPONSE_SRCS	:= HttpResponse.cpp \
 						Redirect.cpp \
 						Get.cpp \
 						generateResponse.cpp \
-						Error.cpp
+						Error.cpp \
+						Post.cpp
 HTTPRESPONSE_OBJS_LIST := $(patsubst %.cpp, %.o, $(HTTPRESPONSE_SRCS))
 HTTPRESPONSE_OBJS	:= $(addprefix $(OBJ_DIR), $(HTTPRESPONSE_OBJS_LIST))
 
