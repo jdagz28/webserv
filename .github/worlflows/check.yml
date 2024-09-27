@@ -15,7 +15,9 @@ jobs:
     
     - name: make
       run: make
-            echo "Compiled Successfully"
+      
+    - name: Compilation success message
+      run: echo "Compiled Successfully"
 
     - name: basic-webserver
       run: ./webserv &
