@@ -18,9 +18,10 @@ jobs:
 
     - name: Compilation success message
       run: echo "Compiled Successfully"
-      
+
     - name: basic-webserver
-      run: ./webserv &
+      run: |
+            ./webserv &
             sleep 5
             echo "==== TESTING ===="
             echo "root"
