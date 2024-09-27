@@ -6,7 +6,7 @@
 #    By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/05 02:06:08 by jdagoy            #+#    #+#              #
-#    Updated: 2024/09/27 04:01:27 by jdagoy           ###   ########.fr        #
+#    Updated: 2024/09/27 14:51:30 by jdagoy           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -112,13 +112,13 @@ build:
 	docker build -t test-nginx .
 
 start:
-	docker start test-nginx
+	docker run -d -p 4242:4242 --name test-nginx test-nginx
 
 stop: 
 	docker stop test-nginx
 
 exec:
-	docker run -it test-nginx /bin/zsh
+	docker run -p 4242:4242 -it test-nginx /bin/zsh
 	
 stop-containers:
 	@if [ -n "$$(docker container ls -aq)" ]; then \
