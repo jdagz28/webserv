@@ -1,0 +1,36 @@
+name: webserv check
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: make
+      run: make
+            echo "Compiled Successfully"
+
+    - name: basic-webserver
+      run: ./webserv &
+            sleep 5
+            echo "==== TESTING ===="
+            echo "root"
+            curl -v localhost:4242/
+            echo "Main Index"
+            curl -v localhost:4242/index.html
+            echo "Another HTML Page"
+            curl -v localhost:4242/html/features.html
+            echo "404 Page Not Found"
+            curl -v localhost:4242/donotexist
+            echo "405 Method Not Allowed"
+            curl -v localhost:4242/uploads
+
+    # run nginx container
+    # compare response status lines, etc.
