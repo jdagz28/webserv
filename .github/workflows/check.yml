@@ -6,7 +6,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
+  webserv-check:
 
     runs-on: ubuntu-latest
 
