@@ -6,7 +6,7 @@
 #    By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/05 02:06:08 by jdagoy            #+#    #+#              #
-#    Updated: 2024/09/25 12:49:16 by jdagoy           ###   ########.fr        #
+#    Updated: 2024/09/27 04:01:27 by jdagoy           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -106,3 +106,33 @@ fclean: clean
 re: fclean all
 
 .PHONY: all clean fclean re
+
+# DOCKER
+build:
+	docker build -t test-nginx .
+
+start:
+	docker start test-nginx
+
+stop: 
+	docker stop test-nginx
+
+exec:
+	docker run -it test-nginx /bin/zsh
+	
+stop-containers:
+	@if [ -n "$$(docker container ls -aq)" ]; then \
+		docker container stop $$(docker container ls -aq); \
+	fi
+
+remove-containers:
+	@if [ -n "$$(docker container ls -aq)" ]; then \
+		docker container rm $$(docker container ls -aq); \
+	fi
+
+remove-images:
+	@if [ -n "$$(docker images -aq)" ]; then \
+		docker rmi -f $$(docker images -aq); \
+	fi
+
+remove: stop-containers remove-containers remove-images
