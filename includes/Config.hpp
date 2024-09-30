@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 22:38:46 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/30 22:42:24 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/01 01:17:04 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ class Config
         void    parseLocationBlock(std::ifstream &infile, LocationConfig &locationConfig);
 
         void    skipEventsBlock(std::ifstream &infile);
+        void    parseHttpBlock(std::ifstream &infile);
 
     public:
         Config(const std::string &configPath);

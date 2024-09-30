@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 22:38:59 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/30 22:54:43 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/01 01:19:52 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -190,6 +190,9 @@ void Config::skipEventsBlock(std::ifstream &infile)
 
     while (std::getline(infile, line))
     {
+        trimWhitespaces(line);
+        if (line.empty() || line[0] == '#')
+            continue ;
         size_t posOpen = line.find("{");
         if (posOpen != std::string::npos)
         {
@@ -199,24 +202,19 @@ void Config::skipEventsBlock(std::ifstream &infile)
         size_t posClose = line.find("}");
         if (posClose != std::string::npos)
         {
-            braceCount--;
-            if (braceCount < 0)
+            braceCount++;
+            if (braceCount == 1)
             {
                 _error = "No opening brace for events block.";
                 throw configException(_error);
             }
         }
-        if (braceCount == 1)
-        {
-            _error = "No closing brace for events block.";
-            throw configException(_error);
-        }
-        if (posOpen > posClose)
+        if (braceCount != 2 || posOpen > posClose)
         {
             _error = "Mismatch braces for events block.";
             throw configException(_error);
         }
-        if (braceCount == 0 && hasOpeningBrace)
+        if (braceCount == 2 && hasOpeningBrace)
             return ;
     }
     if (braceCount != 0)
@@ -226,27 +224,19 @@ void Config::skipEventsBlock(std::ifstream &infile)
     }
 }
 
-void    Config::parseConfig(const std::string &configFile)
+void    Config::parseHttpBlock(std::ifstream &infile)
 {
-    std::ifstream   infile(configFile.c_str());
-
-    if (infile.fail())
-    {
-        _error = "Configuration file is not accessible.";
-        throw configException(_error);
-    }
-
     std::string line;
+    
     while (std::getline(infile, line))
     {
+        trimWhitespaces(line);
+        if (line.empty() || line[0] == '#')
+            continue ;
         std::istringstream iss(line);
         std::string token;
         iss >> token;
-        if (token == "events")
-        {
-            skipEventsBlock(infile);
-            continue ;
-        }
+
         if (token == "keepalive_timeout")
         {
             std::string value;
@@ -268,6 +258,39 @@ void    Config::parseConfig(const std::string &configFile)
             parseServerBlock(infile, serverConfig);
             _serverConfig.push_back(serverConfig);
             _serverCount++;
+        }
+    }
+}
+
+
+void    Config::parseConfig(const std::string &configFile)
+{
+    std::ifstream   infile(configFile.c_str());
+
+    if (infile.fail())
+    {
+        _error = "Configuration file is not accessible.";
+        throw configException(_error);
+    }
+
+    std::string line;
+    while (std::getline(infile, line))
+    {
+        trimWhitespaces(line);
+        if (line.empty() || line[0] == '#')
+            continue ;
+        std::istringstream iss(line);
+        std::string token;
+        iss >> token;
+        if (token == "events")
+        {
+            skipEventsBlock(infile);
+            continue ;
+        }
+        if (token == "http")
+        {
+            parseHttpBlock(infile);
+            break ;
         }
     }
        
