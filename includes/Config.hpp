@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 22:38:46 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/03 03:59:09 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/30 22:42:24 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@
 class Config
 {
     private:
-        std::pair<int, std::string>             _error;
+        std::string                             _error;
         std::vector<ServerConfig>               _serverConfig;
         int                                     _serverCount;
         time_t                                  _keepAliveTimeOut;
@@ -40,6 +40,8 @@ class Config
         void    parseServerBlock(std::ifstream &infile, ServerConfig &serverConfig);
         void    parseLocationBlock(std::ifstream &infile, LocationConfig &locationConfig);
 
+        void    skipEventsBlock(std::ifstream &infile);
+
     public:
         Config(const std::string &configPath);
         ~Config();
@@ -52,7 +54,10 @@ class Config
             private:
                 std::string exceptMsg;
             public:
-                configException(const std::string &msg) : exceptMsg(msg) {};
+                configException(const std::string &msg)
+                {
+                    exceptMsg = "Error: " + msg;
+                };
                 ~configException() throw() {};
                 const char *what() const throw();
         };

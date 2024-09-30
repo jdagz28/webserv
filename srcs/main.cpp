@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/05 00:23:30 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/25 12:06:17 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/30 22:42:46 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,82 +55,89 @@ int main(int argc, char **argv)
         return (EXIT_FAILURE);
     }
 
-    std::string configPath = getConfigPath(argc, argv);
-      
-    Config  config(configPath);
-    
-    struct sockaddr_in server_addr, client_addr;
-    socklen_t client_len = sizeof(client_addr);
-
-    signal(SIGINT, signal_handler);
-    signal(SIGTERM, signal_handler);
-
-    server_socket = socket(AF_INET, SOCK_STREAM, 0);
-    if (server_socket < 0)
+    try
     {
-        std::cerr << "Error: failed to create socket" << std::endl;
-        return (1);
-    }
-
-    // Set SO_REUSEADDR to allow immediate port reuse
-    int opt = 1;
-    if (setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
-    {
-        std::cerr << "Error: setsockopt failed" << std::endl;
-        close(server_socket);
-        return 1;
-    }
-
-    memset(&server_addr, 0, sizeof(server_addr));
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_addr.s_addr = INADDR_ANY;
-    server_addr.sin_port = htons(PORT);
-
-    if (bind(server_socket, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1)
-    {
-        std::cerr << "Error: failed to bind socket" << std::endl;
-        close(server_socket);
-        return (1);
-    }
-    
-    if (listen(server_socket, 5) == -1)
-    {
-        std::cerr << "Error: Could not listen to socket." << std::endl;
-        close(server_socket);
-        return (1);
-    }   
-    
-    // printConfigData(config);
-    std::cout << "Listening on port: " << PORT << std::endl;
-    while (true)
-    {
-        int client_socket = accept(server_socket, (struct sockaddr*)&client_addr, &client_len);
-        if (client_socket < 0)
-        {
-            perror("Failed to accept connection");
-            continue;
-        }
-        std::cout << "Connection accepted" << std::endl;
-
-        std::cout << "Receiving request..." << std::endl;
-        HttpRequest request(client_socket);
-        printHttpRequest(request);
-        std::cout << "Request parsed." << std::endl;
-
-        std::cout << "Generating response..." << std::endl;
-        HttpResponse response(request, config, client_socket);
-        response.execMethod();
-        response.generateHttpResponse();
+        std::string configPath = getConfigPath(argc, argv);
         
-        printHttpResponse(response.getHttpResponse());
-        std::cout << "Sending response..." << std::endl;
-        response.sendResponse();
+        Config  config(configPath);
+        
+        struct sockaddr_in server_addr, client_addr;
+        socklen_t client_len = sizeof(client_addr);
 
-        close(client_socket);
-        std::cout << "Connection closed" << std::endl;
+        signal(SIGINT, signal_handler);
+        signal(SIGTERM, signal_handler);
+
+        server_socket = socket(AF_INET, SOCK_STREAM, 0);
+        if (server_socket < 0)
+        {
+            std::cerr << "Error: failed to create socket" << std::endl;
+            return (1);
+        }
+
+        int opt = 1;
+        if (setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
+        {
+            std::cerr << "Error: setsockopt failed" << std::endl;
+            close(server_socket);
+            return 1;
+        }
+
+        memset(&server_addr, 0, sizeof(server_addr));
+        server_addr.sin_family = AF_INET;
+        server_addr.sin_addr.s_addr = INADDR_ANY;
+        server_addr.sin_port = htons(PORT);
+
+        if (bind(server_socket, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1)
+        {
+            std::cerr << "Error: failed to bind socket" << std::endl;
+            close(server_socket);
+            return (1);
+        }
+        
+        if (listen(server_socket, 5) == -1)
+        {
+            std::cerr << "Error: Could not listen to socket." << std::endl;
+            close(server_socket);
+            return (1);
+        }   
+        
+        printConfigData(config);
+        std::cout << "Listening on port: " << PORT << std::endl;
+        while (true)
+        {
+            int client_socket = accept(server_socket, (struct sockaddr*)&client_addr, &client_len);
+            if (client_socket < 0)
+            {
+                perror("Failed to accept connection");
+                continue;
+            }
+            std::cout << "Connection accepted" << std::endl;
+
+            std::cout << "Receiving request..." << std::endl;
+            HttpRequest request(client_socket);
+            printHttpRequest(request);
+            std::cout << "Request parsed." << std::endl;
+
+            std::cout << "Generating response..." << std::endl;
+            HttpResponse response(request, config, client_socket);
+            response.execMethod();
+            response.generateHttpResponse();
+            
+            printHttpResponse(response.getHttpResponse());
+            std::cout << "Sending response..." << std::endl;
+            response.sendResponse();
+
+            close(client_socket);
+            std::cout << "Connection closed" << std::endl;
+        }
+
+        close(server_socket);
     }
-
-    close(server_socket);
+    catch (const std::exception &e)
+    {
+        std::cerr << e.what() << std::endl;
+        return (EXIT_FAILURE);
+    }
     return (EXIT_SUCCESS);
 }
 

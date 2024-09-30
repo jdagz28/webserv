@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 22:38:59 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/04 23:24:30 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/09/30 22:54:43 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,20 +17,11 @@
 #include <sstream>
 
 Config::Config(const std::string &configPath)
-    : _error(std::make_pair(0, "")), _serverCount(0), _keepAliveTimeOut(0)
+    : _error(""), _serverCount(0), _keepAliveTimeOut(0)
 {
-    try
-    {
-        if (configPath != DEFAULT_CONFIG)
-            checkFile(configPath);
-        parseConfig(configPath);
-
-        
-    }
-    catch (const configException &e)
-    {
-        std::cerr << e.what() << std::endl;
-    } 
+    if (configPath != DEFAULT_CONFIG)
+        checkFile(configPath);
+    parseConfig(configPath);
 }
 
 Config::Config(const Config &copy)
@@ -74,18 +65,18 @@ void    Config::checkFile(const std::string &configPath)
 {
     if (configPath.empty())
     {
-        _error = std::make_pair(1, "No configuration file provided.");
-        throw configException(_error.second);
+        _error = "No configuration file provided.";
+        throw configException(_error);
     }
     else if (validExtension(configPath) == false)
     {
-        _error = std::make_pair(2, "Invalid configuration file type.");
-        throw configException(_error.second);
+        _error = "Invalid configuration file type.";
+        throw configException(_error);
     }
     else if (validPath(configPath) == false)
     {
-        _error = std::make_pair(3, "Configuration file is not accessible.");
-        throw configException(_error.second);
+        _error = "Configuration file is not accessible.";
+        throw configException(_error);
     }
 
 }
@@ -191,14 +182,58 @@ void    Config::parseServerBlock(std::ifstream &infile, ServerConfig &serverConf
     }
 }
 
+void Config::skipEventsBlock(std::ifstream &infile)
+{
+    std::string line;
+    int braceCount = 0;
+    bool hasOpeningBrace = false;
+
+    while (std::getline(infile, line))
+    {
+        size_t posOpen = line.find("{");
+        if (posOpen != std::string::npos)
+        {
+            braceCount++;
+            hasOpeningBrace = true;
+        }
+        size_t posClose = line.find("}");
+        if (posClose != std::string::npos)
+        {
+            braceCount--;
+            if (braceCount < 0)
+            {
+                _error = "No opening brace for events block.";
+                throw configException(_error);
+            }
+        }
+        if (braceCount == 1)
+        {
+            _error = "No closing brace for events block.";
+            throw configException(_error);
+        }
+        if (posOpen > posClose)
+        {
+            _error = "Mismatch braces for events block.";
+            throw configException(_error);
+        }
+        if (braceCount == 0 && hasOpeningBrace)
+            return ;
+    }
+    if (braceCount != 0)
+    {
+        _error = "Mismatch braces for events block.";
+        throw configException(_error);
+    }
+}
+
 void    Config::parseConfig(const std::string &configFile)
 {
     std::ifstream   infile(configFile.c_str());
 
     if (infile.fail())
     {
-        _error = std::make_pair(3, "Configuration file is not accessible.");
-        throw configException(_error.second);
+        _error = "Configuration file is not accessible.";
+        throw configException(_error);
     }
 
     std::string line;
@@ -207,6 +242,11 @@ void    Config::parseConfig(const std::string &configFile)
         std::istringstream iss(line);
         std::string token;
         iss >> token;
+        if (token == "events")
+        {
+            skipEventsBlock(infile);
+            continue ;
+        }
         if (token == "keepalive_timeout")
         {
             std::string value;
@@ -217,8 +257,8 @@ void    Config::parseConfig(const std::string &configFile)
             ss >> timeout;
             if (ss.fail())
             {
-                _error = std::make_pair(4, "Invalid keepalive_timeout value.");
-                throw configException(_error.second);
+                _error = "Invalid keepalive_timeout value.";
+                throw configException(_error);
             }
             _keepAliveTimeOut = timeout;
         }
