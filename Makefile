@@ -6,7 +6,7 @@
 #    By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/05 02:06:08 by jdagoy            #+#    #+#              #
-#    Updated: 2024/10/01 11:20:49 by jdagoy           ###   ########.fr        #
+#    Updated: 2024/10/01 12:14:09 by jdagoy           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -119,7 +119,7 @@ stop:
 	docker stop test-nginx
 
 exec:
-	docker run -p 4242:4242 -it test-nginx /bin/zsh
+	docker run --entrypoint /bin/zsh -p 4242:4242 -it test-nginx
 	
 stop-containers:
 	@if [ -n "$$(docker container ls -aq)" ]; then \

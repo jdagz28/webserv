@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 22:38:46 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/01 11:21:16 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/01 11:55:16 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,8 +42,13 @@ class Config
         void    parseLocationBlock(std::ifstream &infile, LocationConfig &locationConfig);
 
         void    skipEventsBlock(std::ifstream &infile);
-        void    parseHttpBlock(std::ifstream &infile);
         void    checkBraces(const std::string &token, int &braceCount, bool &hasOpeningBrace, bool &hasClosingBrace);
+
+        // http-block parsing
+        void    parseHttpBlock(std::ifstream &infile);
+        void    parseHttpDirective(const std::string &token, std::istringstream &iss, std::ifstream &infile);
+        void    parseErrorPages(std::istringstream &iss);
+        void    parseKeepAlive(std::istringstream &iss);
 
     public:
         Config(const std::string &configPath);
