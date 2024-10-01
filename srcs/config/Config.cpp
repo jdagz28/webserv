@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 22:38:59 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/01 01:19:52 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/01 02:09:31 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -227,6 +227,9 @@ void Config::skipEventsBlock(std::ifstream &infile)
 void    Config::parseHttpBlock(std::ifstream &infile)
 {
     std::string line;
+    int braceCount = 0;
+    bool hasOpeningBrace = 0;
+    bool hasClosingBrace = 0;
     
     while (std::getline(infile, line))
     {
@@ -236,7 +239,23 @@ void    Config::parseHttpBlock(std::ifstream &infile)
         std::istringstream iss(line);
         std::string token;
         iss >> token;
-
+        if (token == "{")
+        {
+            braceCount++;
+            hasOpeningBrace = true;
+            continue ;
+        }
+        else if (token == "}")
+        {
+            braceCount++;
+            hasClosingBrace = true;
+            if (braceCount == 1)
+            {
+                _error = "No opening brace for http block.";
+                throw configException(_error);
+            }
+            continue ;
+        }
         if (token == "keepalive_timeout")
         {
             std::string value;
@@ -252,6 +271,24 @@ void    Config::parseHttpBlock(std::ifstream &infile)
             }
             _keepAliveTimeOut = timeout;
         }
+        else if (token == "error_page")
+        {
+            std::string value;
+            std::getline(iss, value);
+            trimWhitespaces(value);
+            std::vector<std::string> values = splitBySpaces(value);
+            std::string errorPagePath = values[values.size() - 1];
+            for (size_t i = 0; i < values.size() - 1; i++)
+            {
+                int errorCode = strToInt(values[i]);
+                if (errorCode == -1)
+                {
+                    _error = "Invalid error_page directive.";
+                    throw configException(_error);
+                }
+                _errorPages[errorCode] = errorPagePath;
+            }
+        }
         else if (token == "server")
         {
             ServerConfig    serverConfig;
@@ -259,6 +296,17 @@ void    Config::parseHttpBlock(std::ifstream &infile)
             _serverConfig.push_back(serverConfig);
             _serverCount++;
         }
+        else
+        {
+            _error = "Invalid directive in http block.";
+            throw configException(_error);
+        }
+    }
+    
+    if (braceCount > 2 || (braceCount == 2 && !hasOpeningBrace) || (braceCount == 2 && !hasClosingBrace))
+    {
+        _error = "Mismatch braces for http block.";
+        throw configException(_error);
     }
 }
 
@@ -309,4 +357,15 @@ const char *Config::configException::what() const throw()
 time_t  Config::getKeepAliveTimeout() const
 {
     return (_keepAliveTimeOut);
+}
+
+std::string Config::getErrorPages() const
+{
+    std::string errorPages;
+    std::map<int, std::string>::const_iterator it;
+    for (it = _errorPages.begin(); it != _errorPages.end(); it++)
+    {
+        errorPages += "Error Code: " + toString(it->first) + " Error Page: " + it->second + "\n";
+    }
+    return (errorPages);
 }

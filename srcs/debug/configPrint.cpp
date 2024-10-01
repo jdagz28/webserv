@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   configDebug.cpp                                    :+:      :+:    :+:   */
+/*   configPrint.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/07 01:23:08 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/03 03:59:37 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/01 01:51:33 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,11 @@
 
 void    printConfigData(const Config &config)
 {
+    std::cout << "=======================================" << std::endl;
     if (config.getKeepAliveTimeout())
         std::cout << "Keep-Alive timeout " << config.getKeepAliveTimeout() << std::endl;
+    std::cout << "ERROR PAGES" << std::endl;
+    std::cout << config.getErrorPages() << std::endl << std::endl;
     
     for (size_t i = 0; i < config.getServerConfig().size(); i++)
     {

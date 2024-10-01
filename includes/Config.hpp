@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 22:38:46 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/01 01:17:04 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/01 01:52:29 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@ class Config
         std::vector<ServerConfig>               _serverConfig;
         int                                     _serverCount;
         time_t                                  _keepAliveTimeOut;
+        std::map<int, std::string>              _errorPages;
         
         Config(const Config &copy);
         Config  &operator=(const Config &copy); 
@@ -49,6 +50,7 @@ class Config
 
         const std::vector<ServerConfig>& getServerConfig() const;
         time_t  getKeepAliveTimeout() const;
+        std::string getErrorPages() const;
 
         class configException : public std::exception
         {
