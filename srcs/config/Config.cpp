@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 22:38:59 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/01 02:09:31 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/01 11:25:03 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -224,89 +224,22 @@ void Config::skipEventsBlock(std::ifstream &infile)
     }
 }
 
-void    Config::parseHttpBlock(std::ifstream &infile)
+void    Config::checkBraces(const std::string &token, int &braceCount, bool &hasOpeningBrace, bool &hasClosingBrace)
 {
-    std::string line;
-    int braceCount = 0;
-    bool hasOpeningBrace = 0;
-    bool hasClosingBrace = 0;
-    
-    while (std::getline(infile, line))
+    if (token == "{")
     {
-        trimWhitespaces(line);
-        if (line.empty() || line[0] == '#')
-            continue ;
-        std::istringstream iss(line);
-        std::string token;
-        iss >> token;
-        if (token == "{")
+        braceCount++;
+        hasOpeningBrace = true;
+    }
+    else if (token == "}")
+    {
+        braceCount++;
+        hasClosingBrace = true;
+        if (braceCount == 1 && !hasOpeningBrace)
         {
-            braceCount++;
-            hasOpeningBrace = true;
-            continue ;
-        }
-        else if (token == "}")
-        {
-            braceCount++;
-            hasClosingBrace = true;
-            if (braceCount == 1)
-            {
-                _error = "No opening brace for http block.";
-                throw configException(_error);
-            }
-            continue ;
-        }
-        if (token == "keepalive_timeout")
-        {
-            std::string value;
-            std::getline(iss, value);
-            trimWhitespaces(value);
-            std::stringstream ss(value);
-            int timeout;
-            ss >> timeout;
-            if (ss.fail())
-            {
-                _error = "Invalid keepalive_timeout value.";
-                throw configException(_error);
-            }
-            _keepAliveTimeOut = timeout;
-        }
-        else if (token == "error_page")
-        {
-            std::string value;
-            std::getline(iss, value);
-            trimWhitespaces(value);
-            std::vector<std::string> values = splitBySpaces(value);
-            std::string errorPagePath = values[values.size() - 1];
-            for (size_t i = 0; i < values.size() - 1; i++)
-            {
-                int errorCode = strToInt(values[i]);
-                if (errorCode == -1)
-                {
-                    _error = "Invalid error_page directive.";
-                    throw configException(_error);
-                }
-                _errorPages[errorCode] = errorPagePath;
-            }
-        }
-        else if (token == "server")
-        {
-            ServerConfig    serverConfig;
-            parseServerBlock(infile, serverConfig);
-            _serverConfig.push_back(serverConfig);
-            _serverCount++;
-        }
-        else
-        {
-            _error = "Invalid directive in http block.";
+            _error = "No opening brace for http block.";
             throw configException(_error);
         }
-    }
-    
-    if (braceCount > 2 || (braceCount == 2 && !hasOpeningBrace) || (braceCount == 2 && !hasClosingBrace))
-    {
-        _error = "Mismatch braces for http block.";
-        throw configException(_error);
     }
 }
 
@@ -322,6 +255,7 @@ void    Config::parseConfig(const std::string &configFile)
     }
 
     std::string line;
+    
     while (std::getline(infile, line))
     {
         trimWhitespaces(line);
@@ -330,18 +264,34 @@ void    Config::parseConfig(const std::string &configFile)
         std::istringstream iss(line);
         std::string token;
         iss >> token;
+
+        
         if (token == "events")
         {
             skipEventsBlock(infile);
             continue ;
         }
-        if (token == "http")
+        else if (token == "http")
         {
             parseHttpBlock(infile);
             break ;
         }
+        else if (token == "server")
+        {
+            _error = "Server block outside of http block.";
+            throw configException(_error);
+        }
+        else if (token == "location")
+        {
+            _error = "Location block outside of server block.";
+            throw configException(_error);
+        }
+        else
+        {
+            _error = "Invalid directive in http block.";
+            throw configException(_error);
+        }
     }
-       
 }
 
 const std::vector<ServerConfig>& Config::getServerConfig() const

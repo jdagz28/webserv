@@ -6,7 +6,7 @@
 #    By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/05 02:06:08 by jdagoy            #+#    #+#              #
-#    Updated: 2024/09/27 14:51:30 by jdagoy           ###   ########.fr        #
+#    Updated: 2024/10/01 11:20:49 by jdagoy           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -41,7 +41,8 @@ OBJS				:= $(addprefix $(OBJ_DIR), $(OBJS_LIST))
 CONFIG_DIR			:= $(SRC_DIR)config/
 CONFIG_SRCS			:= Config.cpp \
 						LocationConfig.cpp \
-						ServerConfig.cpp 
+						ServerConfig.cpp \
+						parseHttpBlock.cpp
 CONFIG_OBJS_LIST 	:= $(patsubst %.cpp, %.o, $(CONFIG_SRCS))
 CONFIG_OBJS			:= $(addprefix $(OBJ_DIR), $(CONFIG_OBJS_LIST))
 
