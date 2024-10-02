@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/02 11:19:31 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/02 15:48:19 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/02 22:01:49 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,9 +93,8 @@ void Config::parseServerDirective(const std::string &token, std::istringstream &
 void Config::parseServerBlock(std::ifstream &infile, ServerConfig &serverConfig)
 {
     std::string line;
-    int braceCount = 0;
-    bool hasOpeningBrace = false;
-    bool hasClosingBrace = false;
+    int openingBrace = 0;
+    int closingBrace = 0  ;
 
     while (std::getline(infile, line))
     {
@@ -106,16 +105,17 @@ void Config::parseServerBlock(std::ifstream &infile, ServerConfig &serverConfig)
         std::istringstream iss(line);
         std::string token;
         iss >> token;
-
-        checkBraces(token, braceCount, hasOpeningBrace, hasClosingBrace);
-        if (token == "{" || token == "}")
+        
+        checkBraces(token, openingBrace, closingBrace);
+        if (token == "{")
             continue ;
-
+        if (token == "}")
+            break ; 
         parseServerDirective(token, iss, infile, serverConfig);
     }
-    if (braceCount > 2 || (braceCount == 2 && !hasOpeningBrace) || (braceCount == 2 && !hasClosingBrace))
+    if (openingBrace != closingBrace)
     {
-        _error = "Mismatch braces for server block.";
+        _error = "Mismatch braces for server block in server block";
         throw configException(_error);
     }
 }

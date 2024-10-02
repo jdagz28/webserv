@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/01 11:20:02 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/02 15:49:04 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/02 21:47:26 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,9 +119,8 @@ void Config::parseHttpDirective(const std::string &token, std::istringstream &is
 void Config::parseHttpBlock(std::ifstream &infile)
 {
     std::string line;
-    int braceCount = 0;
-    bool hasOpeningBrace = false;
-    bool hasClosingBrace = false;
+    int openingBrace = 0;
+    int closingBrace = 0;
     
     while (std::getline(infile, line))
     {
@@ -133,15 +132,14 @@ void Config::parseHttpBlock(std::ifstream &infile)
         std::string token;
         iss >> token;
 
-        checkBraces(token, braceCount, hasOpeningBrace, hasClosingBrace);
+        checkBraces(token, openingBrace, closingBrace);
         if (token == "{" || token == "}")
             continue ;
-
         parseHttpDirective(token, iss, infile);
     }
-    if (braceCount > 2 || (braceCount == 2 && !hasOpeningBrace) || (braceCount == 2 && !hasClosingBrace))
+    if (openingBrace != closingBrace)
     {
-        _error = "Mismatch braces for http block.";
+        _error = "Mismatch braces in http block.";
         throw configException(_error);
     }
 }

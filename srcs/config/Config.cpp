@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 22:38:59 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/02 15:54:00 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/02 21:47:56 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -164,22 +164,21 @@ void Config::skipEventsBlock(std::ifstream &infile)
     }
 }
 
-void    Config::checkBraces(const std::string &token, int &braceCount, bool &hasOpeningBrace, bool &hasClosingBrace)
+void    Config::checkBraces(const std::string &token, int &openingBrace, int &closingBrace)
 {
     if (token == "{")
-    {
-        braceCount++;
-        hasOpeningBrace = true;
-    }
+        openingBrace++;
     else if (token == "}")
+        closingBrace++;
+    if (closingBrace > 1 || openingBrace > 1)
     {
-        braceCount++;
-        hasClosingBrace = true;
-        if (braceCount == 1 && !hasOpeningBrace)
-        {
-            _error = "No opening brace for http block.";
-            throw configException(_error);
-        }
+        _error = "Unexpected \"" + token + "\"";
+        throw configException(_error);
+    }
+    if (closingBrace > openingBrace)
+    {
+        _error = "A closing brace without an opening brace in http block.";
+        throw configException(_error);
     }
 }
 
