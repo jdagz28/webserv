@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 02:19:46 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/11 23:21:33 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/02 15:29:22 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,6 +67,11 @@ void    ServerConfig::setLocationConfig(const LocationConfig &locationConfig)
     _locationConfig.push_back(locationConfig);
 }
 
+void ServerConfig::setErrorPage(int errorCode, const std::string &errorPagePath)
+{
+    _errorPages[errorCode] = errorPagePath;
+}
+
 const std::map<std::string, std::vector<std::string> > &ServerConfig::getDirectives() const
 {
     return (_directives);
@@ -88,31 +93,9 @@ const std::vector<LocationConfig> &ServerConfig::getLocationConfig() const
 }
 
 const std::string ServerConfig::getErrorPage(StatusCode status) const
-{
-    std::string statusCode = toString(static_cast<int>(status));
-    
-    std::map<std::string, std::vector<std::string> >::const_iterator directive;    
-    for (directive = _directives.begin(); directive != _directives.end(); directive++)
-    {
-        if (directive->first == "error_page")
-        {
-            std::vector<std::string>::const_iterator error;
-            for (error = directive->second.begin(); error != directive->second.end(); error++)
-            {
-                std::string value = *error;
-                std::string code;
-                std::string path;
-
-                std::size_t pos = value.find(' ');
-                if (pos != std::string::npos)
-                {
-                    code = value.substr(0, pos);
-                    path = value.substr(pos + 1);
-                }
-                if (code == statusCode)
-                    return (path);
-            }
-        }
-    }
-    return (std::string());
+{    
+    std::map<int, std::string>::const_iterator it = _errorPages.find(status);
+    if (it == _errorPages.end())
+        return (std::string());
+    return (it->second);
 }

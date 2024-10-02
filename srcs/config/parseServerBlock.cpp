@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   parseHttpBlock.cpp                                 :+:      :+:    :+:   */
+/*   parseServerBlock.cpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/10/01 11:20:02 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/02 15:49:04 by jdagoy           ###   ########.fr       */
+/*   Created: 2024/10/02 11:19:31 by jdagoy            #+#    #+#             */
+/*   Updated: 2024/10/02 15:48:19 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,45 +16,8 @@
 #include <fstream>
 #include <sstream>
 
-void Config::parseKeepAlive(std::istringstream &iss)
-{
-    std::string value;
-    std::getline(iss, value);
-    trimWhitespaces(value);
-    std::stringstream ss(value);
-    if (!value.empty())
-    {
-        if (value[value.length() - 1] != ';')
-        {
-            _error = "directive \"keepalive_timeout\" is not terminated with semicolon \";\"";
-            throw configException(_error);
-        }
-        if (value[value.length() - 2] == 's')
-            value = value.substr(0, value.length() - 2);
-        else
-            value = value.substr(0, value.length() - 1);
-    }
-    int timeout;
-    ss >> timeout;
-    if (ss.fail())
-    {
-        _error = "Invalid keepalive_timeout value.";
-        throw configException(_error);
-    }
-    _keepAliveTimeOut = timeout;
-}
 
-bool Config::checkErrorPage(const std::string &errorPagePath)
-{
-    for (size_t i = 0; i < errorPagePath.length(); i++)
-    {
-        if (errorPagePath[i] != '/' && errorPagePath[i] != '.' && !std::isalnum(errorPagePath[i]))
-            return (false);
-    }
-    return (true);
-}
-
-void Config::parseErrorPages(std::istringstream &iss)
+void Config::parseErrorPages(std::istringstream &iss, ServerConfig &serverConfig)
 {
     std::string value;
     std::getline(iss, value);
@@ -87,48 +50,59 @@ void Config::parseErrorPages(std::istringstream &iss)
             throw configException(_error);
         }
         StatusCode error = static_cast<StatusCode>(errorCode);
-        _errorPages[error] = errorPagePath;
+        serverConfig.setErrorPage(error, errorPagePath);
     }
 }
 
-void Config::parseHttpDirective(const std::string &token, std::istringstream &iss, std::ifstream &infile)
+void Config::parseServerDirective(const std::string &token, std::istringstream &iss, std::ifstream &infile, ServerConfig &serverConfig)
 {
-    if (token == "keepalive_timeout")
-        parseKeepAlive(iss);
+    if (token == "location")
+    {
+        LocationConfig locationConfig;
+        parseLocationBlock(infile, locationConfig);
+        std::string value;
+        std::getline(iss, value);
+        trimWhitespaces(value);
+        locationConfig.setPath(value);
+        serverConfig.setLocationConfig(locationConfig);
+    }
     else if (token == "error_page")
-        parseErrorPages(iss);
-    else if (token == "server")
-    {
-        ServerConfig    serverConfig;
-        parseServerBlock(infile, serverConfig);
-        _serverConfig.push_back(serverConfig);
-        _serverCount++;
-    }
-    else if (token == "location")
-    {
-        _error = "Location block outside of server block.";
-        throw configException(_error);
-    }
+        parseErrorPages(iss, serverConfig);
     else
     {
-        _error = "Invalid directive in http block.";
-        throw configException(_error);
+        if (!token.empty())
+        {
+            std::string directive = token;
+            std::string value;
+            std::getline(iss, value);
+            trimWhitespaces(value);
+            if (value[value.length() - 1]  != ';')
+            {
+                _error = "Missing semicolon at the end of directive \"" + directive + "\".";
+                throw configException(_error);
+            }
+            value = value.substr(0, value.length() - 1);
+            if (directive == "listen")
+                serverConfig.setPort(value);
+            else if (directive == "server_name")
+                serverConfig.setServerName(value);
+        }
     }
 }
 
-void Config::parseHttpBlock(std::ifstream &infile)
+void Config::parseServerBlock(std::ifstream &infile, ServerConfig &serverConfig)
 {
     std::string line;
     int braceCount = 0;
     bool hasOpeningBrace = false;
     bool hasClosingBrace = false;
-    
+
     while (std::getline(infile, line))
     {
         trimWhitespaces(line);
         if (line.empty() || line[0] == '#')
             continue ;
-        
+
         std::istringstream iss(line);
         std::string token;
         iss >> token;
@@ -137,11 +111,11 @@ void Config::parseHttpBlock(std::ifstream &infile)
         if (token == "{" || token == "}")
             continue ;
 
-        parseHttpDirective(token, iss, infile);
+        parseServerDirective(token, iss, infile, serverConfig);
     }
     if (braceCount > 2 || (braceCount == 2 && !hasOpeningBrace) || (braceCount == 2 && !hasClosingBrace))
     {
-        _error = "Mismatch braces for http block.";
+        _error = "Mismatch braces for server block.";
         throw configException(_error);
     }
 }

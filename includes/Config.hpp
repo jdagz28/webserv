@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 22:38:46 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/01 11:55:16 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/02 15:49:44 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ class Config
         std::vector<ServerConfig>               _serverConfig;
         int                                     _serverCount;
         time_t                                  _keepAliveTimeOut;
-        std::map<int, std::string>              _errorPages;
+        std::map<StatusCode, std::string>       _errorPages;
         
         Config(const Config &copy);
         Config  &operator=(const Config &copy); 
@@ -38,17 +38,23 @@ class Config
         bool    validExtension(const std::string &configPath);
         void    checkFile(const std::string &configPath);
         void    parseConfig(const std::string &configFile);
-        void    parseServerBlock(std::ifstream &infile, ServerConfig &serverConfig);
+
         void    parseLocationBlock(std::ifstream &infile, LocationConfig &locationConfig);
 
         void    skipEventsBlock(std::ifstream &infile);
         void    checkBraces(const std::string &token, int &braceCount, bool &hasOpeningBrace, bool &hasClosingBrace);
+        bool    checkErrorPage(const std::string &errorPagePath);
 
         // http-block parsing
         void    parseHttpBlock(std::ifstream &infile);
         void    parseHttpDirective(const std::string &token, std::istringstream &iss, std::ifstream &infile);
         void    parseErrorPages(std::istringstream &iss);
         void    parseKeepAlive(std::istringstream &iss);
+
+        // server-block parsing
+        void    parseServerBlock(std::ifstream &infile, ServerConfig &serverConfig);
+        void    parseServerDirective(const std::string &token, std::istringstream &iss, std::ifstream &infile, ServerConfig &serverConfig);
+        void    parseErrorPages(std::istringstream &iss, ServerConfig &serverConfig);
 
     public:
         Config(const std::string &configPath);

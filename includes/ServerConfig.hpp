@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 02:19:38 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/11 23:01:22 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/02 15:27:53 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@ class ServerConfig
         int                                                 _port;
         std::string                                         _serverName;
         std::vector<LocationConfig>                         _locationConfig;
+        std::map<int, std::string>                          _errorPages;
 
     public:
         ServerConfig();
@@ -37,6 +38,7 @@ class ServerConfig
         void    setPort(const std::string &port);
         void    setServerName(const std::string &name);
         void    setLocationConfig(const LocationConfig &locationConfig);
+        void    setErrorPage(int errorCode, const std::string &errorPagePath);
 
         const std::map<std::string, std::vector<std::string> > &getDirectives() const;
         int   getPort() const;
