@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 02:19:46 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/02 15:29:22 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/02 23:15:00 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ ServerConfig::ServerConfig()
 
 ServerConfig::ServerConfig(const ServerConfig &copy)
 {
-    _port = copy.getPort();
+    // _port = copy.getPort();
     _serverName = copy.getServerName();
     _locationConfig = copy.getLocationConfig();
     _directives = copy.getDirectives();
@@ -31,7 +31,7 @@ ServerConfig::~ServerConfig()
 
 ServerConfig    &ServerConfig::operator=(const ServerConfig &copy)
 {
-    _port = copy.getPort();
+    // _port = copy.getPort();
     _serverName = copy.getServerName();
     _locationConfig = copy.getLocationConfig();
     _directives = copy.getDirectives();
@@ -43,18 +43,9 @@ void   ServerConfig::setDirective(const std::string &directive, const std::strin
     _directives[directive].push_back(value);
 }
 
-void    ServerConfig::setPort(const std::string &port)
+void    ServerConfig::setPort(const std::string &address)
 {
-    std::string portStr = port;
-    
-    size_t colonPos = port.find(':');
-    if (colonPos != std::string::npos)
-    {
-        portStr = port.substr(colonPos + 1);
-        _port = atoi(portStr.c_str());
-    }
-    else
-        _port = atoi(port.c_str());
+    _address.push_back(address);
 }
 
 void    ServerConfig::setServerName(const std::string &name)
@@ -77,10 +68,10 @@ const std::map<std::string, std::vector<std::string> > &ServerConfig::getDirecti
     return (_directives);
 }
 
-int   ServerConfig::getPort() const
-{
-    return (_port);
-}
+// int   ServerConfig::getPort() const
+// {
+//     return (_port);
+// }
 
 const std::string &ServerConfig::getServerName() const
 {

@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/07 01:23:08 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/01 01:51:33 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/02 22:40:35 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ void    printConfigData(const Config &config)
 
         std::cout << "=======================================" << std::endl;
         std::cout << "Server Name: " << server.getServerName() << std::endl;
-        std::cout << "Port: " << server.getPort() << std::endl << std::endl;
+        // std::cout << "Port: " << server.getPort() << std::endl << std::endl;
 
         std::cout << "DIRECTIVES" << std::endl;
         const std::map<std::string, std::vector<std::string> > &directives = server.getDirectives();
