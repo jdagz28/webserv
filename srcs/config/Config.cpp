@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 22:38:59 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/02 21:47:56 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/03 15:18:10 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 #include <sstream>
 
 Config::Config(const std::string &configPath)
-    : _error(""), _serverCount(0), _keepAliveTimeOut(0)
+    : _configPath(configPath), _parsedLine(0), _error(""), _serverCount(0), _keepAliveTimeOut(0)
 {
     if (configPath != DEFAULT_CONFIG)
         checkFile(configPath);
@@ -65,17 +65,17 @@ void    Config::checkFile(const std::string &configPath)
 {
     if (configPath.empty())
     {
-        _error = "No configuration file provided.";
+        _error = "no configuration file provided.";
         throw configException(_error);
     }
     else if (validExtension(configPath) == false)
     {
-        _error = "Invalid configuration file type.";
+        _error = "invalid configuration file type.";
         throw configException(_error);
     }
     else if (validPath(configPath) == false)
     {
-        _error = "Configuration file is not accessible.";
+        _error = "configuration file is not accessible.";
         throw configException(_error);
     }
 
@@ -88,10 +88,8 @@ void    Config::parseLocationBlock(std::ifstream &infile, LocationConfig &locati
     {
         if (line.find("}") != std::string::npos)
             break;
-        // std::cout << "Line: " << line << std::endl;
         std::istringstream iss(line);
         std::string token;
-        // std::cout << "Token: " << token << std::endl;
         iss >> token;
         if (!token.empty())
         {
@@ -130,6 +128,7 @@ void Config::skipEventsBlock(std::ifstream &infile)
 
     while (std::getline(infile, line))
     {
+        _parsedLine++;
         trimWhitespaces(line);
         if (line.empty() || line[0] == '#')
             continue ;
@@ -145,22 +144,22 @@ void Config::skipEventsBlock(std::ifstream &infile)
             braceCount++;
             if (braceCount == 1)
             {
-                _error = "No opening brace for events block.";
-                throw configException(_error);
+                _error = "no opening brace for events block";
+                throw configException(_error, _configPath, _parsedLine);
             }
         }
         if (braceCount != 2 || posOpen > posClose)
         {
-            _error = "Mismatch braces for events block.";
-            throw configException(_error);
+            _error = "mismatch braces for events block";
+            throw configException(_error, _configPath, _parsedLine);
         }
         if (braceCount == 2 && hasOpeningBrace)
             return ;
     }
     if (braceCount != 0)
     {
-        _error = "Mismatch braces for events block.";
-        throw configException(_error);
+        _error = "mismatch braces for events block";
+        throw configException(_error, _configPath, _parsedLine);
     }
 }
 
@@ -172,13 +171,13 @@ void    Config::checkBraces(const std::string &token, int &openingBrace, int &cl
         closingBrace++;
     if (closingBrace > 1 || openingBrace > 1)
     {
-        _error = "Unexpected \"" + token + "\"";
-        throw configException(_error);
+        _error = std::string("unexpected ") + GREEN + "\"" + token + "\"" + RESET;
+        throw configException(_error, _configPath, _parsedLine);
     }
     if (closingBrace > openingBrace)
     {
-        _error = "A closing brace without an opening brace in http block.";
-        throw configException(_error);
+        _error = "a closing brace without an opening brace in http block";
+        throw configException(_error, _configPath, _parsedLine);
     }
 }
 
@@ -189,14 +188,15 @@ void    Config::parseConfig(const std::string &configFile)
 
     if (infile.fail())
     {
-        _error = "Configuration file is not accessible.";
-        throw configException(_error);
+        _error = "configuration file is not accessible";
+        throw configException(_error, _configPath, _parsedLine);
     }
 
     std::string line;
     
     while (std::getline(infile, line))
     {
+        _parsedLine++;
         trimWhitespaces(line);
         if (line.empty() || line[0] == '#')
             continue ;
@@ -217,18 +217,18 @@ void    Config::parseConfig(const std::string &configFile)
         }
         else if (token == "server")
         {
-            _error = "Server block outside of http block.";
-            throw configException(_error);
+            _error = "server block outside of http block";
+            throw configException(_error, _configPath, _parsedLine);
         }
         else if (token == "location")
         {
-            _error = "Location block outside of server block.";
-            throw configException(_error);
+            _error = "location block outside of server block";
+            throw configException(_error, _configPath, _parsedLine);
         }
         else
         {
-            _error = "Invalid directive in http block.";
-            throw configException(_error);
+            _error = "invalid directive in http block";
+            throw configException(_error, _configPath, _parsedLine);
         }
     }
 }
@@ -240,7 +240,14 @@ const std::vector<ServerConfig>& Config::getServerConfig() const
 
 const char *Config::configException::what() const throw()
 {
-    return (exceptMsg.c_str());
+    if (!configPath.empty() && !parsedLine.empty())
+    {
+        errorMsg = RED + std::string("webserv: ") + RESET + "[emerg] " + exceptMsg
+                    + " in " + RESET + configPath + ":" + RED + parsedLine + std::string(RESET);
+        return (errorMsg.c_str());
+    }
+    else
+        return (exceptMsg.c_str());
 }
 
 time_t  Config::getKeepAliveTimeout() const

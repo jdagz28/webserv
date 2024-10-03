@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 22:28:27 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/25 11:07:46 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/03 15:13:56 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,14 @@
 #define CRLF "\r\n"
 #define MAX_URI_LENGTH 1000
 #define MAX_HEADER_LENGTH 1000
+
+#include <iostream>
+
+const std::string RED = "\033[0;31m";
+const std::string GREEN = "\033[0;32m";
+const std::string YELLOW = "\033[1;33m";
+const std::string BLUE = "\033[0;34m";
+const std::string RESET = "\033[0m";
 
 enum HtmlRequestParseStep
 {

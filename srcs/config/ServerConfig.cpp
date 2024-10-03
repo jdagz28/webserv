@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 02:19:46 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/02 23:15:00 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/03 14:52:46 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,14 +14,13 @@
 #include <cstdlib>
 
 ServerConfig::ServerConfig()
-    : _port(-1), _serverName("")
 {
 }
 
 ServerConfig::ServerConfig(const ServerConfig &copy)
 {
     // _port = copy.getPort();
-    _serverName = copy.getServerName();
+    // _serverName = copy.getServerName();
     _locationConfig = copy.getLocationConfig();
     _directives = copy.getDirectives();
 }
@@ -32,7 +31,7 @@ ServerConfig::~ServerConfig()
 ServerConfig    &ServerConfig::operator=(const ServerConfig &copy)
 {
     // _port = copy.getPort();
-    _serverName = copy.getServerName();
+    // _serverName = copy.getServerName();
     _locationConfig = copy.getLocationConfig();
     _directives = copy.getDirectives();
     return (*this);
@@ -48,10 +47,10 @@ void    ServerConfig::setPort(const std::string &address)
     _address.push_back(address);
 }
 
-void    ServerConfig::setServerName(const std::string &name)
-{
-    _serverName = name;
-}
+// void    ServerConfig::setServerName(const std::string &name)
+// {
+//     _serverName = name;
+// }
 
 void    ServerConfig::setLocationConfig(const LocationConfig &locationConfig)
 {
@@ -73,10 +72,10 @@ const std::map<std::string, std::vector<std::string> > &ServerConfig::getDirecti
 //     return (_port);
 // }
 
-const std::string &ServerConfig::getServerName() const
-{
-    return (_serverName);
-}
+// const std::string &ServerConfig::getServerName() const
+// {
+//     return (_serverName);
+// }
 
 const std::vector<LocationConfig> &ServerConfig::getLocationConfig() const
 {

@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:19:13 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/23 22:50:18 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/03 15:04:21 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -136,7 +136,7 @@ bool HttpResponse::checkLocConfigAndRequest()
         std::string path = comparePath(*server, _request.getRequestLine());
         if (path.empty())
             return (false);
-        _serverName = server->getServerName();
+        // _serverName = server->getServerName(); //!match with getHost; return that if found if not default
         if (!isMethodAllowed(*server, path, _request.getRequestLine()))
             return (false);
     }

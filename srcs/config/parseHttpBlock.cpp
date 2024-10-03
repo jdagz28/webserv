@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/01 11:20:02 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/02 21:47:26 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/03 15:18:51 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,13 +20,15 @@ void Config::parseKeepAlive(std::istringstream &iss)
 {
     std::string value;
     std::getline(iss, value);
+    _parsedLine++;
     trimWhitespaces(value);
     std::stringstream ss(value);
     if (!value.empty())
     {
         if (value[value.length() - 1] != ';')
         {
-            _error = "directive \"keepalive_timeout\" is not terminated with semicolon \";\"";
+            _error = std::string("directive ") + GREEN + "\"keepalive_timeout\" " + RESET
+                        + "is not terminated with semicolon " + GREEN + "\";\"" + RESET;
             throw configException(_error);
         }
         if (value[value.length() - 2] == 's')
@@ -38,7 +40,7 @@ void Config::parseKeepAlive(std::istringstream &iss)
     ss >> timeout;
     if (ss.fail())
     {
-        _error = "Invalid keepalive_timeout value.";
+        _error = std::string("invalid ") + GREEN + "\"keepalive_timeout\" " + RESET + value;
         throw configException(_error);
     }
     _keepAliveTimeOut = timeout;
@@ -58,33 +60,35 @@ void Config::parseErrorPages(std::istringstream &iss)
 {
     std::string value;
     std::getline(iss, value);
+    _parsedLine++;
     trimWhitespaces(value);
     std::vector<std::string> values = splitBySpaces(value);
     if (values.empty())
     {
-        _error = "Empty \"error_page\" directive.";
-        throw configException(_error);
+        _error = std::string("empty ") + GREEN + "\"error_page\" " + RESET + "directive";
+        throw configException(_error, _configPath, _parsedLine);
     }
     std::string errorPagePath = values.back();
     trimWhitespaces(errorPagePath);
     if (errorPagePath.empty() || errorPagePath[errorPagePath.length() - 1] != ';')
     {
-        _error = "directive \"error_page\" is not terminated with semicolon \";\"";
-        throw configException(_error);
+        _error = std::string("directive ") + GREEN + "\"error_page\"" 
+                    + RESET + "is not terminated with semicolon " + GREEN + "\";\"" + RESET;
+        throw configException(_error, _configPath, _parsedLine);
     }
     errorPagePath = errorPagePath.substr(0, errorPagePath.length() - 1);
     if (!checkErrorPage(errorPagePath))
     {
-        _error = "Invalid value in \"error_page\": " + errorPagePath;
-        throw configException(_error);
+        _error = std::string("invalid value in ") + GREEN + "\"error_page\"" + RESET + ": " + errorPagePath;
+        throw configException(_error, _configPath, _parsedLine);
     }
     for (size_t i = 0; i < values.size() - 1; i++)
     {
         int errorCode = strToInt(values[i]);
         if (errorCode == -1 || getStatusReason(static_cast<StatusCode>(errorCode)) == "Unknown Status Code")
         {
-            _error = "Invalid HTTP status code in \"error_page\" directive" ;
-            throw configException(_error);
+            _error = std::string("invalid HTTP status code in ") + GREEN + "\"error_page\"" + RESET + " directive" ;
+            throw configException(_error, _configPath, _parsedLine);
         }
         StatusCode error = static_cast<StatusCode>(errorCode);
         _errorPages[error] = errorPagePath;
@@ -106,13 +110,13 @@ void Config::parseHttpDirective(const std::string &token, std::istringstream &is
     }
     else if (token == "location")
     {
-        _error = "Location block outside of server block.";
-        throw configException(_error);
+        _error = "location block outside of server block";
+        throw configException(_error, _configPath, _parsedLine);
     }
     else
     {
-        _error = "Invalid directive in http block.";
-        throw configException(_error);
+        _error = "invalid directive in http block";
+        throw configException(_error, _configPath, _parsedLine);
     }
 }
 
@@ -124,6 +128,7 @@ void Config::parseHttpBlock(std::ifstream &infile)
     
     while (std::getline(infile, line))
     {
+        _parsedLine++;
         trimWhitespaces(line);
         if (line.empty() || line[0] == '#')
             continue ;
@@ -139,7 +144,7 @@ void Config::parseHttpBlock(std::ifstream &infile)
     }
     if (openingBrace != closingBrace)
     {
-        _error = "Mismatch braces in http block.";
-        throw configException(_error);
+        _error = "mismatch braces in http bloc.";
+        throw configException(_error, _configPath, _parsedLine);
     }
 }

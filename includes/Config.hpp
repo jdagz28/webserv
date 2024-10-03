@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 22:38:46 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/02 21:31:49 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/03 15:16:21 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,8 @@
 class Config
 {
     private:
+        std::string                             _configPath;
+        int                                     _parsedLine;
         std::string                             _error;
         std::vector<ServerConfig>               _serverConfig;
         int                                     _serverCount;
@@ -55,6 +57,12 @@ class Config
         void    parseServerBlock(std::ifstream &infile, ServerConfig &serverConfig);
         void    parseServerDirective(const std::string &token, std::istringstream &iss, std::ifstream &infile, ServerConfig &serverConfig);
         void    parseErrorPages(std::istringstream &iss, ServerConfig &serverConfig);
+        void    parseServerListen(const std::string &value, ServerConfig &serverConfig);
+        bool    validPort(const std::string &value);
+        bool    checkAddr(const std::string &host, const std::string &port);
+        
+        
+        
 
     public:
         Config(const std::string &configPath);
@@ -68,10 +76,16 @@ class Config
         {
             private:
                 std::string exceptMsg;
+                std::string configPath;
+                std::string parsedLine;
+                mutable std::string errorMsg;
             public:
                 configException(const std::string &msg)
+                    : exceptMsg(msg), configPath(""), parsedLine(""), errorMsg("") {};
+                configException(const std::string &msg, const std::string &configPath, int line)
+                    : exceptMsg(msg), configPath(configPath)
                 {
-                    exceptMsg = "Error: " + msg;
+                    parsedLine = toString(line);
                 };
                 ~configException() throw() {};
                 const char *what() const throw();
