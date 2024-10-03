@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/02 11:19:31 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/03 15:19:16 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/03 15:39:36 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,6 @@ void Config::parseErrorPages(std::istringstream &iss, ServerConfig &serverConfig
 {
     std::string value;
     std::getline(iss, value);
-    _parsedLine++;
     trimWhitespaces(value);
     std::vector<std::string> values = splitBySpaces(value);
     if (values.empty())
@@ -55,6 +54,31 @@ void Config::parseErrorPages(std::istringstream &iss, ServerConfig &serverConfig
         StatusCode error = static_cast<StatusCode>(errorCode);
         serverConfig.setErrorPage(error, errorPagePath);
     }
+}
+
+bool Config::checkServerName(const std::string &name)
+{
+    for (size_t i = 0; i < name.length(); i++)
+    {
+        if (!std::isalnum(name[i]) && name[i] != '.')
+            return (false);
+    }
+    return (true);
+}
+
+void Config::parseServerName(const std::string &value, ServerConfig &serverConfig)
+{
+    std::vector<std::string> serverNames = splitBySpaces(value);
+    for (size_t i = 0; i < serverNames.size(); i++)
+    {
+        if (!checkServerName(serverNames[i]))
+        {
+            _error = "invalid server name in \"server_name\" directive";
+            throw configException(_error, _configPath, _parsedLine);
+        }
+        serverConfig.setServerName(serverNames[i]);
+    }
+    serverConfig.setDirective("server_name", value);
 }
 
 bool Config::validPort(const std::string &value)
@@ -121,7 +145,6 @@ void Config::parseServerListen(const std::string &value, ServerConfig &serverCon
     serverConfig.setDirective("listen", value);
 }
 
-
 void Config::parseServerDirective(const std::string &token, std::istringstream &iss, std::ifstream &infile, ServerConfig &serverConfig)
 {
     if (token == "location")
@@ -141,7 +164,6 @@ void Config::parseServerDirective(const std::string &token, std::istringstream &
     {
         std::string value;
         std::getline(iss, value);
-        _parsedLine++;
         trimWhitespaces(value);
         if (value[value.length() - 1]  != ';')
         {
@@ -151,8 +173,8 @@ void Config::parseServerDirective(const std::string &token, std::istringstream &
         value = value.substr(0, value.length() - 1);
         if (token == "listen")
             parseServerListen(value, serverConfig);
-        // else if (token == "server_name")
-        //     parseServerName(value);
+        else if (token == "server_name")
+            parseServerName(value, serverConfig);
     }
     else
     {

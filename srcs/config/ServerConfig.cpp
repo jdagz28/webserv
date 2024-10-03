@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 02:19:46 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/03 14:52:46 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/03 15:31:31 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,10 +47,16 @@ void    ServerConfig::setPort(const std::string &address)
     _address.push_back(address);
 }
 
-// void    ServerConfig::setServerName(const std::string &name)
-// {
-//     _serverName = name;
-// }
+void    ServerConfig::setServerName(const std::string &name)
+{
+    std::vector<std::string>::iterator it;
+    for (it = _serverName.begin(); it != _serverName.end(); it++)
+    {
+        if (*it == name)
+            return ;
+    }
+    _serverName.push_back(name);
+}
 
 void    ServerConfig::setLocationConfig(const LocationConfig &locationConfig)
 {

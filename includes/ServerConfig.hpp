@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 02:19:38 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/03 14:53:14 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/03 15:29:29 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ class ServerConfig
         
         void    setDirective(const std::string &directive, const std::string &value);
         void    setPort(const std::string &address);
-        // void    setServerName(const std::string &name);
+        void    setServerName(const std::string &name);
         void    setLocationConfig(const LocationConfig &locationConfig);
         void    setErrorPage(int errorCode, const std::string &errorPagePath);
 

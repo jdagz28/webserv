@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 22:38:46 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/03 15:16:21 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/03 15:30:10 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,8 @@ class Config
         void    parseServerListen(const std::string &value, ServerConfig &serverConfig);
         bool    validPort(const std::string &value);
         bool    checkAddr(const std::string &host, const std::string &port);
-        
+        void    parseServerName(const std::string &value, ServerConfig &serverConfig);
+        bool    checkServerName(const std::string &name);
         
         
 

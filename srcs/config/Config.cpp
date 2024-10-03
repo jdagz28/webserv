@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 22:38:59 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/03 15:18:10 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/03 15:35:17 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -203,8 +203,7 @@ void    Config::parseConfig(const std::string &configFile)
         std::istringstream iss(line);
         std::string token;
         iss >> token;
-
-        
+ 
         if (token == "events")
         {
             skipEventsBlock(infile);

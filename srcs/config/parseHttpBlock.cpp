@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/01 11:20:02 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/03 15:18:51 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/03 15:38:43 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,6 @@ void Config::parseKeepAlive(std::istringstream &iss)
 {
     std::string value;
     std::getline(iss, value);
-    _parsedLine++;
     trimWhitespaces(value);
     std::stringstream ss(value);
     if (!value.empty())
@@ -60,7 +59,6 @@ void Config::parseErrorPages(std::istringstream &iss)
 {
     std::string value;
     std::getline(iss, value);
-    _parsedLine++;
     trimWhitespaces(value);
     std::vector<std::string> values = splitBySpaces(value);
     if (values.empty())
