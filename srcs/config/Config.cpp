@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 22:38:59 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/03 15:35:17 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/04 14:51:16 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,45 +79,6 @@ void    Config::checkFile(const std::string &configPath)
         throw configException(_error);
     }
 
-}
-
-void    Config::parseLocationBlock(std::ifstream &infile, LocationConfig &locationConfig)
-{
-    std::string line;
-    while(std::getline(infile, line))
-    {
-        if (line.find("}") != std::string::npos)
-            break;
-        std::istringstream iss(line);
-        std::string token;
-        iss >> token;
-        if (!token.empty())
-        {
-            std::string directive = token;
-            std::string value;
-            std::getline(iss, value);
-            trimWhitespaces(value);
-            if (directive == "allowed_methods")
-            {
-                std::vector<std::string> methods = splitBySpaces(value);
-                for (size_t i = 0; i < methods.size(); i++)
-                    locationConfig.setAllowedMethod(methods[i]);
-            }
-            else if (directive == "limit_except")
-            {
-                locationConfig.setLimitExcept(true);
-                std::vector<std::string> methods = splitBySpaces(value);
-                for (size_t i = 0; i < methods.size(); i++)
-                    locationConfig.setLimitExcept(methods[i]);
-            }
-            else if (directive != "{" && directive != "}")
-            {
-                std::vector<std::string> values = splitBySpaces(value);
-                for (size_t i = 0; i < values.size(); i++)
-                    locationConfig.setDirective(directive, values[i]);
-            }
-        }
-    }
 }
 
 void Config::skipEventsBlock(std::ifstream &infile)

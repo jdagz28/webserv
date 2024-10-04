@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 22:28:27 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/03 15:13:56 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/04 15:04:06 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ const std::string GREEN = "\033[0;32m";
 const std::string YELLOW = "\033[1;33m";
 const std::string BLUE = "\033[0;34m";
 const std::string RESET = "\033[0m";
+
 
 enum HtmlRequestParseStep
 {

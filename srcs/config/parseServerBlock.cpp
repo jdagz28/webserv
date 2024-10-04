@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/02 11:19:31 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/03 15:39:36 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/04 15:17:47 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,7 +111,7 @@ void Config::parseServerListen(const std::string &value, ServerConfig &serverCon
     std::vector<std::string> check = splitBySpaces(value);
     if (check.size() != 1)
     {
-        _error = "invalid parameter \"" + value + "\"";
+        _error = std::string("invalid parameter ") + GREEN + "\"" + value + "\"" + RESET;
         throw configException(_error, _configPath, _parsedLine);
     }
     
@@ -179,7 +179,7 @@ void Config::parseServerDirective(const std::string &token, std::istringstream &
     else
     {
         _error = "invalid directictive in server block";
-        throw configException(_error);
+        throw configException(_error, _configPath, _parsedLine);
     }
 }
 
@@ -187,7 +187,7 @@ void Config::parseServerBlock(std::ifstream &infile, ServerConfig &serverConfig)
 {
     std::string line;
     int openingBrace = 0;
-    int closingBrace = 0  ;
+    int closingBrace = 0;
 
     while (std::getline(infile, line))
     {
@@ -209,7 +209,7 @@ void Config::parseServerBlock(std::ifstream &infile, ServerConfig &serverConfig)
     }
     if (openingBrace != closingBrace)
     {
-        _error = "mismatch braces for server block in server block";
+        _error = "mismatch braces in server block";
         throw configException(_error, _configPath, _parsedLine);
     }
 }
