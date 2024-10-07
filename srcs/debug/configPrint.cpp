@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/07 01:23:08 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/07 13:16:36 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/07 16:07:49 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,18 +78,12 @@ void    printConfigData(const Config &config)
             for (allowed = allowedMethods.begin(); allowed != allowedMethods.end(); allowed++)
                 std::cout << "\t\t\t" << *allowed << std::endl;
                        
-            const std::map<std::string, std::vector<std::string> >&locationDirectives = location.getDirectives();
-            std::map<std::string, std::vector<std::string> >::const_iterator it;
+            const std::map<std::string, std::string>&locationDirectives = location.getDirectives();
+            std::map<std::string, std::string>::const_iterator it;
             for (it = locationDirectives.begin(); it != locationDirectives.end(); it++)
             {
-                std::cout << "\t\t";
-                std::cout << it->first << std::endl;
-                const std::vector<std::string> &values = it->second;
-                for (size_t j = 0; j < values.size(); j++)
-                {
-                    std::cout << "\t\t\t";
-                    std::cout << "Value: " << values[j] << std::endl;   
-                }
+                std::cout << "\t\t" << it->first << std::endl;
+                std::cout << "\t\t\tValue: " << it->second << std::endl;  
             }
         }
     }

@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:19:13 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/07 13:17:03 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/07 15:17:43 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -224,9 +224,7 @@ std::string HttpResponse::getDirectiveLoc(const ServerConfig &server, const std:
             return(std::string());
         if (location->getPath() == path)
         {
-            if (directive == "default")
-                return (location->getDefaultName());
-            else if (directive == "index")
+            if (directive == "index")
                 return (location->getIndex());
             else if (directive == "autoindex")
                 return (location->getAutoIndex());
