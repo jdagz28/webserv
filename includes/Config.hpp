@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 22:38:46 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/03 15:30:10 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/07 02:26:14 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,8 +41,6 @@ class Config
         void    checkFile(const std::string &configPath);
         void    parseConfig(const std::string &configFile);
 
-        void    parseLocationBlock(std::ifstream &infile, LocationConfig &locationConfig);
-
         void    skipEventsBlock(std::ifstream &infile);
         void    checkBraces(const std::string &token, int &openingBrace, int &closingBrace);
         bool    checkErrorPage(const std::string &errorPagePath);
@@ -63,6 +61,19 @@ class Config
         void    parseServerName(const std::string &value, ServerConfig &serverConfig);
         bool    checkServerName(const std::string &name);
         
+        //  location-block parsing
+        void    parseLocationBlock(std::ifstream &infile, LocationConfig &locationConfig);
+        void    parseLocationDirective(const std::string &token, std::istringstream &iss, std::ifstream &infile, LocationConfig &locationConfig);
+        void    checkAllowedMethod(const std::string &value, LocationConfig &locationConfig);
+        void    parseLimitExcept(std::istringstream &iss, LocationConfig &locationConfig);
+        void    parseTypes(std::istringstream &iss);
+        void    parseLimitExceptTypes(std::ifstream &infile, LocationConfig &locationConfig);
+        void    parseRedirect(const std::string &value, LocationConfig &locationConfig);
+        void    parseAutoindex(const std::string &value, LocationConfig &locationConfig);
+        void    parseIndex(const std::string &value, LocationConfig &locationConfig);
+        void    parseRoot(const std::string &value, LocationConfig &locationConfig);
+        void    checkValueNum(const std::string &token, const std::string &value);
+        bool    validLocationDirective(const std::string &token);
         
 
     public:

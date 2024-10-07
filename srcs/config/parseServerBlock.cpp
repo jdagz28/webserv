@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/02 11:19:31 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/04 15:17:47 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/07 01:25:35 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -153,7 +153,6 @@ void Config::parseServerDirective(const std::string &token, std::istringstream &
         parseLocationBlock(infile, locationConfig);
         std::string value;
         std::getline(iss, value);
-        _parsedLine++;
         trimWhitespaces(value);
         locationConfig.setPath(value);
         serverConfig.setLocationConfig(locationConfig);

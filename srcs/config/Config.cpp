@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 22:38:59 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/04 14:51:16 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/07 02:46:29 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,8 +84,8 @@ void    Config::checkFile(const std::string &configPath)
 void Config::skipEventsBlock(std::ifstream &infile)
 {
     std::string line;
-    int braceCount = 0;
-    bool hasOpeningBrace = false;
+    int openingBrace = 0;
+    int closingBrace = 0;
 
     while (std::getline(infile, line))
     {
@@ -93,33 +93,20 @@ void Config::skipEventsBlock(std::ifstream &infile)
         trimWhitespaces(line);
         if (line.empty() || line[0] == '#')
             continue ;
-        size_t posOpen = line.find("{");
-        if (posOpen != std::string::npos)
-        {
-            braceCount++;
-            hasOpeningBrace = true;
-        }
-        size_t posClose = line.find("}");
-        if (posClose != std::string::npos)
-        {
-            braceCount++;
-            if (braceCount == 1)
-            {
-                _error = "no opening brace for events block";
-                throw configException(_error, _configPath, _parsedLine);
-            }
-        }
-        if (braceCount != 2 || posOpen > posClose)
-        {
-            _error = "mismatch braces for events block";
-            throw configException(_error, _configPath, _parsedLine);
-        }
-        if (braceCount == 2 && hasOpeningBrace)
-            return ;
+
+        std::istringstream iss(line);
+        std::string token;
+        iss >> token;
+        
+        checkBraces(token, openingBrace, closingBrace);
+        if (token == "{")
+            continue ;
+        if (token == "}")
+            break ; 
     }
-    if (braceCount != 0)
+    if (openingBrace != closingBrace)
     {
-        _error = "mismatch braces for events block";
+        _error = "mismatch braces in server block";
         throw configException(_error, _configPath, _parsedLine);
     }
 }
