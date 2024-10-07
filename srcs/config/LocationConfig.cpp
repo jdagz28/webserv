@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/07 23:05:41 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/11 11:13:15 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/07 13:22:50 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 #include <algorithm>
 
 LocationConfig::LocationConfig()
-    : _path(""), _isLimited("False")
+    : _path("")
 {
 }
 
@@ -23,8 +23,6 @@ LocationConfig::LocationConfig(const LocationConfig &copy)
     _path = copy.getPath();
     _directives = copy.getDirectives();
     _allowedMethods = copy.getAllowedMethods();
-    _isLimited = copy.isLimited();
-    _limitExcept = copy.getLimitExcept();
 }
 
 LocationConfig::~LocationConfig()
@@ -32,11 +30,12 @@ LocationConfig::~LocationConfig()
 
 LocationConfig    &LocationConfig::operator=(const LocationConfig &copy)
 {
-    _path = copy.getPath();
-    _directives = copy.getDirectives();
-    _allowedMethods = copy.getAllowedMethods();
-    _isLimited = copy.isLimited();
-    _limitExcept = copy.getLimitExcept();
+    if (this != &copy)
+    {
+        _path = copy.getPath();
+        _directives = copy.getDirectives();
+        _allowedMethods = copy.getAllowedMethods();
+    }
     return (*this);
 }
 
@@ -53,16 +52,6 @@ void    LocationConfig::setPath(const std::string &path)
 void    LocationConfig::setAllowedMethod(const std::string &method)
 {
     _allowedMethods.push_back(method);
-}
-
-void    LocationConfig::setLimitExcept(bool limited)
-{
-    _isLimited = limited;
-}
-
-void    LocationConfig::setLimitExcept(const std::string &method)
-{
-    _limitExcept.push_back(method);
 }
 
 const std::map<std::string, std::vector<std::string> > &LocationConfig::getDirectives() const
@@ -89,11 +78,6 @@ const std::string LocationConfig::getRoot() const
 const std::vector<std::string> &LocationConfig::getAllowedMethods() const
 {
     return(_allowedMethods);
-}
-
-const std::vector<std::string> &LocationConfig::getLimitExcept() const
-{
-    return(_limitExcept);
 }
 
 const std::string LocationConfig::getDefaultName() const
@@ -140,22 +124,6 @@ bool LocationConfig::isMethodAllowed(const std::string &method) const
     return (false);
 }
 
-bool LocationConfig::isLimited() const
-{
-    return (_isLimited);
-}
-
-bool LocationConfig::isLimitExcept(const std::string &method) const
-{
-    if (_limitExcept.empty())
-        return (true); //if not specified - then allow all methods
-    std::vector<std::string>::const_iterator it;
-    for(it = _limitExcept.begin(); it != _limitExcept.end(); it++)
-        if (*it == method)
-            return (true);
-    return (false);
-}
-
 bool LocationConfig::isRedirect() const
 {
     if (_directives.empty())
@@ -180,3 +148,4 @@ const std::vector<std::string>& LocationConfig::getRedirect() const
     static const std::vector<std::string> empty;
     return (empty);
 }
+

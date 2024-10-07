@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:19:13 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/03 15:04:21 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/07 13:17:03 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -157,21 +157,10 @@ bool HttpResponse::isMethodAllowed(const ServerConfig &server, const std::string
         std::string config_location = location->getPath();
         if (config_location == path)
         {
-            if (location->isLimited())
+            if (!location->isMethodAllowed(requestMethod))
             {
-                if (!location->isLimitExcept(requestMethod))
-                {
-                    setStatusCode(METHOD_NOT_ALLOWED);
-                    return (false);
-                }
-            }
-            else
-            {
-                if (!location->isMethodAllowed(requestMethod))
-                {
-                    setStatusCode(METHOD_NOT_ALLOWED);
-                    return (false);
-                }
+                setStatusCode(METHOD_NOT_ALLOWED);
+                return (false);
             }
             _allowedMethods = location->getAllowedMethods();
             return (true);

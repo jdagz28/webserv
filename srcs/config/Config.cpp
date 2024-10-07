@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 22:38:59 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/07 02:46:29 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/07 13:13:56 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,13 @@ Config::Config(const std::string &configPath)
 
 Config::Config(const Config &copy)
 {
-    (void) copy;
+    _configPath = copy._configPath;
+    _parsedLine = copy._parsedLine;
+    _error = copy._error;
+    _serverConfig = copy._serverConfig;
+    _serverCount = copy._serverCount;
+    _keepAliveTimeOut = copy._keepAliveTimeOut;
+    _errorPages = copy._errorPages;
 }
 
 Config::~Config()
@@ -34,7 +40,16 @@ Config::~Config()
 
 Config  &Config::operator=(const Config &copy)
 {
-    (void) copy;
+    if (this != &copy)
+    {
+        _configPath = copy._configPath;
+        _parsedLine = copy._parsedLine;
+        _error = copy._error;
+        _serverConfig = copy._serverConfig;
+        _serverCount = copy._serverCount;
+        _keepAliveTimeOut = copy._keepAliveTimeOut;
+        _errorPages = copy._errorPages;
+    }
     return (*this);
 }
 

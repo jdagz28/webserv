@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 02:19:46 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/03 15:31:31 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/07 13:26:55 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,10 +19,12 @@ ServerConfig::ServerConfig()
 
 ServerConfig::ServerConfig(const ServerConfig &copy)
 {
-    // _port = copy.getPort();
-    // _serverName = copy.getServerName();
-    _locationConfig = copy.getLocationConfig();
-    _directives = copy.getDirectives();
+    _directives = copy._directives;
+    _address = copy._address;
+    _serverName = copy._serverName;
+    _locationConfig = copy._locationConfig;
+    _errorPages = copy._errorPages;
+    _locationPaths = copy._locationPaths;
 }
 
 ServerConfig::~ServerConfig()
@@ -30,10 +32,15 @@ ServerConfig::~ServerConfig()
 
 ServerConfig    &ServerConfig::operator=(const ServerConfig &copy)
 {
-    // _port = copy.getPort();
-    // _serverName = copy.getServerName();
-    _locationConfig = copy.getLocationConfig();
-    _directives = copy.getDirectives();
+    if (this != &copy)
+    {
+        _directives = copy._directives;
+        _address = copy._address;
+        _serverName = copy._serverName;
+        _locationConfig = copy._locationConfig;
+        _errorPages = copy._errorPages;
+        _locationPaths = copy._locationPaths;
+    }
     return (*this);
 }
 
@@ -73,15 +80,37 @@ const std::map<std::string, std::vector<std::string> > &ServerConfig::getDirecti
     return (_directives);
 }
 
-// int   ServerConfig::getPort() const
-// {
-//     return (_port);
-// }
+std::string ServerConfig::getPort() const
+{
+    if (_address.empty())
+        return (std::string());
+    std::vector<std::string>::const_iterator it;
+    std::string ports;
+    for (it = _address.begin(); it != _address.end(); it++)
+    {
+        size_t pos = it->find(':');
+        if (pos != std::string::npos)
+        {    
+            ports += it->substr(pos + 1);
+            ports += " ";
+        }
+    }
+    return (ports);
+}
 
-// const std::string &ServerConfig::getServerName() const
-// {
-//     return (_serverName);
-// }
+std::string ServerConfig::getServerName() const
+{
+    if (_serverName.empty())
+        return (std::string());
+    std::vector<std::string>::const_iterator it;
+    std::string names;
+    for (it = _serverName.begin(); it != _serverName.end(); it++)
+    {
+        names += *it;
+        names += " ";
+    }
+    return (names);
+}
 
 const std::vector<LocationConfig> &ServerConfig::getLocationConfig() const
 {
@@ -94,4 +123,20 @@ const std::string ServerConfig::getErrorPage(StatusCode status) const
     if (it == _errorPages.end())
         return (std::string());
     return (it->second);
+}
+
+void ServerConfig::setLocationPath(const std::string &path)
+{
+    _locationPaths.push_back(path);
+}
+
+bool ServerConfig::isPathAlreadySet(const std::string &path) const
+{
+    std::vector<std::string>::const_iterator it;
+    for (it = _locationPaths.begin(); it != _locationPaths.end(); it++)
+    {
+        if (*it == path)
+            return (true);
+    }
+    return (false);
 }
