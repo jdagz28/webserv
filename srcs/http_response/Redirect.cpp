@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:02:29 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/25 12:58:24 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/07 16:10:44 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ bool HttpResponse::isRedirect()
             {
                 if (location->isRedirect())
                 {
-                    _redirectDirective = location->getRedirect();
+                    _redirectDirective = splitBySpaces(location->getRedirect());
                     return (true);
                 }
             }

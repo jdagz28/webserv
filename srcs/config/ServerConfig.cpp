@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 02:19:46 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/11 23:21:33 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/07 13:26:55 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,16 +14,17 @@
 #include <cstdlib>
 
 ServerConfig::ServerConfig()
-    : _port(-1), _serverName("")
 {
 }
 
 ServerConfig::ServerConfig(const ServerConfig &copy)
 {
-    _port = copy.getPort();
-    _serverName = copy.getServerName();
-    _locationConfig = copy.getLocationConfig();
-    _directives = copy.getDirectives();
+    _directives = copy._directives;
+    _address = copy._address;
+    _serverName = copy._serverName;
+    _locationConfig = copy._locationConfig;
+    _errorPages = copy._errorPages;
+    _locationPaths = copy._locationPaths;
 }
 
 ServerConfig::~ServerConfig()
@@ -31,10 +32,15 @@ ServerConfig::~ServerConfig()
 
 ServerConfig    &ServerConfig::operator=(const ServerConfig &copy)
 {
-    _port = copy.getPort();
-    _serverName = copy.getServerName();
-    _locationConfig = copy.getLocationConfig();
-    _directives = copy.getDirectives();
+    if (this != &copy)
+    {
+        _directives = copy._directives;
+        _address = copy._address;
+        _serverName = copy._serverName;
+        _locationConfig = copy._locationConfig;
+        _errorPages = copy._errorPages;
+        _locationPaths = copy._locationPaths;
+    }
     return (*this);
 }
 
@@ -43,23 +49,20 @@ void   ServerConfig::setDirective(const std::string &directive, const std::strin
     _directives[directive].push_back(value);
 }
 
-void    ServerConfig::setPort(const std::string &port)
+void    ServerConfig::setPort(const std::string &address)
 {
-    std::string portStr = port;
-    
-    size_t colonPos = port.find(':');
-    if (colonPos != std::string::npos)
-    {
-        portStr = port.substr(colonPos + 1);
-        _port = atoi(portStr.c_str());
-    }
-    else
-        _port = atoi(port.c_str());
+    _address.push_back(address);
 }
 
 void    ServerConfig::setServerName(const std::string &name)
 {
-    _serverName = name;
+    std::vector<std::string>::iterator it;
+    for (it = _serverName.begin(); it != _serverName.end(); it++)
+    {
+        if (*it == name)
+            return ;
+    }
+    _serverName.push_back(name);
 }
 
 void    ServerConfig::setLocationConfig(const LocationConfig &locationConfig)
@@ -67,19 +70,46 @@ void    ServerConfig::setLocationConfig(const LocationConfig &locationConfig)
     _locationConfig.push_back(locationConfig);
 }
 
+void ServerConfig::setErrorPage(int errorCode, const std::string &errorPagePath)
+{
+    _errorPages[errorCode] = errorPagePath;
+}
+
 const std::map<std::string, std::vector<std::string> > &ServerConfig::getDirectives() const
 {
     return (_directives);
 }
 
-int   ServerConfig::getPort() const
+std::string ServerConfig::getPort() const
 {
-    return (_port);
+    if (_address.empty())
+        return (std::string());
+    std::vector<std::string>::const_iterator it;
+    std::string ports;
+    for (it = _address.begin(); it != _address.end(); it++)
+    {
+        size_t pos = it->find(':');
+        if (pos != std::string::npos)
+        {    
+            ports += it->substr(pos + 1);
+            ports += " ";
+        }
+    }
+    return (ports);
 }
 
-const std::string &ServerConfig::getServerName() const
+std::string ServerConfig::getServerName() const
 {
-    return (_serverName);
+    if (_serverName.empty())
+        return (std::string());
+    std::vector<std::string>::const_iterator it;
+    std::string names;
+    for (it = _serverName.begin(); it != _serverName.end(); it++)
+    {
+        names += *it;
+        names += " ";
+    }
+    return (names);
 }
 
 const std::vector<LocationConfig> &ServerConfig::getLocationConfig() const
@@ -88,31 +118,25 @@ const std::vector<LocationConfig> &ServerConfig::getLocationConfig() const
 }
 
 const std::string ServerConfig::getErrorPage(StatusCode status) const
-{
-    std::string statusCode = toString(static_cast<int>(status));
-    
-    std::map<std::string, std::vector<std::string> >::const_iterator directive;    
-    for (directive = _directives.begin(); directive != _directives.end(); directive++)
-    {
-        if (directive->first == "error_page")
-        {
-            std::vector<std::string>::const_iterator error;
-            for (error = directive->second.begin(); error != directive->second.end(); error++)
-            {
-                std::string value = *error;
-                std::string code;
-                std::string path;
+{    
+    std::map<int, std::string>::const_iterator it = _errorPages.find(status);
+    if (it == _errorPages.end())
+        return (std::string());
+    return (it->second);
+}
 
-                std::size_t pos = value.find(' ');
-                if (pos != std::string::npos)
-                {
-                    code = value.substr(0, pos);
-                    path = value.substr(pos + 1);
-                }
-                if (code == statusCode)
-                    return (path);
-            }
-        }
+void ServerConfig::setLocationPath(const std::string &path)
+{
+    _locationPaths.push_back(path);
+}
+
+bool ServerConfig::isPathAlreadySet(const std::string &path) const
+{
+    std::vector<std::string>::const_iterator it;
+    for (it = _locationPaths.begin(); it != _locationPaths.end(); it++)
+    {
+        if (*it == path)
+            return (true);
     }
-    return (std::string());
+    return (false);
 }

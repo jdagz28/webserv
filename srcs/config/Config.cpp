@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 22:38:59 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/04 23:24:30 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/07 13:13:56 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,25 +17,22 @@
 #include <sstream>
 
 Config::Config(const std::string &configPath)
-    : _error(std::make_pair(0, "")), _serverCount(0), _keepAliveTimeOut(0)
+    : _configPath(configPath), _parsedLine(0), _error(""), _serverCount(0), _keepAliveTimeOut(0)
 {
-    try
-    {
-        if (configPath != DEFAULT_CONFIG)
-            checkFile(configPath);
-        parseConfig(configPath);
-
-        
-    }
-    catch (const configException &e)
-    {
-        std::cerr << e.what() << std::endl;
-    } 
+    if (configPath != DEFAULT_CONFIG)
+        checkFile(configPath);
+    parseConfig(configPath);
 }
 
 Config::Config(const Config &copy)
 {
-    (void) copy;
+    _configPath = copy._configPath;
+    _parsedLine = copy._parsedLine;
+    _error = copy._error;
+    _serverConfig = copy._serverConfig;
+    _serverCount = copy._serverCount;
+    _keepAliveTimeOut = copy._keepAliveTimeOut;
+    _errorPages = copy._errorPages;
 }
 
 Config::~Config()
@@ -43,7 +40,16 @@ Config::~Config()
 
 Config  &Config::operator=(const Config &copy)
 {
-    (void) copy;
+    if (this != &copy)
+    {
+        _configPath = copy._configPath;
+        _parsedLine = copy._parsedLine;
+        _error = copy._error;
+        _serverConfig = copy._serverConfig;
+        _serverCount = copy._serverCount;
+        _keepAliveTimeOut = copy._keepAliveTimeOut;
+        _errorPages = copy._errorPages;
+    }
     return (*this);
 }
 
@@ -74,122 +80,70 @@ void    Config::checkFile(const std::string &configPath)
 {
     if (configPath.empty())
     {
-        _error = std::make_pair(1, "No configuration file provided.");
-        throw configException(_error.second);
+        _error = "no configuration file provided.";
+        throw configException(_error);
     }
     else if (validExtension(configPath) == false)
     {
-        _error = std::make_pair(2, "Invalid configuration file type.");
-        throw configException(_error.second);
+        _error = "invalid configuration file type.";
+        throw configException(_error);
     }
     else if (validPath(configPath) == false)
     {
-        _error = std::make_pair(3, "Configuration file is not accessible.");
-        throw configException(_error.second);
+        _error = "configuration file is not accessible.";
+        throw configException(_error);
     }
 
 }
 
-void    Config::parseLocationBlock(std::ifstream &infile, LocationConfig &locationConfig)
+void Config::skipEventsBlock(std::ifstream &infile)
 {
     std::string line;
-    while(std::getline(infile, line))
-    {
-        if (line.find("}") != std::string::npos)
-            break;
-        // std::cout << "Line: " << line << std::endl;
-        std::istringstream iss(line);
-        std::string token;
-        // std::cout << "Token: " << token << std::endl;
-        iss >> token;
-        if (!token.empty())
-        {
-            std::string directive = token;
-            std::string value;
-            std::getline(iss, value);
-            trimWhitespaces(value);
-            if (directive == "allowed_methods")
-            {
-                std::vector<std::string> methods = splitBySpaces(value);
-                for (size_t i = 0; i < methods.size(); i++)
-                    locationConfig.setAllowedMethod(methods[i]);
-            }
-            else if (directive == "limit_except")
-            {
-                locationConfig.setLimitExcept(true);
-                std::vector<std::string> methods = splitBySpaces(value);
-                for (size_t i = 0; i < methods.size(); i++)
-                    locationConfig.setLimitExcept(methods[i]);
-            }
-            else if (directive != "{" && directive != "}")
-            {
-                std::vector<std::string> values = splitBySpaces(value);
-                for (size_t i = 0; i < values.size(); i++)
-                    locationConfig.setDirective(directive, values[i]);
-            }
-        }
-    }
-}
+    int openingBrace = 0;
+    int closingBrace = 0;
 
-void    Config::parseServerBlock(std::ifstream &infile, ServerConfig &serverConfig)
-{
-    std::string line;
     while (std::getline(infile, line))
     {
-        if (line.find("}") != std::string::npos)
-            break;
+        _parsedLine++;
+        trimWhitespaces(line);
+        if (line.empty() || line[0] == '#')
+            continue ;
 
-        // std::cout << "Line: " << line << std::endl;
         std::istringstream iss(line);
         std::string token;
-        // std::cout << "Token: " << token << std::endl;
         iss >> token;
-        if (token == "location")
-        {
-            LocationConfig locationConfig;
-            parseLocationBlock(infile, locationConfig);
-            std::string value;
-            std::getline(iss, value);
-            trimWhitespaces(value);
-            locationConfig.setPath(value);
-            serverConfig.setLocationConfig(locationConfig);
-        }
-        else
-        {
-            if (!token.empty())
-            {
-                std::string directive = token;
-                std::string value;
-                std::getline(iss, value);
-                trimWhitespaces(value);
-                if (directive == "listen")
-                    serverConfig.setPort(value);
-                else if (directive == "server_name")
-                    serverConfig.setServerName(value);
-                if (directive != "{" && directive != "}")
-                {
-                    std::vector<std::string> values = splitBySpaces(value);
-                    if (directive == "error_page")
-                    {
-                        for (size_t i = 0; i < values.size(); i++)
-                        {
-                            if (i + 1 < values.size())
-                            {
-                                std::string errorCode = values[i];
-                                std::string errorPage = values[i + 1];
-                                serverConfig.setDirective(directive, errorCode + " " + errorPage);
-                            }
-                            i++;
-                        }
-                    }
-                    else
-                        for (size_t i = 0; i < values.size(); i++)
-                            serverConfig.setDirective(directive, values[i]);
-                }
-            }
-        }
+        
+        checkBraces(token, openingBrace, closingBrace);
+        if (token == "{")
+            continue ;
+        if (token == "}")
+            break ; 
+    }
+    if (openingBrace != closingBrace)
+    {
+        _error = "mismatch braces in server block";
+        throw configException(_error, _configPath, _parsedLine);
     }
 }
+
+void    Config::checkBraces(const std::string &token, int &openingBrace, int &closingBrace)
+{
+    if (token == "{")
+        openingBrace++;
+    else if (token == "}")
+        closingBrace++;
+    if (closingBrace > 1 || openingBrace > 1)
+    {
+        _error = std::string("unexpected ") + GREEN + "\"" + token + "\"" + RESET;
+        throw configException(_error, _configPath, _parsedLine);
+    }
+    if (closingBrace > openingBrace)
+    {
+        _error = "a closing brace without an opening brace in http block";
+        throw configException(_error, _configPath, _parsedLine);
+    }
+}
+
 
 void    Config::parseConfig(const std::string &configFile)
 {
@@ -197,40 +151,48 @@ void    Config::parseConfig(const std::string &configFile)
 
     if (infile.fail())
     {
-        _error = std::make_pair(3, "Configuration file is not accessible.");
-        throw configException(_error.second);
+        _error = "configuration file is not accessible";
+        throw configException(_error, _configPath, _parsedLine);
     }
 
     std::string line;
+    
     while (std::getline(infile, line))
     {
+        _parsedLine++;
+        trimWhitespaces(line);
+        if (line.empty() || line[0] == '#')
+            continue ;
         std::istringstream iss(line);
         std::string token;
         iss >> token;
-        if (token == "keepalive_timeout")
+ 
+        if (token == "events")
         {
-            std::string value;
-            std::getline(iss, value);
-            trimWhitespaces(value);
-            std::stringstream ss(value);
-            int timeout;
-            ss >> timeout;
-            if (ss.fail())
-            {
-                _error = std::make_pair(4, "Invalid keepalive_timeout value.");
-                throw configException(_error.second);
-            }
-            _keepAliveTimeOut = timeout;
+            skipEventsBlock(infile);
+            continue ;
+        }
+        else if (token == "http")
+        {
+            parseHttpBlock(infile);
+            break ;
         }
         else if (token == "server")
         {
-            ServerConfig    serverConfig;
-            parseServerBlock(infile, serverConfig);
-            _serverConfig.push_back(serverConfig);
-            _serverCount++;
+            _error = "server block outside of http block";
+            throw configException(_error, _configPath, _parsedLine);
+        }
+        else if (token == "location")
+        {
+            _error = "location block outside of server block";
+            throw configException(_error, _configPath, _parsedLine);
+        }
+        else
+        {
+            _error = "invalid directive in http block";
+            throw configException(_error, _configPath, _parsedLine);
         }
     }
-       
 }
 
 const std::vector<ServerConfig>& Config::getServerConfig() const
@@ -240,10 +202,28 @@ const std::vector<ServerConfig>& Config::getServerConfig() const
 
 const char *Config::configException::what() const throw()
 {
-    return (exceptMsg.c_str());
+    if (!configPath.empty() && !parsedLine.empty())
+    {
+        errorMsg = RED + std::string("webserv: ") + RESET + "[emerg] " + exceptMsg
+                    + " in " + RESET + configPath + ":" + RED + parsedLine + std::string(RESET);
+        return (errorMsg.c_str());
+    }
+    else
+        return (exceptMsg.c_str());
 }
 
 time_t  Config::getKeepAliveTimeout() const
 {
     return (_keepAliveTimeOut);
+}
+
+std::string Config::getErrorPages() const
+{
+    std::string errorPages;
+    std::map<StatusCode, std::string>::const_iterator it;
+    for (it = _errorPages.begin(); it != _errorPages.end(); it++)
+    {
+        errorPages += "Error Code: " + toString(it->first) + " Error Page: " + it->second + "\n";
+    }
+    return (errorPages);
 }

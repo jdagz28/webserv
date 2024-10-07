@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:05:38 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/25 12:01:45 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/07 15:34:59 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,28 +47,6 @@ void HttpResponse::processRequestGET()
 
     if (isDirectory(path))
     {
-        if (checkDirIndex())
-        {
-            std::string redirect = _request.getRequestLine().getUri();
-            if (redirect[redirect.length() - 1] != '/')
-                redirect += '/';
-            std::string index = getDirective("index");
-            if (index.empty())
-            {
-                setStatusCode(NOT_FOUND);
-                return ;
-            }
-            std::string indexPath;
-            if (!checkSlash(redirect, index))
-                indexPath = redirect + '/' + index;
-            else if (redirect[redirect.length() - 1] == '/' && index[0] == '/')
-                indexPath = redirect + index.substr(1);
-            else
-                indexPath = redirect + index;
-            getResource(indexPath);
-            return ;
-        }
-        
         if (path.find("directory") != std::string::npos)
         {
             std::string uri = _request.getRequestLine().getUri();
@@ -116,7 +94,7 @@ void HttpResponse::getResource(const std::string &target_path)
     }
     else
     {
-        std::string defaultPage = getDirective("default");
+        std::string defaultPage = getDirective("index");
         if (defaultPage.empty())
             setStatusCode(NOT_FOUND);
         if (!checkSlash(target_path, defaultPage))

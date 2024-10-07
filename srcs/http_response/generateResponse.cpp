@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:11:06 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/16 10:16:27 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/07 13:17:50 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,28 +116,14 @@ void HttpResponse::addAllowHeader()
             if (config_location == target_path)
             {
                 std::string allowed_method;
-                if (location->isLimited())
+                std::vector<std::string> allowedMethods = location->getAllowedMethods();
+                for (size_t i = 0; i < allowedMethods.size(); i++)
                 {
-                    std::vector<std::string> limitExceptMethods = location->getLimitExcept();
-                    for (size_t i = 0; i < limitExceptMethods.size(); i++)
-                    {
-                        if (i != 0)
-                            allowed_method += ", ";
-                        allowed_method += limitExceptMethods[i];
-                    }
-                    _headers["Allow"] = allowed_method;
+                    if (i != 0)
+                        allowed_method += ", ";
+                    allowed_method += allowed_method[i];
                 }
-                else
-                {
-                    std::vector<std::string> allowedMethods = location->getAllowedMethods();
-                    for (size_t i = 0; i < allowedMethods.size(); i++)
-                    {
-                        if (i != 0)
-                            allowed_method += ", ";
-                        allowed_method += allowed_method[i];
-                    }
-                    _headers["Allow"] = allowed_method;
-                }
+                _headers["Allow"] = allowed_method;
             }
         }
     }

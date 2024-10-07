@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   configDebug.cpp                                    :+:      :+:    :+:   */
+/*   configPrint.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/07 01:23:08 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/03 03:59:37 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/07 16:07:49 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,17 +18,36 @@
 
 void    printConfigData(const Config &config)
 {
+    std::cout << "=======================================" << std::endl;
     if (config.getKeepAliveTimeout())
         std::cout << "Keep-Alive timeout " << config.getKeepAliveTimeout() << std::endl;
+    std::cout << "ERROR PAGES" << std::endl;
+    std::cout << config.getErrorPages() << std::endl << std::endl;
     
     for (size_t i = 0; i < config.getServerConfig().size(); i++)
     {
         const ServerConfig &server = config.getServerConfig()[i];
 
         std::cout << "=======================================" << std::endl;
-        std::cout << "Server Name: " << server.getServerName() << std::endl;
-        std::cout << "Port: " << server.getPort() << std::endl << std::endl;
-
+        std::vector<std::string> serverNames = splitBySpaces(server.getServerName());
+        if (serverNames.size() > 1)
+        {
+            std::cout << "Server Names: " << std::endl;
+            for (size_t i = 0; i < serverNames.size(); i++)
+                std::cout << "\t \t" << serverNames[i] << std::endl;
+        }
+        else
+            std::cout << "Server Name: \t \t" << serverNames[0] << std::endl;
+        std::vector<std::string> serverPorts = splitBySpaces(server.getPort());
+        if (serverPorts.size() > 1)
+        {
+            std::cout << "Ports: " << std::endl;
+            for (size_t i = 0; i < serverPorts.size(); i++)
+                std::cout << "\t \t" << serverPorts[i] << std::endl;
+        }
+        else
+            std::cout << "Port: \t \t" << serverPorts[0] << std::endl;
+ 
         std::cout << "DIRECTIVES" << std::endl;
         const std::map<std::string, std::vector<std::string> > &directives = server.getDirectives();
         std::map<std::string, std::vector<std::string> >::const_iterator it;
@@ -58,28 +77,13 @@ void    printConfigData(const Config &config)
                 std::cout << "\t\tAllowed Method: " << std::endl;
             for (allowed = allowedMethods.begin(); allowed != allowedMethods.end(); allowed++)
                 std::cout << "\t\t\t" << *allowed << std::endl;
-            
-            const std::vector<std::string> &exceptMethods = location.getLimitExcept();
-            std::vector<std::string>::const_iterator except;
-            if (!exceptMethods.empty())
-                std::cout << "\t\tExcept Method: " << std::endl;
-            for (except = exceptMethods.begin(); except != exceptMethods.end(); except++)
-            {
-                std::cout << "\t\t\t" << *except << std::endl;
-            }
-            
-            const std::map<std::string, std::vector<std::string> >&locationDirectives = location.getDirectives();
-            std::map<std::string, std::vector<std::string> >::const_iterator it;
+                       
+            const std::map<std::string, std::string>&locationDirectives = location.getDirectives();
+            std::map<std::string, std::string>::const_iterator it;
             for (it = locationDirectives.begin(); it != locationDirectives.end(); it++)
             {
-                std::cout << "\t\t";
-                std::cout << it->first << std::endl;
-                const std::vector<std::string> &values = it->second;
-                for (size_t j = 0; j < values.size(); j++)
-                {
-                    std::cout << "\t\t\t";
-                    std::cout << "Value: " << values[j] << std::endl;   
-                }
+                std::cout << "\t\t" << it->first << std::endl;
+                std::cout << "\t\t\tValue: " << it->second << std::endl;  
             }
         }
     }
