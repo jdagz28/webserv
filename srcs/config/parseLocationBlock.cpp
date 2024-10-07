@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/04 14:50:02 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/07 02:43:22 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/07 02:57:31 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -154,6 +154,11 @@ void Config::parseIndex(const std::string &value, LocationConfig &locationConfig
             _error = std::string("invalid value in ") + GREEN + "\"index\"" + RESET + " directive";
             throw configException(_error, _configPath, _parsedLine);
         }
+    }
+    if (value.substr(value.size() - 5) != ".html")
+    {
+        _error = std::string("invalid value in ") + GREEN + "\"index\"" + RESET + " directive";
+        throw configException(_error, _configPath, _parsedLine);
     }
     locationConfig.setDirective("index", value);
 }
