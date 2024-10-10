@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:11:42 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/21 23:00:35 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/10 21:39:50 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,8 +41,6 @@ class HttpRequest
         
 
         HttpRequest();
-        HttpRequest(const HttpRequest &copy);
-        HttpRequest &operator=(const HttpRequest &copy);
 
         void    parseHttpRequest();
         void    requestToBuffer(); 
@@ -66,6 +64,8 @@ class HttpRequest
     
     public:
         HttpRequest(int client_socket);
+        HttpRequest(const HttpRequest &copy);
+        HttpRequest &operator=(const HttpRequest &copy);
         ~HttpRequest();
 
         void    setClientSocket(int client_socket);
@@ -80,7 +80,7 @@ class HttpRequest
         const std::string getHeader(const std::string &field) const;
         bool isSupportedMediaPOST();
         bool isSupportedMediaPOST(const std::string &type);
-        const std::map<std::string, std::string> &getFormData() const; //!
+        const std::map<std::string, std::string> &getFormData() const;
         bool    isMultiPartFormData(std::string *boundary);
         bool    isMultiPartFormData();
         bool    isForUpload();
