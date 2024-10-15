@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 22:38:46 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/07 02:26:14 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/15 13:04:15 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,6 +72,7 @@ class Config
         void    parseAutoindex(const std::string &value, LocationConfig &locationConfig);
         void    parseIndex(const std::string &value, LocationConfig &locationConfig);
         void    parseRoot(const std::string &value, LocationConfig &locationConfig);
+        void    parseClientBodySize(std::string &value, LocationConfig &locationConfig);
         void    checkValueNum(const std::string &token, const std::string &value);
         bool    validLocationDirective(const std::string &token);
         

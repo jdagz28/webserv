@@ -6,11 +6,12 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/07 23:05:41 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/07 16:06:02 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/15 13:03:31 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "LocationConfig.hpp"
+#include "webserv.hpp"
 #include <algorithm>
 
 LocationConfig::LocationConfig()
@@ -148,3 +149,13 @@ std::string LocationConfig::getRedirect() const
     return (std::string());
 }
 
+int LocationConfig::getClientMaxBodySize()
+{
+    std::map<std::string, std::string>::const_iterator directive;
+    for (directive = _directives.begin(); directive != _directives.end(); directive++)
+    {
+        if (directive->first == "client_max_body_size")
+            return (strToInt(directive->second));
+    }
+    return (-1);
+}

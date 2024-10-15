@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 22:38:51 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/07 16:02:19 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/15 13:02:21 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,7 @@ class LocationConfig
         const std::string getIndex() const;
         const std::string getAutoIndex() const;
         std::string getRedirect() const;
+        int getClientMaxBodySize();
 
         bool    isMethodAllowed(const std::string &method) const;
         bool    isRedirect() const;
