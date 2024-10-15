@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/04 14:50:02 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/07 15:56:27 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/15 13:07:37 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -177,9 +177,26 @@ void Config::parseRoot(const std::string &value, LocationConfig &locationConfig)
     locationConfig.setDirective("root", value);
 }
 
+void Config::parseClientBodySize(std::string &value, LocationConfig &locationConfig)
+{
+    if (value[value.length() - 1] != 'M' && value[value.length() - 1] != 'm')
+    {
+        _error = std::string("invalid value in ") + GREEN + "\"" + "client_max_body_size" + "\"" + RESET;
+        throw configException(_error, _configPath, _parsedLine);
+    }
+    value = value.substr(0, value.length() - 1);
+    int converted = strToInt(value);
+    if (converted < 0 && converted > 10)
+    {
+        _error = std::string("invalid value in ") + GREEN + "\"" + "client_max_body_size" + "\"" + RESET;
+        throw configException(_error, _configPath, _parsedLine);
+    }
+    locationConfig.setDirective("client_max_body_size", value);
+}
+
 void Config::checkValueNum(const std::string &token, const std::string &value)
 {
-    if (token == "return" || token == "limit_except" || token == "types")
+    if (token == "return" || token == "limit_except" || token == "types" || token == "client_max_body_size")
         return ;
     std::vector<std::string> values = splitBySpaces(value);
     if (value.empty() || values.size() != 1)
@@ -191,7 +208,8 @@ void Config::checkValueNum(const std::string &token, const std::string &value)
 
 bool Config::validLocationDirective(const std::string &token)
 {
-    if (token == "root" || token == "index" || token == "autoindex" || token == "return" || token == "limit_except" || token == "types")
+    if (token == "root" || token == "index" || token == "autoindex" || token == "return" || token == "limit_except" 
+        || token == "types" || token == "client_max_body_size")
         return (true);
     return (false);   
 }
@@ -222,6 +240,8 @@ void Config::parseLocationDirective(const std::string &token, std::istringstream
                 parseAutoindex(value, locationConfig);
             else if (token == "return")
                 parseRedirect(value, locationConfig);
+            else if (token == "client_max_body_size")
+                parseClientBodySize(value, locationConfig);
         }
     }
     else
