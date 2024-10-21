@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:05:38 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/21 12:27:18 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/21 22:47:43 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,9 +66,7 @@ void HttpResponse::processRequestGET()
             while (checkPath.find("//") != std::string::npos)
                 checkPath.erase(checkPath.find("//"), 1);
             if (fileExists(checkPath))
-            {
                 getResourceContent(checkPath);
-            }
         }
 
         if (isAutoIndex())
@@ -262,56 +260,76 @@ void HttpResponse::generateDirList(std::string path)
     _headers["Location"] = _request.getHost() + "/" + path;
     std::stringstream html;
     
-    html << "<!DOCTYPE html>";
-    html << "<html lang=\"en\">";
-    
-    html << "<head>";
-    html << "<meta charset=\"UTF-8\">";
-    html << "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">";
-    html << "<link rel=\"stylesheet\" href=\"/resources/css/styles.css\">";
-    html << "<link rel=\"stylesheet\" href=\"/resources/css/directory.css\">";
-    html << "<title>Index of " << path << "</title>";
-    html << "</head><body>";
+    html << "<!DOCTYPE html>\r\n";
+    html << "<html lang=\"en\">\r\n\r\n";
+    html << "<head>\r\n";
+    html << "\t<meta charset=\"UTF-8\">\r\n";
+    html << "\t<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\r\n";
+    html << "\t<link rel=\"stylesheet\" href=\"/resources/css/styles.css\">\r\n";
+    html << "\t<link rel=\"stylesheet\" href=\"/resources/css/directory.css\">\r\n";
+    html << "\t<title>Index of " << path << "</title>\r\n";
+    html << "</head>\r\n\r\n";
+    html << "<body>\r\n";
+    html << "\t<nav class=\"navbar\">\r\n";
+    html << "\t\t<ul class=\"nav-list\">\r\n";
+    html << "\t\t\t<li class=\"nav-item\"><a href=\"/\">Home</a></li>\r\n";
+    html << "\t\t\t<li class=\"nav-item\"><a href=\"/html/features.html\">Features</a></li>\r\n";
+    html << "\t\t\t<li class=\"nav-item\"><a href=\"/directory\">Directory</a></li>\r\n";
+    html << "\t\t\t<li class=\"nav-item\"><a href=\"/html/search.html\">Search</a></li>\r\n";
+    html << "\t\t\t<li class=\"nav-item\"><a href=\"/\">About Us</a></li>\r\n";
+    html << "\t\t</ul>\r\n";
+    html << "\t</nav>\r\n\r\n";
+    html << "\t<div class=\"directory\">\r\n";
+    html << "\t\t<h1>Index of " << path << "</h1>\r\n";
 
-    html << "<nav class=\"navbar\">";
-    html << "<ul class=\"nav-list\">";
-    html << "<li class=\"nav-item\"><a href=\"/\">Home</a></li>";
-    html << "<li class=\"nav-item\"><a href=\"/html/features.html\">Features</a></li>";
-    html << "<li class=\"nav-item\"><a href=\"/directory\">Directory</a></li>";
-    html << "<li class=\"nav-item\"><a href=\"/html/search.html\">Search</a></li>";
-    html << "<li class=\"nav-item\"><a href=\"/\">About Us</a></li>";
-    html << "</ul>";
-    html << "</nav><div class=\"directory\">";
-    
-    html << "<h1>Index of " << path << "</h1>";
+    if (!path.empty() && path != "/directory") 
+    {
+        size_t pos = path.find("website/");
+        if (pos != std::string::npos)
+            pos += std::string("website/").length();
+        else
+            pos = 0;
+        std::string parentPath = path.substr(pos, path.find_last_of('/') - pos);
+        html << "\t\t<p><a href=\"http://" << _request.getHost() << "/" << parentPath << "\">⬅️ Move up</a></p>\r\n";
+    }
 
-    html << "<table class=\"table\">";
-    html << "<thead>";
-    html << "<tr><th>Name</th><th>Size</th><th>Last Modified</th></tr>";
-    html << "</thead><tbody>";
+    html << "\t\t<table class=\"table\">\r\n";
+    html << "\t\t\t<thead>\r\n";
+    html << "\t\t\t<tr><th>Name</th><th>Size</th><th>Last Modified</th></tr>\r\n";
+    html << "\t\t\t</thead>";
+    html << "\t\t\t<tbody>\r\n";
 
     std::set<FileData>::iterator itDir;
     for (itDir = directories.begin(); itDir != directories.end(); ++itDir)
     {
-        html << "<tr>";
-        html << "<td><a href=\"" + _request.getRequestLine().getUri() + "/" + itDir->filename + "/\">" + itDir->filename + "</a></td>";
-        html << "<td>--</td>";  
-        html << "<td>" + itDir->lastModified + "</td>";
-        html << "</tr>";
+        html << "\t\t\t<tr>\r\n";
+        html << "\t\t\t\t<td><a href=\"" + _request.getRequestLine().getUri() + "/" + itDir->filename + "/\">" + "📁 " + itDir->filename + "</a></td>\r\n";
+        html << "\t\t\t\t<td>--</td>\r\n";  
+        html << "\t\t\t\t<td>" + itDir->lastModified + "</td>\r\n";
+        html << "\t\t\t</tr>\r\n";
     }
 
     std::set<FileData>::iterator itFiles;
     for (itFiles = files.begin(); itFiles != files.end(); ++itFiles)
     {
-        html << "<tr>";
-        html << "<td><a href=\"" + _request.getRequestLine().getUri() + "/" + itFiles->filename + "\">" + itFiles->filename + "</a></td>";
-        html << "<td>" + toString(itFiles->size) + " bytes</td>"; 
-        html << "<td>" + itFiles->lastModified + "</td>";
-        html << "</tr>";
+        html << "\t\t\t<tr>\r\n";
+        std::string extension = getExtension(itFiles->filename);
+        std::string emoji;
+        if (extension == "html")
+            emoji = "🌐 ";
+        else if (extension == "jpg" || extension == "jpeg" || extension == "png" || extension == "bmp" || extension == "gif")
+            emoji = "🖼️ ";
+        html << "\t\t\t\t<td><a href=\"" + _request.getRequestLine().getUri() + "/" + itFiles->filename + "\">" + emoji + itFiles->filename + "</a></td>\r\n";
+        html << "\t\t\t\t<td>" + toString(itFiles->size) + " bytes</td>\r\n"; 
+        html << "\t\t\t\t<td>" + itFiles->lastModified + "</td>\r\n";
+        html << "\t\t\t</tr>\r\n";
     }
 
-    html << "</tbody></table>";
-    html << "</div></body></html>";
+    html << "\t\t\t</tbody>\r\n";
+    html << "\t\t</table>\r\n";
+    html << "\t</div>\r\n";
+    html << "</body>\r\n";
+    html << "</html>\r\n";
     
     _body = html.str();
     setStatusCode(OK);
