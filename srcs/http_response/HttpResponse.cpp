@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:19:13 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/21 12:20:17 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/22 00:16:57 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,6 @@ void HttpResponse::execMethod()
 {
     std::string method = _request.getRequestLine().getMethod();
     
-
     switch (checkMethod(method))
     {
         case GET:

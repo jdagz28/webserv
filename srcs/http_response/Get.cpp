@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:05:38 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/21 22:47:43 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/22 00:54:28 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ void HttpResponse::processRequestGET()
             setStatusCode(INTERNAL_SERVER_ERROR);
         return ;
     }
-
+    
     _locationConfig = getLocationConfig();
     if (_locationConfig.getPath().empty())
     {
@@ -55,6 +55,7 @@ void HttpResponse::processRequestGET()
         setStatusCode(NOT_FOUND);
         return ;
     }
+    std::cout << "Resolved path: " << path << std::endl;
     
     if (isDirectory(path))
     {
@@ -71,6 +72,7 @@ void HttpResponse::processRequestGET()
 
         if (isAutoIndex())
         {
+            std::cout << "Path before generating directory " << path << std::endl;
             generateDirList(path);
             return ;
         }
@@ -203,10 +205,13 @@ void HttpResponse::generateDirList(std::string path)
     struct stat statbuf;
     struct FileData fileInfo;
     
+    std::cout << "Path: " << path << std::endl;
     //OpenDir
     std::string uri = _request.getRequestLine().getUri();
     while (uri.find("//") != std::string::npos)
         uri.erase(uri.find("//"), 1);
+    if (uri[uri.size() - 1] == '/')
+        uri = uri.substr(0, uri.size() - 1);
     if (path.find(uri) == std::string::npos)
     {
         size_t addPath = uri.find("directory/");
@@ -214,6 +219,7 @@ void HttpResponse::generateDirList(std::string path)
         if (path[path.size() - 1] == '/')
             path = path.substr(0, path.size() - 1);
     }
+    std::cout << "Path: " << path << std::endl;
     dir = opendir(path.c_str());
     if (dir == NULL)
     {

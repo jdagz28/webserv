@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:18:22 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/10 21:42:57 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/21 23:27:03 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -314,7 +314,7 @@ bool HttpRequest::isMultiPartFormData()
 bool HttpRequest::isForUpload()
 {
     if (_multiFormData.empty())
-        return (false);
+    return (false);
     std::map<std::string, MultiFormData>::iterator form;
     for (form = _multiFormData.begin(); form != _multiFormData.end(); form++)
     {

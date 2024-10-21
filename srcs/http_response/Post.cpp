@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:57:50 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/21 12:25:57 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/21 23:23:01 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,9 +26,14 @@
 
 void    HttpResponse::processRequestPOST()
 {
-    ServerConfig config = checkLocConfigAndRequest();
-    if (!config.isValid())
-        return;
+    _serverConfig = checkLocConfigAndRequest();
+    if (!_serverConfig.isValid())
+    {
+        if (_status == INIT)
+            setStatusCode(INTERNAL_SERVER_ERROR);
+        return ;
+    }
+
     _locationConfig = getLocationConfig();
     if (_locationConfig.getPath().empty())
     {
@@ -38,7 +43,8 @@ void    HttpResponse::processRequestPOST()
     
     if (!isMethodAllowed(_locationConfig, _request.getRequestLine().getMethod()))
         return ;
-    
+
+
     _request.parseRequestBody();
     if (_request.getStatusCode() >= 400)
     {
@@ -63,6 +69,7 @@ void    HttpResponse::processRequestPOST()
     {
         if (_request.isForUpload())
         {
+            std::cout << "Processing image upload" << std::endl;
             processImageUpload();
         }
     }
@@ -72,7 +79,8 @@ void HttpResponse::processImageUpload()
 {
     std::srand(static_cast<unsigned>(std::time(0)));
     
-    std::string directory = "./website/uploads/";
+    std::cout << "Processing image upload" << std::endl;
+    std::string directory = "./website/directory/uploads/";
     struct stat st;
     if (stat(directory.c_str(), &st) == -1 || !S_ISDIR(st.st_mode))
     {

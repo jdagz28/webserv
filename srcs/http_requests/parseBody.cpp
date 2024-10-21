@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/25 12:44:49 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/10 21:53:07 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/22 00:52:51 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -187,6 +187,8 @@ void HttpRequest::parseRequestBody()
         setStatusCode(UNSUPPORTED_MEDIA_TYPE);
         return ;
     }
+    if (_parseStep != REQUEST_BODY)
+        _parseStep = REQUEST_BODY;
     while (true)
     {
         if (_buffer.empty())
