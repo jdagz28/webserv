@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/05 00:23:30 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/21 06:33:06 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/21 10:05:05 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,7 +115,7 @@ int main(int argc, char **argv)
 
             // std::cout << "Receiving request..." << std::endl;
             HttpRequest request(client_socket);
-            // printHttpRequest(request);
+            printHttpRequest(request);
             // std::cout << "Request parsed." << std::endl;
 
             // std::cout << "Generating response..." << std::endl;
@@ -123,7 +123,7 @@ int main(int argc, char **argv)
             response.execMethod();
             response.generateHttpResponse();
             
-            // printHttpResponse(response.getHttpResponse());
+            printHttpResponse(response.getHttpResponse());
             // std::cout << "Sending response..." << std::endl;
             response.sendResponse();
 

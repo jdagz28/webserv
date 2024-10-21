@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:13:31 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/21 05:59:01 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/21 10:57:33 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,7 @@ class HttpResponse
     private:
         HttpRequest                             &_request;
         Config                                  &_config;
+        ServerConfig                            _serverConfig;
         StatusCode                              _status;
         int                                     _client_socket; //!
         std::vector<std::string>                _allowedMethods; 
@@ -61,12 +62,13 @@ class HttpResponse
         void    processRequestGET();
 
         int checkMethod(const std::string &method);
-        bool    isMethodAllowed(const ServerConfig &server, const std::string &path, const HttpRequestLine &request);
+        bool    isMethodAllowed(const LocationConfig &location, const std::string &requestMethod);
         bool    isKeepAlive() const;
         ServerConfig    checkLocConfigAndRequest();
+        LocationConfig  getLocationConfig();
         
         std::string comparePath(const ServerConfig &server, const HttpRequestLine &request);
-        std::string resolvePath();
+        std::string resolvePath(const ServerConfig &server);
         std::string checkRoot(const ServerConfig &server, const std::string &path);
         
         std::string getDirective(const std::string &directive);
@@ -85,7 +87,7 @@ class HttpResponse
         void addAllowHeader();
         std::string generateHeaderLines();
 
-        bool isRedirect();
+        bool isRedirect(const LocationConfig &location);
         bool validateRedirect();
         bool isRedirectExternal();
         void getRedirectContent();

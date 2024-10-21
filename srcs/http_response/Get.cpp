@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:05:38 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/21 06:45:55 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/21 11:00:10 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,39 +25,37 @@
 
 void HttpResponse::processRequestGET()
 {
-    ServerConfig config = checkLocConfigAndRequest();
-    if (!config.isValid())
+    _serverConfig = checkLocConfigAndRequest();
+    if (!_serverConfig.isValid())
     {
         if (_status == INIT)
-            setStatusCode(NOT_FOUND);
+            setStatusCode(INTERNAL_SERVER_ERROR);
         return ;
     }
-    std::cout << "server " << config.getServerName() << std::endl;
-    std::cout << "server name " << _serverName << std::endl;
-    LocationConfig location = config.getLocationConfig(_request.getRequestLine().getUri());
+
+    LocationConfig location = getLocationConfig();
     if (location.getPath().empty())
     {
-        if (_status == INIT)
-            setStatusCode(NOT_FOUND);
+        setStatusCode(NOT_FOUND);
         return ;
     }
-    std::cout << "GET: " << location.getPath() << std::endl;
-    if (!isMethodAllowed(config, location.getPath(), _request.getRequestLine()))
+    
+    if (!isMethodAllowed(location, _request.getRequestLine().getMethod()))
         return ;
 
-    if (isRedirect())
+    if (isRedirect(location))
     {
         getRedirectContent();
         return ;
     }
-    
-    std::string path = resolvePath();
+
+    std::string path = resolvePath(_serverConfig);
     if (path.empty())
     {
         setStatusCode(NOT_FOUND);
         return ;
     }
-
+    
     if (isDirectory(path))
     {
         if (path.find("directory") != std::string::npos)
@@ -72,7 +70,7 @@ void HttpResponse::processRequestGET()
                 getResourceContent(checkPath);
             }
         }
-        
+
         if (isAutoIndex())
         {
             generateDirList(path);

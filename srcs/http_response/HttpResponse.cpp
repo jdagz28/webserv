@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:19:13 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/21 06:50:59 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/21 10:59:38 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,6 +124,30 @@ std::string HttpResponse::comparePath(const ServerConfig &server, const HttpRequ
     return (path);
 }
 
+
+LocationConfig HttpResponse::getLocationConfig()
+{
+    LocationConfig location;
+    
+    std::string path = comparePath(_serverConfig, _request.getRequestLine());
+    if (path.empty())
+        return (location);
+    
+    const std::vector<LocationConfig> &locationConfigs = _serverConfig.getLocationConfig();
+    if (locationConfigs.empty())
+        return (location);
+    std::vector<LocationConfig>::const_iterator loc;
+    for (loc = locationConfigs.begin(); loc != locationConfigs.end(); loc++)
+    {
+        if (loc->getPath() == path)
+        {
+            location = *loc;
+            return (location);
+        }
+    }
+    return (location);    
+}
+
 ServerConfig HttpResponse::checkLocConfigAndRequest()
 {
     ServerConfig config;
@@ -160,31 +184,16 @@ ServerConfig HttpResponse::checkLocConfigAndRequest()
     return (config);
 }
 
-bool HttpResponse::isMethodAllowed(const ServerConfig &server, const std::string &path, const HttpRequestLine &request)
+bool HttpResponse::isMethodAllowed(const LocationConfig &location, const std::string &requestMethod)
 {
-    std::string requestMethod = request.getMethod();
-    
-    const std::vector<LocationConfig> &locationConfigs = server.getLocationConfig();
-    if (locationConfigs.empty())
-        return (false);
-    std::vector<LocationConfig>::const_iterator location;
 
-    for (location = locationConfigs.begin(); location != server.getLocationConfig().end(); location++)
+    if (!location.isMethodAllowed(requestMethod))
     {
-        std::string config_location = location->getPath();
-        if (config_location == path)
-        {
-            if (!location->isMethodAllowed(requestMethod))
-            {
-                setStatusCode(METHOD_NOT_ALLOWED);
-                return (false);
-            }
-            _allowedMethods = location->getAllowedMethods();
-            return (true);
-        }
+        setStatusCode(METHOD_NOT_ALLOWED);
+        return (false);
     }
-    setStatusCode(METHOD_NOT_ALLOWED);
-    return (false);
+    _allowedMethods = location.getAllowedMethods();
+    return (true);
 }
 
 std::string HttpResponse::checkRoot(const ServerConfig &server, const std::string &path)
@@ -207,24 +216,16 @@ std::string HttpResponse::checkRoot(const ServerConfig &server, const std::strin
     return (std::string());
 }
 
-std::string HttpResponse::resolvePath()
+std::string HttpResponse::resolvePath(const ServerConfig &server)
 {
-    const std::vector<ServerConfig> &serverConfigs = _config.getServerConfig();
-    if (serverConfigs.empty())
+    std::string path = comparePath(server, _request.getRequestLine());
+    if (path.empty())
         return (std::string());
-    std::vector<ServerConfig>::const_iterator server;
-    for (server = serverConfigs.begin(); server != serverConfigs.end(); server++)
-    {
-        std::string path = comparePath(*server, _request.getRequestLine());
-        if (path.empty())
-            return (std::string());
-        std::string root = checkRoot(*server, path);
-        if (!root.empty())
-            return (root + path);
-        else
-            return (path);
-    }
-    return (std::string());
+    std::string root = checkRoot(server, path);
+    if (!root.empty())
+        return (root + path);
+    else
+        return (path);
 }
 
 std::string HttpResponse::getDirectiveLoc(const ServerConfig &server, const std::string &directive)

@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 02:19:46 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/21 06:36:46 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/21 09:40:24 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,9 +52,9 @@ void   ServerConfig::setDirective(const std::string &directive, const std::strin
     _directives[directive].push_back(value);
 }
 
-void    ServerConfig::setPort(const std::string &port)
+void    ServerConfig::setPort(int port)
 {
-    _port = strToInt(port);
+    _port = port;
 }
 
 void    ServerConfig::setServerName(const std::string &name)
@@ -135,7 +135,6 @@ LocationConfig ServerConfig::getLocationConfig(const std::string &path) const
     std::vector<LocationConfig>::const_iterator it;
     for (it = _locationConfig.begin(); it != _locationConfig.end(); it++)
     {
-        std::cout << "Location Path: " << it->getPath() << std::endl;
         if (it->getPath() == path)
             return (*it);
     }

@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:02:29 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/07 16:10:44 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/21 09:53:49 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,35 +20,12 @@
 #include <ctime>
 #include <sstream>
 
-bool HttpResponse::isRedirect()
+bool HttpResponse::isRedirect(const LocationConfig &location)
 {
-    const std::vector<ServerConfig> &serverConfigs = _config.getServerConfig();
-    if (serverConfigs.empty())
-        return (false);
-    std::vector<ServerConfig>::const_iterator server;
-    for (server = serverConfigs.begin(); server != serverConfigs.end(); server++)
+    if (location.isRedirect())
     {
-        std::string path = comparePath(*server, _request.getRequestLine());
-        if (path.empty())
-            continue ;
-        const std::vector<LocationConfig> &locationConfigs = server->getLocationConfig();
-        if (locationConfigs.empty())
-            return (false);
-        std::vector<LocationConfig>::const_iterator location;
-        for (location = locationConfigs.begin(); location != locationConfigs.end(); location++)
-        {
-            std::string path = comparePath(*server, _request.getRequestLine());
-            if (path.empty())
-                continue ;
-            if (location->getPath() == path)
-            {
-                if (location->isRedirect())
-                {
-                    _redirectDirective = splitBySpaces(location->getRedirect());
-                    return (true);
-                }
-            }
-        }
+        _redirectDirective = splitBySpaces(location.getRedirect());
+        return (true);
     }
     return (false);
 }

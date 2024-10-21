@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/02 11:19:31 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/21 06:34:12 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/21 09:39:00 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,34 +114,12 @@ void Config::parseServerListen(const std::string &value, ServerConfig &serverCon
         _error = std::string("invalid parameter ") + GREEN + "\"" + value + "\"" + RESET;
         throw configException(_error, _configPath, _parsedLine);
     }
-    
-    size_t colonPos = value.find(':');
-    std::string host;
-    std::string port;
-    if (colonPos != std::string::npos)
-    {
-        host = value.substr(0, colonPos);
-        port = value.substr(colonPos + 1);
-    }
-    else
-    {
-        host = "0.0.0.0";
-        port = value;
-    }
-    
-    if (!validPort(port))
+    if (!validPort(value))
     {
         _error = std::string("Invalid port number in ") + GREEN + "\"listen\"" + RESET + " directive";
         throw configException(_error, _configPath, _parsedLine);
     }
-    if (!checkAddr(host, port))
-    {
-        _error = std::string("host not found in \"") + host + ":" + port + "\" of the " 
-                    + GREEN + "\"listen\"" + RESET + " directive";
-        throw configException(_error, _configPath, _parsedLine);
-    }
-    std::string addr = host + ":" + port;
-    serverConfig.setPort(addr);
+    serverConfig.setPort(strToInt(value));
     serverConfig.setDirective("listen", value);
 }
 
