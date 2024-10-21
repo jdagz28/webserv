@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:57:50 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/21 09:55:32 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/21 12:25:57 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,14 +29,14 @@ void    HttpResponse::processRequestPOST()
     ServerConfig config = checkLocConfigAndRequest();
     if (!config.isValid())
         return;
-    LocationConfig location = config.getLocationConfig(_request.getRequestLine().getUri());
-    if (location.getPath().empty())
+    _locationConfig = getLocationConfig();
+    if (_locationConfig.getPath().empty())
     {
-        if (_status == INIT)
-            setStatusCode(INTERNAL_SERVER_ERROR);
+        setStatusCode(NOT_FOUND);
         return ;
     }
-    if (!isMethodAllowed(location, _request.getRequestLine().getMethod()))
+    
+    if (!isMethodAllowed(_locationConfig, _request.getRequestLine().getMethod()))
         return ;
     
     _request.parseRequestBody();
@@ -53,7 +53,7 @@ void    HttpResponse::processRequestPOST()
     std::string type = _request.getHeader("content-type");
     if (type == "application/x-www-form-urlencoded")
     {
-        if (isRedirect(location))
+        if (isRedirect(_locationConfig))
         {
             getRedirectContent();
             return ;

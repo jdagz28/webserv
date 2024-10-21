@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 22:50:55 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/24 05:13:35 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/21 12:40:52 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,16 +21,7 @@
 
 void HttpResponse::getErrorPage()
 {
-    std::string ErrorPagePath;
-    
-    const std::vector<ServerConfig> &serverConfigs = _config.getServerConfig();
-    if (serverConfigs.empty())
-        return ;
-    std::vector<ServerConfig>::const_iterator server;
-    for (server = serverConfigs.begin(); server != serverConfigs.end(); server++)
-    {
-        ErrorPagePath = server->getErrorPage(_status);
-    }
+    std::string ErrorPagePath = _serverConfig.getErrorPage(_status);
     if (!ErrorPagePath.empty())
         getResourceContent(ErrorPagePath);
     else
@@ -43,27 +34,27 @@ void HttpResponse::getErrorPage()
 
 std::string HttpResponse::generateErrorPage(const std::string &status, const std::string &statusMessage)
 {
-std::string html = std::string("<!DOCTYPE html>")
-        + "<html lang=\"en\">"
-        + "<head>"
-        + "<meta charset=\"UTF-8\">"
-        + "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">"
-        + "<link rel=\"stylesheet\" href=\"/resources/css/styles.css\">"
-        + "<title> Error " + status + "</title>"
-        + "</head><body>"
-
-        + "<nav class=\"navbar\">"
-        + "<ul class=\"nav-list\">"
-        + "<li class=\"nav-item\"><a href=\"/\">Home</a></li>"
-        + "<li class=\"nav-item\"><a href=\"/html/features.html\">Features</a></li>"
-        + "<li class=\"nav-item\"><a href=\"/directory\">Directory</a></li>"
-        + "<li class=\"nav-item\"><a href=\"/html/search.html\">Search</a></li>"
-        + "<li class=\"nav-item\"><a href=\"/\">About Us</a></li>"
-        + "</ul>"
-        + "</nav>"
-        + "<h1 class=\"landing\">" + status + ": " + statusMessage + "</h1>"
-        + "</body>\n"
-        + "</html>\n";
+std::string html = std::string("<!DOCTYPE html>\r\n")
+        + "<html lang=\"en\">\r\n\rn"
+        + "<head>\r\n"
+        + "\t<meta charset=\"UTF-8\">\r\n"
+        + "\t<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\r\n"
+        + "\t<link rel=\"stylesheet\" href=\"/resources/css/styles.css\">\r\n"
+        + "\t<title> Error " + status + "</title>\r\n"
+        + "</head>\r\n\r\n"
+        + "<body>\r\n"
+        + "\t<nav class=\"navbar\">\r\n"
+        + "\t\t<ul class=\"nav-list\">\r\n"
+        + "\t\t\t<li class=\"nav-item\"><a href=\"/\">Home</a></li>\r\n"
+        + "\t\t\t<li class=\"nav-item\"><a href=\"/html/features.html\">Features</a></li>\r\n"
+        + "\t\t\t<li class=\"nav-item\"><a href=\"/directory\">Directory</a></li>\r\n"
+        + "\t\t\t<li class=\"nav-item\"><a href=\"/html/search.html\">Search</a></li>\r\n"
+        + "\t\t\t<li class=\"nav-item\"><a href=\"/\">About Us</a></li>\r\n"
+        + "\t\t</ul>\r\n"
+        + "\t</nav>\r\n\r\n"
+        + "\t<h1 class=\"landing\">" + status + ": " + statusMessage + "</h1>\r\n\r\n"
+        + "</body>\r\n\r\n"
+        + "</html>\r\n";
 
     return (html);   
 }

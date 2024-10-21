@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:13:31 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/21 10:57:33 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/21 12:18:42 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,7 @@ class HttpResponse
         HttpRequest                             &_request;
         Config                                  &_config;
         ServerConfig                            _serverConfig;
+        LocationConfig                          _locationConfig;
         StatusCode                              _status;
         int                                     _client_socket; //!
         std::vector<std::string>                _allowedMethods; 
@@ -71,8 +72,7 @@ class HttpResponse
         std::string resolvePath(const ServerConfig &server);
         std::string checkRoot(const ServerConfig &server, const std::string &path);
         
-        std::string getDirective(const std::string &directive);
-        std::string getDirectiveLoc(const ServerConfig &server, const std::string &directive);
+        std::string getDirectiveLoc(const std::string &directive);
         
         void getResourceContent(const std::string &file_path);
         bool isSupportedMedia(const std::string &uri);

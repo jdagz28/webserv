@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:19:13 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/21 10:59:38 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/21 12:20:17 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -228,47 +228,16 @@ std::string HttpResponse::resolvePath(const ServerConfig &server)
         return (path);
 }
 
-std::string HttpResponse::getDirectiveLoc(const ServerConfig &server, const std::string &directive)
+std::string HttpResponse::getDirectiveLoc(const std::string &directive)
 {
-    const std::vector<LocationConfig> &LocationConfigs = server.getLocationConfig();
-    if (LocationConfigs.empty())
-        return (std::string());
-    std::vector<LocationConfig>::const_iterator location;
-    for (location = LocationConfigs.begin(); location != LocationConfigs.end(); location++)
-    {
-        std::string path = comparePath(server, _request.getRequestLine());
-        if (path.empty())
-            return(std::string());
-        if (location->getPath() == path)
-        {
-            if (directive == "index")
-                return (location->getIndex());
-            else if (directive == "autoindex")
-                return (location->getAutoIndex());
-        }
-    }
+
+    if (directive == "index")
+        return (_locationConfig.getIndex());
+    else if (directive == "autoindex")
+        return (_locationConfig.getAutoIndex());
     return (std::string());
 }
 
-
-std::string HttpResponse::getDirective(const std::string &directive)
-{
-    std::string defaultName;
-    const std::vector<ServerConfig> &serverConfigs = _config.getServerConfig();
-    if (serverConfigs.empty())
-        return (std::string());
-    std::vector<ServerConfig>::const_iterator server;
-    for (server = serverConfigs.begin(); server != serverConfigs.end(); server++)
-    {
-        std::string path = comparePath(*server, _request.getRequestLine());
-        if (path.empty())
-            return (std::string());
-        defaultName = getDirectiveLoc(*server, directive);
-        if (!defaultName.empty())
-            return (defaultName);
-    }
-    return (std::string());
-}
 
 bool HttpResponse::isSupportedMedia(const std::string &uri)
 {

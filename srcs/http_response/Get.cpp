@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:05:38 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/21 11:00:10 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/21 12:27:18 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,17 +33,17 @@ void HttpResponse::processRequestGET()
         return ;
     }
 
-    LocationConfig location = getLocationConfig();
-    if (location.getPath().empty())
+    _locationConfig = getLocationConfig();
+    if (_locationConfig.getPath().empty())
     {
         setStatusCode(NOT_FOUND);
         return ;
     }
     
-    if (!isMethodAllowed(location, _request.getRequestLine().getMethod()))
+    if (!isMethodAllowed(_locationConfig, _request.getRequestLine().getMethod()))
         return ;
 
-    if (isRedirect(location))
+    if (isRedirect(_locationConfig))
     {
         getRedirectContent();
         return ;
@@ -105,7 +105,7 @@ void HttpResponse::getResource(const std::string &target_path)
     }
     else
     {
-        std::string defaultPage = getDirective("index");
+        std::string defaultPage = getDirectiveLoc("index");
         if (defaultPage.empty())
             setStatusCode(NOT_FOUND);
         if (!checkSlash(target_path, defaultPage))
@@ -161,7 +161,7 @@ bool HttpResponse::checkSlash(const std::string &defaultLoc, const std::string &
 
 bool HttpResponse::checkDirIndex()
 {
-    std::string index = getDirective("index");
+    std::string index = getDirectiveLoc("index");
     if (index.empty())
         return (false);
     return (true);
@@ -169,7 +169,7 @@ bool HttpResponse::checkDirIndex()
 
 bool HttpResponse::isAutoIndex()
 {
-    std::string autoIndex = getDirective("autoindex");
+    std::string autoIndex = getDirectiveLoc("autoindex");
     if (autoIndex.empty() || autoIndex != "on")
         return (false);
     return (true);

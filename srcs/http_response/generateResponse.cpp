@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:11:06 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/07 13:17:50 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/21 12:41:33 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,8 +134,9 @@ std::string HttpResponse::generateStatusLine()
     std::ostringstream status_line;
     
     status_line << "HTTP/1.1" << " ";
-    status_line << static_cast<int>(getStatusCode()) << " ";
-    status_line << getStatusReason(getStatusCode());
+    status_line << toString(static_cast<int>(_status));
+    status_line << " ";
+    status_line << getStatusReason(_status);
     status_line << CRLF;
     return (status_line.str());   
 }
