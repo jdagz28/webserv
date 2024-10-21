@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 02:19:46 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/07 13:26:55 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/21 05:17:05 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ ServerConfig::ServerConfig()
 ServerConfig::ServerConfig(const ServerConfig &copy)
 {
     _directives = copy._directives;
-    _address = copy._address;
+    _port = copy._port;
     _serverName = copy._serverName;
     _locationConfig = copy._locationConfig;
     _errorPages = copy._errorPages;
@@ -35,7 +35,7 @@ ServerConfig    &ServerConfig::operator=(const ServerConfig &copy)
     if (this != &copy)
     {
         _directives = copy._directives;
-        _address = copy._address;
+        _port = copy._port;
         _serverName = copy._serverName;
         _locationConfig = copy._locationConfig;
         _errorPages = copy._errorPages;
@@ -49,9 +49,9 @@ void   ServerConfig::setDirective(const std::string &directive, const std::strin
     _directives[directive].push_back(value);
 }
 
-void    ServerConfig::setPort(const std::string &address)
+void    ServerConfig::setPort(const std::string &port)
 {
-    _address.push_back(address);
+    _port = strToInt(port);
 }
 
 void    ServerConfig::setServerName(const std::string &name)
@@ -80,22 +80,9 @@ const std::map<std::string, std::vector<std::string> > &ServerConfig::getDirecti
     return (_directives);
 }
 
-std::string ServerConfig::getPort() const
+int ServerConfig::getPort() const
 {
-    if (_address.empty())
-        return (std::string());
-    std::vector<std::string>::const_iterator it;
-    std::string ports;
-    for (it = _address.begin(); it != _address.end(); it++)
-    {
-        size_t pos = it->find(':');
-        if (pos != std::string::npos)
-        {    
-            ports += it->substr(pos + 1);
-            ports += " ";
-        }
-    }
-    return (ports);
+    return (_port);
 }
 
 std::string ServerConfig::getServerName() const
@@ -110,6 +97,19 @@ std::string ServerConfig::getServerName() const
         names += " ";
     }
     return (names);
+}
+
+std::string ServerConfig::checkServerName(const std::string &requestHost) const
+{
+    if (_serverName.empty())
+        return (DEFAULT_SERVERNAME);
+    std::vector<std::string>::const_iterator it;
+    for (it = _serverName.begin(); it != _serverName.end(); it++)
+    {
+        if (*it == requestHost)
+            return (requestHost);
+    }
+    return (DEFAULT_SERVERNAME);
 }
 
 const std::vector<LocationConfig> &ServerConfig::getLocationConfig() const

@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/07 01:23:08 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/07 16:07:49 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/21 05:17:52 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,15 +38,7 @@ void    printConfigData(const Config &config)
         }
         else
             std::cout << "Server Name: \t \t" << serverNames[0] << std::endl;
-        std::vector<std::string> serverPorts = splitBySpaces(server.getPort());
-        if (serverPorts.size() > 1)
-        {
-            std::cout << "Ports: " << std::endl;
-            for (size_t i = 0; i < serverPorts.size(); i++)
-                std::cout << "\t \t" << serverPorts[i] << std::endl;
-        }
-        else
-            std::cout << "Port: \t \t" << serverPorts[0] << std::endl;
+        std::cout << "Port: \t \t" << server.getPort() << std::endl;
  
         std::cout << "DIRECTIVES" << std::endl;
         const std::map<std::string, std::vector<std::string> > &directives = server.getDirectives();

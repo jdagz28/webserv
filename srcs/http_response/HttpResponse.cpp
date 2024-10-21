@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:19:13 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/07 15:17:43 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/21 05:23:41 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,16 +129,29 @@ bool HttpResponse::checkLocConfigAndRequest()
     const std::vector<ServerConfig> &serverConfigs = _config.getServerConfig();
     if (serverConfigs.empty())
         return (false);
+    std::string host = _request.getHost();
+        if (host.empty())
+            return (false);
+    std::string requestHost;
+    int port;
+    size_t check = host.find(":");
+    if (check != std::string::npos)
+    {
+        requestHost = host.substr(0, check);
+        port = strToInt(host.substr(check + 1));
+    }
+
     std::vector<ServerConfig>::const_iterator server;
     for (server = serverConfigs.begin(); server != serverConfigs.end(); server++)
     {
-        //! checkport -> config list and request port
         std::string path = comparePath(*server, _request.getRequestLine());
         if (path.empty())
             return (false);
-        // _serverName = server->getServerName(); //!match with getHost; return that if found if not default
+        _serverName = server->checkServerName(requestHost);
         if (!isMethodAllowed(*server, path, _request.getRequestLine()))
             return (false);
+        if (port == server->getPort())
+            break ;
     }
     return (true);
 }
@@ -168,7 +181,6 @@ bool HttpResponse::isMethodAllowed(const ServerConfig &server, const std::string
     }
     setStatusCode(METHOD_NOT_ALLOWED);
     return (false);
-    
 }
 
 std::string HttpResponse::checkRoot(const ServerConfig &server, const std::string &path)

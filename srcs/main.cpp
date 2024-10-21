@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/05 00:23:30 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/07 15:39:33 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/21 04:33:48 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,12 +111,12 @@ int main(int argc, char **argv)
                 perror("Failed to accept connection");
                 continue;
             }
-            // std::cout << "Connection accepted" << std::endl;
+            std::cout << "Connection accepted" << std::endl;
 
-            // std::cout << "Receiving request..." << std::endl;
+            std::cout << "Receiving request..." << std::endl;
             HttpRequest request(client_socket);
-            // printHttpRequest(request);
-            // std::cout << "Request parsed." << std::endl;
+            printHttpRequest(request);
+            std::cout << "Request parsed." << std::endl;
 
             // std::cout << "Generating response..." << std::endl;
             HttpResponse response(request, config, client_socket);
