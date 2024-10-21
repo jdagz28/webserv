@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 02:19:46 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/21 05:17:05 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/21 06:36:46 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include <cstdlib>
 
 ServerConfig::ServerConfig()
+    : _valid(false)
 {
 }
 
@@ -25,6 +26,7 @@ ServerConfig::ServerConfig(const ServerConfig &copy)
     _locationConfig = copy._locationConfig;
     _errorPages = copy._errorPages;
     _locationPaths = copy._locationPaths;
+    _valid = copy._valid;
 }
 
 ServerConfig::~ServerConfig()
@@ -40,6 +42,7 @@ ServerConfig    &ServerConfig::operator=(const ServerConfig &copy)
         _locationConfig = copy._locationConfig;
         _errorPages = copy._errorPages;
         _locationPaths = copy._locationPaths;
+        _valid = copy._valid;
     }
     return (*this);
 }
@@ -75,6 +78,11 @@ void ServerConfig::setErrorPage(int errorCode, const std::string &errorPagePath)
     _errorPages[errorCode] = errorPagePath;
 }
 
+void    ServerConfig::setValid()
+{
+    _valid = true;
+}
+
 const std::map<std::string, std::vector<std::string> > &ServerConfig::getDirectives() const
 {
     return (_directives);
@@ -99,6 +107,11 @@ std::string ServerConfig::getServerName() const
     return (names);
 }
 
+bool    ServerConfig::isValid() const
+{
+    return (_valid);
+}
+
 std::string ServerConfig::checkServerName(const std::string &requestHost) const
 {
     if (_serverName.empty())
@@ -115,6 +128,18 @@ std::string ServerConfig::checkServerName(const std::string &requestHost) const
 const std::vector<LocationConfig> &ServerConfig::getLocationConfig() const
 {
     return (_locationConfig);
+}
+
+LocationConfig ServerConfig::getLocationConfig(const std::string &path) const
+{
+    std::vector<LocationConfig>::const_iterator it;
+    for (it = _locationConfig.begin(); it != _locationConfig.end(); it++)
+    {
+        std::cout << "Location Path: " << it->getPath() << std::endl;
+        if (it->getPath() == path)
+            return (*it);
+    }
+    return (LocationConfig());   
 }
 
 const std::string ServerConfig::getErrorPage(StatusCode status) const

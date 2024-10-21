@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/07 23:05:41 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/15 13:03:31 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/21 06:19:03 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,7 @@ const std::map<std::string, std::string> &LocationConfig::getDirectives() const
     return (_directives);
 }
 
-const std::string &LocationConfig::getPath() const
+const std::string LocationConfig::getPath() const
 {
     return (_path);
 }
@@ -113,6 +113,7 @@ const std::string LocationConfig::getAutoIndex() const
     }
     return (std::string()); 
 }
+
 
 bool LocationConfig::isMethodAllowed(const std::string &method) const
 {

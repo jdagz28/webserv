@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:19:13 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/21 05:23:41 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/21 06:50:59 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,14 +124,16 @@ std::string HttpResponse::comparePath(const ServerConfig &server, const HttpRequ
     return (path);
 }
 
-bool HttpResponse::checkLocConfigAndRequest()
+ServerConfig HttpResponse::checkLocConfigAndRequest()
 {
+    ServerConfig config;
+    
     const std::vector<ServerConfig> &serverConfigs = _config.getServerConfig();
     if (serverConfigs.empty())
-        return (false);
+        return (config);
     std::string host = _request.getHost();
         if (host.empty())
-            return (false);
+            return (config);
     std::string requestHost;
     int port;
     size_t check = host.find(":");
@@ -146,14 +148,16 @@ bool HttpResponse::checkLocConfigAndRequest()
     {
         std::string path = comparePath(*server, _request.getRequestLine());
         if (path.empty())
-            return (false);
+            return (config);
         _serverName = server->checkServerName(requestHost);
-        if (!isMethodAllowed(*server, path, _request.getRequestLine()))
-            return (false);
         if (port == server->getPort())
-            break ;
+        {
+            config = *server;
+            config.setValid();
+            return (config);;
+        }    
     }
-    return (true);
+    return (config);
 }
 
 bool HttpResponse::isMethodAllowed(const ServerConfig &server, const std::string &path, const HttpRequestLine &request)

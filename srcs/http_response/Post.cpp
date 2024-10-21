@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:57:50 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/25 11:43:31 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/21 06:08:20 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,8 +26,11 @@
 
 void    HttpResponse::processRequestPOST()
 {
-    if (!checkLocConfigAndRequest())
-        return ;
+    ServerConfig config = checkLocConfigAndRequest();
+    if (!config.isValid())
+        return;
+    
+    
     _request.parseRequestBody();
     if (_request.getStatusCode() >= 400)
     {

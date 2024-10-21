@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:05:38 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/07 15:34:59 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/21 06:45:55 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,12 +25,25 @@
 
 void HttpResponse::processRequestGET()
 {
-    if (!checkLocConfigAndRequest())
+    ServerConfig config = checkLocConfigAndRequest();
+    if (!config.isValid())
     {
         if (_status == INIT)
             setStatusCode(NOT_FOUND);
         return ;
     }
+    std::cout << "server " << config.getServerName() << std::endl;
+    std::cout << "server name " << _serverName << std::endl;
+    LocationConfig location = config.getLocationConfig(_request.getRequestLine().getUri());
+    if (location.getPath().empty())
+    {
+        if (_status == INIT)
+            setStatusCode(NOT_FOUND);
+        return ;
+    }
+    std::cout << "GET: " << location.getPath() << std::endl;
+    if (!isMethodAllowed(config, location.getPath(), _request.getRequestLine()))
+        return ;
 
     if (isRedirect())
     {
