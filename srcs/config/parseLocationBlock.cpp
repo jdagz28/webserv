@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/04 14:50:02 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/22 14:06:38 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/22 15:10:29 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,7 +82,8 @@ void Config::parseTypes(const std::string &value, std::ifstream &infile, Locatio
 void Config::parseLimitExcept(const std::string &value, std::ifstream &infile, LocationConfig &locationConfig)
 {
     checkAllowedMethod(value, locationConfig);
-        
+    locationConfig.setDirective("limit_except", "true");
+
     std::string line;
     int openingBrace = 0;
     int closingBrace = 0;    

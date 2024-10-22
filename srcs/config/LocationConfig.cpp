@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/07 23:05:41 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/22 13:40:23 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/22 15:06:35 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,6 +81,18 @@ const std::vector<std::string> &LocationConfig::getAllowedMethods() const
     return(_allowedMethods);
 }
 
+bool LocationConfig::isLimitExcept() const
+{
+    std::map<std::string, std::string>::const_iterator directive;
+    for (directive = _directives.begin(); directive != _directives.end(); directive++)
+    {
+        if (directive->first == "limit_except")
+            return (true);
+    }
+    return (false); 
+}
+
+
 const std::string LocationConfig::getDefaultName() const
 {
     std::map<std::string, std::string>::const_iterator directive;
@@ -117,6 +129,8 @@ const std::string LocationConfig::getAutoIndex() const
 
 bool LocationConfig::isMethodAllowed(const std::string &method) const
 {
+    if (isLimitExcept() && _allowedMethods.empty())
+        return (false);
     if (_allowedMethods.empty())
         return (true);
     std::vector<std::string>::const_iterator it;

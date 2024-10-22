@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:13:31 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/22 13:15:21 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/22 15:16:25 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <set>
 #include "Config.hpp"
 #include "webserv.hpp"
 
@@ -96,6 +97,7 @@ class HttpResponse
         void setRedirect(std::string status, const std::string &path);
 
         void generateDirList(std::string path);
+        void generateDirPage(const std::string &path, std::set<FileData> &directories, std::set<FileData> &files);
         bool isAutoIndex();
         bool checkDirIndex();
 

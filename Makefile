@@ -6,7 +6,7 @@
 #    By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/05 02:06:08 by jdagoy            #+#    #+#              #
-#    Updated: 2024/10/04 14:50:26 by jdagoy           ###   ########.fr        #
+#    Updated: 2024/10/22 15:17:09 by jdagoy           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -70,6 +70,7 @@ HTTPRESPONSE_SRCS	:= HttpResponse.cpp \
 						StatusCodes.cpp \
 						Redirect.cpp \
 						Get.cpp \
+						GetDirectory.cpp\
 						generateResponse.cpp \
 						Error.cpp \
 						Post.cpp
