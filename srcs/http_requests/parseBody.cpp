@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/25 12:44:49 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/22 00:52:51 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/23 00:17:07 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,6 +132,11 @@ void HttpRequest::parseBinary(const std::string &boundary, MultiFormData *form)
         if (boundaryIt == _buffer.end())
         {
             form->binary.insert(form->binary.end(), _buffer.begin(), _buffer.end());
+            if (form->binary.size() > _maxBodySize)
+            {
+                setStatusCode(PAYLOAD_TOO_LARGE);
+                return ;
+            }
             _buffer.clear();
             break;
         }

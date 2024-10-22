@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:13:31 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/22 15:16:25 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/23 00:14:11 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,7 +106,6 @@ class HttpResponse
 
         
         void    processRequestPOST();
-        // std::string generateFilename(const std::string &extension);
         void processImageUpload();
     public:
         HttpResponse(HttpRequest &request,

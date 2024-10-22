@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 22:50:55 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/21 22:15:56 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/22 23:16:59 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ void HttpResponse::getErrorPage()
 
 std::string HttpResponse::generateErrorPage(const std::string &status, const std::string &statusMessage)
 {
-std::string html = std::string("<!DOCTYPE html>\r\n")
+    std::string html = std::string("<!DOCTYPE html>\r\n")
         + "<html lang=\"en\">\r\n\r\n"
         + "<head>\r\n"
         + "\t<meta charset=\"UTF-8\">\r\n"

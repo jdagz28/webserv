@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:57:50 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/22 13:43:22 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/23 00:16:28 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ void    HttpResponse::processRequestPOST()
     
     if (!isMethodAllowed(_locationConfig, _request.getRequestLine().getMethod()))
         return ;
-
+    _request.setMaxBodySize(_locationConfig.getClientMaxBodySize());
 
     _request.parseRequestBody();
     if (_request.getStatusCode() >= 400)

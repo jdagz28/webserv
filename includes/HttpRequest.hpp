@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:11:42 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/10 21:39:50 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/23 00:20:45 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ class HttpRequest
         std::map<std::string, std::string>                                  _formData;
         HtmlRequestParseStep                                                _parseStep;
         std::map<std::string, MultiFormData>                                _multiFormData;
+        size_t                                                              _maxBodySize;
         
 
         HttpRequest();
@@ -70,24 +71,25 @@ class HttpRequest
 
         void    setClientSocket(int client_socket);
         void    setStatusCode(StatusCode status);
+        void    setMaxBodySize(size_t bodySize);
 
         const HttpRequestLine& getRequestLine() const;
-        const std::map<std::string, std::vector<std::string> >& getHeaders() const;
-        bool    isConnectionClosed() const;
+        const std::map<std::string, std::vector<std::string> >& getHeaders() const;    
         std::string getHost() const;
         StatusCode  getStatusCode() const;
         const std::string &getErrorMsg() const;
         const std::string getHeader(const std::string &field) const;
-        bool isSupportedMediaPOST();
-        bool isSupportedMediaPOST(const std::string &type);
+        const std::map<std::string, MultiFormData> &getMultiFormData() const;
         const std::map<std::string, std::string> &getFormData() const;
+
+        bool    isConnectionClosed() const;
         bool    isMultiPartFormData(std::string *boundary);
         bool    isMultiPartFormData();
         bool    isForUpload();
-        const std::map<std::string, MultiFormData> &getMultiFormData() const;
-
+        bool    isSupportedMediaPOST();
+        bool    isSupportedMediaPOST(const std::string &type);
+        
         void    parseRequestBody();
-
         void    printBuffer() const;
 
 };

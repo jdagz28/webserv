@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:18:22 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/21 23:27:03 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/23 00:17:27 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@
 #include <cstring>
 
 HttpRequest::HttpRequest(int client_socket)
-    : _request(),  _headersN(0), _status(OK), _errorMsg(""), _client_socket(client_socket), _parseStep(REQUEST_INIT)
+    : _request(),  _headersN(0), _status(OK), _errorMsg(""), _client_socket(client_socket), _parseStep(REQUEST_INIT), _maxBodySize(0)
 {
     requestToBuffer();
     // printBuffer();
@@ -31,16 +31,17 @@ HttpRequest::HttpRequest(int client_socket)
 }
 
 HttpRequest::HttpRequest(const HttpRequest &copy)
-    : _request(copy._request),
-      _headers(copy._headers),
-      _headersN(copy._headersN),
-      _buffer(copy._buffer),
-      _status(copy._status),
-      _errorMsg(copy._errorMsg),
-      _client_socket(copy._client_socket),
-      _formData(copy._formData),
-      _parseStep(copy._parseStep),
-      _multiFormData(copy._multiFormData)
+    :   _request(copy._request),
+        _headers(copy._headers),
+        _headersN(copy._headersN),
+        _buffer(copy._buffer),
+        _status(copy._status),
+        _errorMsg(copy._errorMsg),
+        _client_socket(copy._client_socket),
+        _formData(copy._formData),
+        _parseStep(copy._parseStep),
+        _multiFormData(copy._multiFormData),
+        _maxBodySize(copy._maxBodySize)
 {
 }
 
@@ -58,6 +59,7 @@ HttpRequest &HttpRequest::operator=(const HttpRequest &copy)
         _formData = copy._formData;
         _parseStep = copy._parseStep;
         _multiFormData = copy._multiFormData;
+        _maxBodySize = copy._maxBodySize;
     }
     return (*this);
 }
@@ -192,6 +194,11 @@ void HttpRequest::printBuffer() const
 void HttpRequest::setClientSocket(int client_socket)
 {
     _client_socket = client_socket;
+}
+
+void HttpRequest::setMaxBodySize(size_t bodySize)
+{
+    _maxBodySize = bodySize * 1024 * 1024;
 }
 
 const HttpRequestLine& HttpRequest::getRequestLine() const
