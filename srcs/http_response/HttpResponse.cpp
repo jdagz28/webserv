@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:19:13 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/07 15:17:43 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/22 13:30:32 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,6 @@ void HttpResponse::execMethod()
 {
     std::string method = _request.getRequestLine().getMethod();
     
-
     switch (checkMethod(method))
     {
         case GET:
@@ -124,51 +123,75 @@ std::string HttpResponse::comparePath(const ServerConfig &server, const HttpRequ
     return (path);
 }
 
-bool HttpResponse::checkLocConfigAndRequest()
+
+LocationConfig HttpResponse::getLocationConfig()
 {
+    LocationConfig location;
+    
+    std::string path = comparePath(_serverConfig, _request.getRequestLine());
+    if (path.empty())
+        return (location);
+    
+    const std::vector<LocationConfig> &locationConfigs = _serverConfig.getLocationConfig();
+    if (locationConfigs.empty())
+        return (location);
+    std::vector<LocationConfig>::const_iterator loc;
+    for (loc = locationConfigs.begin(); loc != locationConfigs.end(); loc++)
+    {
+        if (loc->getPath() == path)
+        {
+            location = *loc;
+            return (location);
+        }
+    }
+    return (location);    
+}
+
+ServerConfig HttpResponse::checkLocConfigAndRequest()
+{
+    ServerConfig config;
+    
     const std::vector<ServerConfig> &serverConfigs = _config.getServerConfig();
     if (serverConfigs.empty())
-        return (false);
+        return (config);
+    std::string host = _request.getHost();
+        if (host.empty())
+            return (config);
+    std::string requestHost;
+    int port;
+    size_t check = host.find(":");
+    if (check != std::string::npos)
+    {
+        requestHost = host.substr(0, check);
+        port = strToInt(host.substr(check + 1));
+    }
+
     std::vector<ServerConfig>::const_iterator server;
     for (server = serverConfigs.begin(); server != serverConfigs.end(); server++)
     {
-        //! checkport -> config list and request port
         std::string path = comparePath(*server, _request.getRequestLine());
         if (path.empty())
-            return (false);
-        // _serverName = server->getServerName(); //!match with getHost; return that if found if not default
-        if (!isMethodAllowed(*server, path, _request.getRequestLine()))
-            return (false);
+            return (config);
+        _serverName = server->checkServerName(requestHost);
+        if (port == server->getPort())
+        {
+            config = *server;
+            config.setValid();
+            return (config);;
+        }    
     }
-    return (true);
+    return (config);
 }
 
-bool HttpResponse::isMethodAllowed(const ServerConfig &server, const std::string &path, const HttpRequestLine &request)
+bool HttpResponse::isMethodAllowed(const LocationConfig &location, const std::string &requestMethod)
 {
-    std::string requestMethod = request.getMethod();
-    
-    const std::vector<LocationConfig> &locationConfigs = server.getLocationConfig();
-    if (locationConfigs.empty())
-        return (false);
-    std::vector<LocationConfig>::const_iterator location;
-
-    for (location = locationConfigs.begin(); location != server.getLocationConfig().end(); location++)
+    if (!location.isMethodAllowed(requestMethod))
     {
-        std::string config_location = location->getPath();
-        if (config_location == path)
-        {
-            if (!location->isMethodAllowed(requestMethod))
-            {
-                setStatusCode(METHOD_NOT_ALLOWED);
-                return (false);
-            }
-            _allowedMethods = location->getAllowedMethods();
-            return (true);
-        }
+        setStatusCode(METHOD_NOT_ALLOWED);
+        return (false);
     }
-    setStatusCode(METHOD_NOT_ALLOWED);
-    return (false);
-    
+    _allowedMethods = location.getAllowedMethods();
+    return (true);
 }
 
 std::string HttpResponse::checkRoot(const ServerConfig &server, const std::string &path)
@@ -191,67 +214,28 @@ std::string HttpResponse::checkRoot(const ServerConfig &server, const std::strin
     return (std::string());
 }
 
-std::string HttpResponse::resolvePath()
+std::string HttpResponse::resolvePath(const ServerConfig &server)
 {
-    const std::vector<ServerConfig> &serverConfigs = _config.getServerConfig();
-    if (serverConfigs.empty())
+    std::string path = comparePath(server, _request.getRequestLine());
+    if (path.empty())
         return (std::string());
-    std::vector<ServerConfig>::const_iterator server;
-    for (server = serverConfigs.begin(); server != serverConfigs.end(); server++)
-    {
-        std::string path = comparePath(*server, _request.getRequestLine());
-        if (path.empty())
-            return (std::string());
-        std::string root = checkRoot(*server, path);
-        if (!root.empty())
-            return (root + path);
-        else
-            return (path);
-    }
+    std::string root = checkRoot(server, path);
+    if (!root.empty())
+        return (root + path);
+    else
+        return (path);
+}
+
+std::string HttpResponse::getDirectiveLoc(const std::string &directive)
+{
+
+    if (directive == "index")
+        return (_locationConfig.getIndex());
+    else if (directive == "autoindex")
+        return (_locationConfig.getAutoIndex());
     return (std::string());
 }
 
-std::string HttpResponse::getDirectiveLoc(const ServerConfig &server, const std::string &directive)
-{
-    const std::vector<LocationConfig> &LocationConfigs = server.getLocationConfig();
-    if (LocationConfigs.empty())
-        return (std::string());
-    std::vector<LocationConfig>::const_iterator location;
-    for (location = LocationConfigs.begin(); location != LocationConfigs.end(); location++)
-    {
-        std::string path = comparePath(server, _request.getRequestLine());
-        if (path.empty())
-            return(std::string());
-        if (location->getPath() == path)
-        {
-            if (directive == "index")
-                return (location->getIndex());
-            else if (directive == "autoindex")
-                return (location->getAutoIndex());
-        }
-    }
-    return (std::string());
-}
-
-
-std::string HttpResponse::getDirective(const std::string &directive)
-{
-    std::string defaultName;
-    const std::vector<ServerConfig> &serverConfigs = _config.getServerConfig();
-    if (serverConfigs.empty())
-        return (std::string());
-    std::vector<ServerConfig>::const_iterator server;
-    for (server = serverConfigs.begin(); server != serverConfigs.end(); server++)
-    {
-        std::string path = comparePath(*server, _request.getRequestLine());
-        if (path.empty())
-            return (std::string());
-        defaultName = getDirectiveLoc(*server, directive);
-        if (!defaultName.empty())
-            return (defaultName);
-    }
-    return (std::string());
-}
 
 bool HttpResponse::isSupportedMedia(const std::string &uri)
 {
@@ -289,3 +273,13 @@ std::string HttpResponse::getHttpResponse()
     return (response);
 }
 
+std::string HttpResponse::cleanURI(std::string uri)
+{
+    while (uri.find("//") != std::string::npos)
+        uri.erase(uri.find("//"), 1);
+    if (!uri.empty() && uri[uri.size() - 1] == '/')
+        uri = uri.substr(0, uri.size() - 1);
+    if (uri[0] == '/')
+        uri = uri.substr(1);
+    return (uri);
+}

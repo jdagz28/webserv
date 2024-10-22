@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:18:22 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/25 12:47:55 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/23 00:17:27 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,14 +19,49 @@
 #include <sys/stat.h>
 #include <fstream>
 #include <iomanip> 
+#include <cstring>
 
 HttpRequest::HttpRequest(int client_socket)
-    : _request(),  _headersN(0), _status(OK), _errorMsg(""), _client_socket(client_socket), _parseStep(REQUEST_INIT)
+    : _request(),  _headersN(0), _status(OK), _errorMsg(""), _client_socket(client_socket), _parseStep(REQUEST_INIT), _maxBodySize(0)
 {
     requestToBuffer();
     // printBuffer();
     if (_errorMsg.empty())
         parseHttpRequest();
+}
+
+HttpRequest::HttpRequest(const HttpRequest &copy)
+    :   _request(copy._request),
+        _headers(copy._headers),
+        _headersN(copy._headersN),
+        _buffer(copy._buffer),
+        _status(copy._status),
+        _errorMsg(copy._errorMsg),
+        _client_socket(copy._client_socket),
+        _formData(copy._formData),
+        _parseStep(copy._parseStep),
+        _multiFormData(copy._multiFormData),
+        _maxBodySize(copy._maxBodySize)
+{
+}
+
+HttpRequest &HttpRequest::operator=(const HttpRequest &copy)
+{
+    if (this != &copy)
+    {
+        _request = copy._request;
+        _headers = copy._headers;
+        _headersN = copy._headersN;
+        _buffer = copy._buffer;
+        _status = copy._status;
+        _errorMsg = copy._errorMsg;
+        _client_socket = copy._client_socket;
+        _formData = copy._formData;
+        _parseStep = copy._parseStep;
+        _multiFormData = copy._multiFormData;
+        _maxBodySize = copy._maxBodySize;
+    }
+    return (*this);
 }
 
 HttpRequest::~HttpRequest()
@@ -40,7 +75,8 @@ void HttpRequest::parseHttpRequest()
     while (true)
     {
         std::string line = getLineAndPopFromBuffer();
-
+        if (line.empty())
+            return ;
         switch (_parseStep)
         {
             case REQUEST_LINE:
@@ -73,12 +109,11 @@ size_t getContentLengthBuffer(const std::string &header)
 {
     std::string lowerHeader = toLower(header);
     size_t  pos = lowerHeader.find("content-length:");
-    if (pos != std::string::npos) {
-        pos += 16;
-        std::string::size_type endPos = lowerHeader.find("\r\n", pos);
-        return (strToInt(lowerHeader.substr(pos, endPos - pos)));
-    }
-    return (0);
+    if (pos == std::string::npos)
+        return (0);
+    pos += 16;
+    std::string::size_type endPos = lowerHeader.find("\r\n", pos);
+    return (strToInt(lowerHeader.substr(pos, endPos - pos)));
 }
 
 
@@ -89,13 +124,11 @@ void HttpRequest::requestToBuffer()
     ssize_t bytesRead = recv(_client_socket, &buffer[0], buffer.size(), 0);
     if (bytesRead == -1)
     {
-        _errorMsg = "Error: recv failed";
+        _errorMsg = strerror(errno);
         return ;
     }
     if (0 < bytesRead)
-    {
         _buffer.insert(_buffer.end(), buffer.begin(), buffer.begin() + bytesRead);
-    }
     ssize_t contentLength = getContentLengthBuffer(std::string(buffer.begin(), buffer.end()));;
     if (static_cast<ssize_t>(_buffer.size()) >= contentLength)
         return ;
@@ -105,13 +138,11 @@ void HttpRequest::requestToBuffer()
         bytesRead = recv(_client_socket, &buffer[0], buffer.size(), 0);
         if (bytesRead == -1)
         {
-            _errorMsg = "Error: recv failed";
+            _errorMsg = strerror(errno);
             return ;
         }
         if (0 < bytesRead)
-        {
             _buffer.insert(_buffer.end(), buffer.begin(), buffer.begin() + bytesRead);
-        }
         if (bytesRead >= contentLength)
             contentLength = 0;
         else
@@ -122,7 +153,7 @@ void HttpRequest::requestToBuffer()
 std::vector<unsigned char>::iterator HttpRequest::findBufferCRLF()
 {
     std::vector<unsigned char>::iterator it;
-    for (it = _buffer.begin(); it != _buffer.end(); it++)
+    for (it = _buffer.begin(); it != _buffer.end() - 1; ++it)
     {
         if (*it == '\r' && *(it + 1) == '\n')
             return (it);
@@ -165,6 +196,11 @@ void HttpRequest::setClientSocket(int client_socket)
     _client_socket = client_socket;
 }
 
+void HttpRequest::setMaxBodySize(size_t bodySize)
+{
+    _maxBodySize = bodySize * 1024 * 1024;
+}
+
 const HttpRequestLine& HttpRequest::getRequestLine() const
 {
     return (_request);
@@ -186,7 +222,7 @@ bool HttpRequest::isConnectionClosed() const
     std::vector<std::string>::const_iterator value;
     for (value = header->second.begin(); value != header->second.end(); value++)
     {
-        if (*value == "close")
+        if (toLower(*value) == "close")
             return (true);
     }
     return (false);
@@ -285,7 +321,7 @@ bool HttpRequest::isMultiPartFormData()
 bool HttpRequest::isForUpload()
 {
     if (_multiFormData.empty())
-        return (false);
+    return (false);
     std::map<std::string, MultiFormData>::iterator form;
     for (form = _multiFormData.begin(); form != _multiFormData.end(); form++)
     {

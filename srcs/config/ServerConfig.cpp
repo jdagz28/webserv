@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 02:19:46 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/07 13:26:55 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/21 09:40:24 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,17 +14,19 @@
 #include <cstdlib>
 
 ServerConfig::ServerConfig()
+    : _valid(false)
 {
 }
 
 ServerConfig::ServerConfig(const ServerConfig &copy)
 {
     _directives = copy._directives;
-    _address = copy._address;
+    _port = copy._port;
     _serverName = copy._serverName;
     _locationConfig = copy._locationConfig;
     _errorPages = copy._errorPages;
     _locationPaths = copy._locationPaths;
+    _valid = copy._valid;
 }
 
 ServerConfig::~ServerConfig()
@@ -35,11 +37,12 @@ ServerConfig    &ServerConfig::operator=(const ServerConfig &copy)
     if (this != &copy)
     {
         _directives = copy._directives;
-        _address = copy._address;
+        _port = copy._port;
         _serverName = copy._serverName;
         _locationConfig = copy._locationConfig;
         _errorPages = copy._errorPages;
         _locationPaths = copy._locationPaths;
+        _valid = copy._valid;
     }
     return (*this);
 }
@@ -49,9 +52,9 @@ void   ServerConfig::setDirective(const std::string &directive, const std::strin
     _directives[directive].push_back(value);
 }
 
-void    ServerConfig::setPort(const std::string &address)
+void    ServerConfig::setPort(int port)
 {
-    _address.push_back(address);
+    _port = port;
 }
 
 void    ServerConfig::setServerName(const std::string &name)
@@ -75,27 +78,19 @@ void ServerConfig::setErrorPage(int errorCode, const std::string &errorPagePath)
     _errorPages[errorCode] = errorPagePath;
 }
 
+void    ServerConfig::setValid()
+{
+    _valid = true;
+}
+
 const std::map<std::string, std::vector<std::string> > &ServerConfig::getDirectives() const
 {
     return (_directives);
 }
 
-std::string ServerConfig::getPort() const
+int ServerConfig::getPort() const
 {
-    if (_address.empty())
-        return (std::string());
-    std::vector<std::string>::const_iterator it;
-    std::string ports;
-    for (it = _address.begin(); it != _address.end(); it++)
-    {
-        size_t pos = it->find(':');
-        if (pos != std::string::npos)
-        {    
-            ports += it->substr(pos + 1);
-            ports += " ";
-        }
-    }
-    return (ports);
+    return (_port);
 }
 
 std::string ServerConfig::getServerName() const
@@ -112,9 +107,38 @@ std::string ServerConfig::getServerName() const
     return (names);
 }
 
+bool    ServerConfig::isValid() const
+{
+    return (_valid);
+}
+
+std::string ServerConfig::checkServerName(const std::string &requestHost) const
+{
+    if (_serverName.empty())
+        return (DEFAULT_SERVERNAME);
+    std::vector<std::string>::const_iterator it;
+    for (it = _serverName.begin(); it != _serverName.end(); it++)
+    {
+        if (*it == requestHost)
+            return (requestHost);
+    }
+    return (DEFAULT_SERVERNAME);
+}
+
 const std::vector<LocationConfig> &ServerConfig::getLocationConfig() const
 {
     return (_locationConfig);
+}
+
+LocationConfig ServerConfig::getLocationConfig(const std::string &path) const
+{
+    std::vector<LocationConfig>::const_iterator it;
+    for (it = _locationConfig.begin(); it != _locationConfig.end(); it++)
+    {
+        if (it->getPath() == path)
+            return (*it);
+    }
+    return (LocationConfig());   
 }
 
 const std::string ServerConfig::getErrorPage(StatusCode status) const

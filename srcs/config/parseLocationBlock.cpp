@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/04 14:50:02 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/15 13:07:37 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/22 15:10:29 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,37 +32,59 @@ void Config::checkAllowedMethod(const std::string &value, LocationConfig &locati
     }
 }
 
-void Config::parseLimitExcept(std::istringstream &iss, LocationConfig &locationConfig)
+void Config::parseTypes(const std::string &value, std::ifstream &infile, LocationConfig &locationConfig)
 {
-    std::string value;
-    std::getline(iss, value);
-    trimWhitespaces(value);
-    checkAllowedMethod(value, locationConfig);
-}
-
-void Config::parseTypes(std::istringstream &iss)
-{
-    std::string value;
-    std::getline(iss, value);
     if (!value.empty())
     {
         _error = std::string("invalid value in ") + GREEN + "\"types\"" + RESET + " directive";
         throw configException(_error, _configPath, _parsedLine);
     }
+    
+    std::string line;
+    int openingBrace = 0;
+    int closingBrace = 0;    
+    while (std::getline(infile, line))
+    {
+        _parsedLine++;
+        trimWhitespaces(line);
+        if (line.empty() || line[0] == '#')
+            continue ;
+        
+        std::istringstream iss(line);
+        std::string token;
+        iss >> token;
+        
+        checkBraces(token, openingBrace, closingBrace);
+        if (token == "{")
+            continue ;
+        if (token == "}")
+            break ;
+        if (openingBrace == 1 && token == "text/css")
+        {
+            std::string value;
+            std::getline(iss, value);
+            trimWhitespaces(value);
+            if (value != "css;")
+            {
+                _error = std::string("invalid value in ") + GREEN + "\"text/css\"" + RESET + " directive";
+                throw configException(_error, _configPath, _parsedLine);
+            }
+            locationConfig.setDirective("types", token);
+        }
+    }
+    if (openingBrace != closingBrace)
+    {
+        _error = "mismatch braces in one of the directives in location block";
+        throw configException(_error, _configPath, _parsedLine);
+    }
 }
 
-void Config::parseLimitExceptTypes(std::ifstream &infile, LocationConfig &locationConfig)
+void Config::parseLimitExcept(const std::string &value, std::ifstream &infile, LocationConfig &locationConfig)
 {
-    std::string line;
-    std::istringstream iss(line);
-    std::string token;
-    iss >> token;
-    
-    if (token == "limit_except")
-        parseLimitExcept(iss, locationConfig);
-    else if (token == "types")
-        parseTypes(iss);
+    checkAllowedMethod(value, locationConfig);
+    locationConfig.setDirective("limit_except", "true");
 
+    std::string line;
     int openingBrace = 0;
     int closingBrace = 0;    
     while (std::getline(infile, line))
@@ -89,17 +111,6 @@ void Config::parseLimitExceptTypes(std::ifstream &infile, LocationConfig &locati
             if (value != "all")
             {
                 _error = std::string("invalid value in ") + GREEN + "\"deny\"" + RESET + " directive";
-                throw configException(_error, _configPath, _parsedLine);
-            }
-        }
-        else if (openingBrace == 1 && token == "text/css")
-        {
-            std::string value;
-            std::getline(iss, value);
-            trimWhitespaces(value);
-            if (value != "css;")
-            {
-                _error = std::string("invalid value in ") + GREEN + "\"text/css\"" + RESET + " directive";
                 throw configException(_error, _configPath, _parsedLine);
             }
         }
@@ -221,8 +232,10 @@ void Config::parseLocationDirective(const std::string &token, std::istringstream
         std::string value;
         std::getline(iss, value);
         trimWhitespaces(value);
-        if (token == "limit_except" || token == "types")
-            parseLimitExceptTypes(infile, locationConfig);
+        if (token == "limit_except")
+            parseLimitExcept(value,  infile, locationConfig);
+        else if (token == "types")
+            parseTypes(value, infile, locationConfig);
         else
         {       
             if (value[value.length() - 1]  != ';')
