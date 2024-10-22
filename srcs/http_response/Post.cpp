@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:57:50 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/21 23:23:01 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/22 13:43:22 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,10 +68,7 @@ void    HttpResponse::processRequestPOST()
     else if (_request.isMultiPartFormData())
     {
         if (_request.isForUpload())
-        {
-            std::cout << "Processing image upload" << std::endl;
             processImageUpload();
-        }
     }
 }
 
@@ -79,7 +76,6 @@ void HttpResponse::processImageUpload()
 {
     std::srand(static_cast<unsigned>(std::time(0)));
     
-    std::cout << "Processing image upload" << std::endl;
     std::string directory = "./website/directory/uploads/";
     struct stat st;
     if (stat(directory.c_str(), &st) == -1 || !S_ISDIR(st.st_mode))

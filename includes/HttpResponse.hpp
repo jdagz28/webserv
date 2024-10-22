@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:13:31 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/22 10:47:50 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/22 13:15:21 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,17 +67,18 @@ class HttpResponse
         bool    isKeepAlive() const;
         ServerConfig    checkLocConfigAndRequest();
         LocationConfig  getLocationConfig();
+        std::string cleanURI(std::string uri);
         
         std::string comparePath(const ServerConfig &server, const HttpRequestLine &request);
         std::string resolvePath(const ServerConfig &server);
         std::string checkRoot(const ServerConfig &server, const std::string &path);
-        
         std::string getDirectiveLoc(const std::string &directive);
         
         void getResourceContent(const std::string &file_path);
         bool isSupportedMedia(const std::string &uri);
         void getResource(const std::string &target_path);
         std::string extractResourceName(const std::string &uri);
+        std::string buildResourcePath(const std::string &basePath, const std::string &resourceName);
         bool checkSlash(const std::string &defaultLoc, const std::string &page);
         std::string verifyPath(std::string path);
 

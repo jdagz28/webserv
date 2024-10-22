@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:05:38 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/22 11:01:58 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/22 14:08:49 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,10 @@ void HttpResponse::processRequestGET()
     }
     
     if (!isMethodAllowed(_locationConfig, _request.getRequestLine().getMethod()))
+    {
+        setStatusCode(METHOD_NOT_ALLOWED);
         return ;
+    }
     
     if (isRedirect(_locationConfig))
     {
@@ -69,6 +72,8 @@ void HttpResponse::processRequestGET()
             getResource(path);
         else if (isAutoIndex())
             generateDirList(path);
+        else
+            getResource(path);
         return ;
     }
     getResource(path);
@@ -76,20 +81,22 @@ void HttpResponse::processRequestGET()
 
 std::string HttpResponse::verifyPath(std::string path)
 {
-    std::string checkPath;
-    
-    std::string uri = _request.getRequestLine().getUri();
-    if (uri[0] == '/')
-        uri = uri.substr(1);
-    while (uri.find("//") != std::string::npos)
-        uri.erase(uri.find("//"), 1);
-    if (path[path.size() - 1] == '/')
-        path = path.substr(0, path.size() - 1);
+    std::string uri = cleanURI(_request.getRequestLine().getUri());
     std::string subset = path.substr(path.find('/') + 1);
     size_t pos = uri.find(subset);
     if (pos != std::string::npos)
-        checkPath = path + uri.substr(subset.size());
-    return (checkPath);
+        return (path + uri.substr(subset.size()));
+    return (path);
+}
+
+std::string HttpResponse::buildResourcePath(const std::string &basePath, const std::string &resourceName)
+{
+    if (!checkSlash(basePath, resourceName))
+        return(basePath + '/' + resourceName);
+    else if (basePath[basePath.length() - 1] == '/' && resourceName[0] == '/')
+        return(basePath + resourceName.substr(1));
+    else
+        return(basePath + resourceName);
 }
 
 
@@ -97,18 +104,11 @@ void HttpResponse::getResource(const std::string &target_path)
 {
     std::string indexPath;
         
-    std::string uri = _request.getRequestLine().getUri();
+    std::string uri = cleanURI(_request.getRequestLine().getUri());
     if (isSupportedMedia(uri))
     {
         std::string resourceName = extractResourceName(uri);
-        
-        if (!checkSlash(target_path, resourceName))
-            indexPath = target_path + '/' + resourceName;
-        else if (target_path[target_path.length() - 1] == '/' && resourceName[0] == '/')
-            indexPath = target_path + resourceName.substr(1);
-        else
-            indexPath = target_path + resourceName;
-        
+        indexPath = buildResourcePath(target_path, resourceName);
         if (fileExists(indexPath))
             getResourceContent(indexPath);
         else
@@ -119,35 +119,36 @@ void HttpResponse::getResource(const std::string &target_path)
         std::string defaultPage = getDirectiveLoc("index");
         if (defaultPage.empty())
             setStatusCode(NOT_FOUND);
-        if (!checkSlash(target_path, defaultPage))
-            indexPath = target_path + '/' + defaultPage;
-        else
-            indexPath = target_path + defaultPage;
+        indexPath = buildResourcePath(target_path, defaultPage);
         getResourceContent(indexPath);
     }
 }
 
 void  HttpResponse::getResourceContent(const std::string &file_path)
 {
-    std::ifstream   infile;
-    std::string     buffer;
+    if (!fileExists(file_path))
+    {
+        setStatusCode(NOT_FOUND);
+        return;
+    }
     
-    infile.open(file_path.c_str(), std::ios::binary);
+    std::ifstream infile(file_path.c_str(), std::ios::binary);
     if (!infile.is_open())
     {
         setStatusCode(NOT_FOUND);
         return ;
-    }
-    std::string contentType = getExtension(file_path);
-    if (!isSupportedMedia(contentType))
-        setStatusCode(UNSUPPORTED_MEDIA_TYPE);
-    
+    }   
     infile.seekg(0, std::ios::end);
     std::streampos fileSize = infile.tellg(); 
     infile.seekg(0, std::ios::beg); 
     _body.resize(fileSize);
     infile.read(&_body[0], fileSize); 
     infile.close();
+    
+    std::string contentType = getExtension(file_path);
+    if (!isSupportedMedia(contentType))
+        setStatusCode(UNSUPPORTED_MEDIA_TYPE);
+    
     addContentTypeHeader(contentType);
     setStatusCode(OK);
 }
@@ -217,11 +218,7 @@ void HttpResponse::generateDirList(std::string path)
     struct FileData fileInfo;
     
     //OpenDir
-    std::string uri = _request.getRequestLine().getUri();
-    while (uri.find("//") != std::string::npos)
-        uri.erase(uri.find("//"), 1);
-    if (uri[uri.size() - 1] == '/')
-        uri = uri.substr(0, uri.size() - 1);
+    std::string uri = cleanURI(_request.getRequestLine().getUri());
     if (path.find(uri) == std::string::npos)
     {
         size_t addPath = uri.find("directory/");
@@ -273,7 +270,7 @@ void HttpResponse::generateDirList(std::string path)
     closedir(dir);
     
     _headers["Location"] = _request.getHost() + "/" + path;
-    std::stringstream html;
+    std::ostringstream html;
     
     html << "<!DOCTYPE html>\r\n";
     html << "<html lang=\"en\">\r\n\r\n";

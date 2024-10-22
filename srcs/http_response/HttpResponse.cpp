@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:19:13 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/22 00:16:57 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/22 13:30:32 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -185,7 +185,6 @@ ServerConfig HttpResponse::checkLocConfigAndRequest()
 
 bool HttpResponse::isMethodAllowed(const LocationConfig &location, const std::string &requestMethod)
 {
-
     if (!location.isMethodAllowed(requestMethod))
     {
         setStatusCode(METHOD_NOT_ALLOWED);
@@ -274,3 +273,13 @@ std::string HttpResponse::getHttpResponse()
     return (response);
 }
 
+std::string HttpResponse::cleanURI(std::string uri)
+{
+    while (uri.find("//") != std::string::npos)
+        uri.erase(uri.find("//"), 1);
+    if (!uri.empty() && uri[uri.size() - 1] == '/')
+        uri = uri.substr(0, uri.size() - 1);
+    if (uri[0] == '/')
+        uri = uri.substr(1);
+    return (uri);
+}
