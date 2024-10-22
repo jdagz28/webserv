@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:13:31 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/21 12:18:42 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/22 10:47:50 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,6 +79,7 @@ class HttpResponse
         void getResource(const std::string &target_path);
         std::string extractResourceName(const std::string &uri);
         bool checkSlash(const std::string &defaultLoc, const std::string &page);
+        std::string verifyPath(std::string path);
 
         std::string generateStatusLine();
         void addContentTypeHeader(const std::string &type);

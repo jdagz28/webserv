@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:05:38 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/22 00:54:28 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/22 11:01:58 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ void HttpResponse::processRequestGET()
     
     if (!isMethodAllowed(_locationConfig, _request.getRequestLine().getMethod()))
         return ;
-
+    
     if (isRedirect(_locationConfig))
     {
         getRedirectContent();
@@ -55,32 +55,43 @@ void HttpResponse::processRequestGET()
         setStatusCode(NOT_FOUND);
         return ;
     }
-    std::cout << "Resolved path: " << path << std::endl;
-    
+
+    std::string extension = getExtension(_request.getRequestLine().getUri());
     if (isDirectory(path))
     {
         if (path.find("directory") != std::string::npos)
         {
-            std::string uri = _request.getRequestLine().getUri();
-            size_t pos = uri.find("directory/");
-            std::string checkPath = path + uri.substr(pos + 10);
-            while (checkPath.find("//") != std::string::npos)
-                checkPath.erase(checkPath.find("//"), 1);
+            std::string checkPath = verifyPath(path);
             if (fileExists(checkPath))
                 getResourceContent(checkPath);
         }
-
-        if (isAutoIndex())
-        {
-            std::cout << "Path before generating directory " << path << std::endl;
+        if (!extension.empty())
+            getResource(path);
+        else if (isAutoIndex())
             generateDirList(path);
-            return ;
-        }
-        getResource(path);
         return ;
     }
     getResource(path);
 }
+
+std::string HttpResponse::verifyPath(std::string path)
+{
+    std::string checkPath;
+    
+    std::string uri = _request.getRequestLine().getUri();
+    if (uri[0] == '/')
+        uri = uri.substr(1);
+    while (uri.find("//") != std::string::npos)
+        uri.erase(uri.find("//"), 1);
+    if (path[path.size() - 1] == '/')
+        path = path.substr(0, path.size() - 1);
+    std::string subset = path.substr(path.find('/') + 1);
+    size_t pos = uri.find(subset);
+    if (pos != std::string::npos)
+        checkPath = path + uri.substr(subset.size());
+    return (checkPath);
+}
+
 
 void HttpResponse::getResource(const std::string &target_path)
 {
@@ -205,7 +216,6 @@ void HttpResponse::generateDirList(std::string path)
     struct stat statbuf;
     struct FileData fileInfo;
     
-    std::cout << "Path: " << path << std::endl;
     //OpenDir
     std::string uri = _request.getRequestLine().getUri();
     while (uri.find("//") != std::string::npos)
@@ -219,7 +229,6 @@ void HttpResponse::generateDirList(std::string path)
         if (path[path.size() - 1] == '/')
             path = path.substr(0, path.size() - 1);
     }
-    std::cout << "Path: " << path << std::endl;
     dir = opendir(path.c_str());
     if (dir == NULL)
     {
