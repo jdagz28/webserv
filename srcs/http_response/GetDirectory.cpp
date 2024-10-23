@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 15:15:53 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/22 15:16:07 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/23 11:41:26 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,40 +98,77 @@ void HttpResponse::generateDirPage(const std::string &path, std::set<FileData> &
         html << "\t\t<p><a href=\"http://" << _request.getHost() << "/" << parentPath << "\">⬅️ Move up</a></p>\r\n";
     }
 
-    html << "\t\t<table class=\"table\">\r\n";
-    html << "\t\t\t<thead>\r\n";
-    html << "\t\t\t<tr><th>Name</th><th>Size</th><th>Last Modified</th></tr>\r\n";
-    html << "\t\t\t</thead>";
-    html << "\t\t\t<tbody>\r\n";
-
-    std::set<FileData>::iterator itDir;
-    for (itDir = directories.begin(); itDir != directories.end(); ++itDir)
+    if (path == "website/directory/uploads")
     {
-        html << "\t\t\t<tr>\r\n";
-        html << "\t\t\t\t<td><a href=\"" + _request.getRequestLine().getUri() + "/" + itDir->filename + "/\">" + "📁 " + itDir->filename + "</a></td>\r\n";
-        html << "\t\t\t\t<td>--</td>\r\n";  
-        html << "\t\t\t\t<td>" + itDir->lastModified + "</td>\r\n";
-        html << "\t\t\t</tr>\r\n";
+        html << "\t\t<form method=\"POST\" action=\"/delete\">\r\n";
+        html << "\t\t<table class=\"table\">\r\n";
+        html << "\t\t\t<thead>\r\n";
+        html << "\t\t\t<tr><th>Select</th><th>Name</th><th>Size</th><th>Last Modified</th></tr>\r\n";
+        html << "\t\t\t</thead>";
+        html << "\t\t\t<tbody>\r\n";
+
+        std::set<FileData>::iterator itFiles;
+        for (itFiles = files.begin(); itFiles != files.end(); ++itFiles)
+        {
+            html << "\t\t\t<tr>\r\n";
+            std::string extension = getExtension(itFiles->filename);
+            std::string emoji;
+            if (extension == "jpg" || extension == "jpeg" || extension == "png" || extension == "bmp" || extension == "gif")
+                emoji = "🖼️ ";
+            
+            html << "\t\t\t\t<td><input type=\"checkbox\" name=\"files\" value=\"" + itFiles->filename + "\"></td>\r\n";
+            html << "\t\t\t\t<td><a href=\"" + _request.getRequestLine().getUri() + "/" + itFiles->filename + "\">" + emoji + itFiles->filename + "</a></td>\r\n";
+            html << "\t\t\t\t<td>" + toString(itFiles->size) + " bytes</td>\r\n"; 
+            html << "\t\t\t\t<td>" + itFiles->lastModified + "</td>\r\n";
+            html << "\t\t\t</tr>\r\n";
+        }
+        html << "\t\t\t</tbody>\r\n";
+        html << "\t\t</table>\r\n";
+
+        html << "\t\t<div class=\"button-wrapper\">\r\n";
+        html << "\t\t\t<button type=\"submit\" class=\"file-delete-button\">Delete Selected Files</button>\r\n";
+        html << "\t\t</div>\r\n";
+        html << "\t\t</form>\r\n";
     }
 
-    std::set<FileData>::iterator itFiles;
-    for (itFiles = files.begin(); itFiles != files.end(); ++itFiles)
+    else
     {
-        html << "\t\t\t<tr>\r\n";
-        std::string extension = getExtension(itFiles->filename);
-        std::string emoji;
-        if (extension == "html")
-            emoji = "🌐 ";
-        else if (extension == "jpg" || extension == "jpeg" || extension == "png" || extension == "bmp" || extension == "gif")
-            emoji = "🖼️ ";
-        html << "\t\t\t\t<td><a href=\"" + _request.getRequestLine().getUri() + "/" + itFiles->filename + "\">" + emoji + itFiles->filename + "</a></td>\r\n";
-        html << "\t\t\t\t<td>" + toString(itFiles->size) + " bytes</td>\r\n"; 
-        html << "\t\t\t\t<td>" + itFiles->lastModified + "</td>\r\n";
-        html << "\t\t\t</tr>\r\n";
-    }
+        html << "\t\t<table class=\"table\">\r\n";
+        html << "\t\t\t<thead>\r\n";
+        html << "\t\t\t<tr><th>Name</th><th>Size</th><th>Last Modified</th></tr>\r\n";
+        html << "\t\t\t</thead>";
+        html << "\t\t\t<tbody>\r\n";
 
-    html << "\t\t\t</tbody>\r\n";
-    html << "\t\t</table>\r\n";
+        std::set<FileData>::iterator itDir;
+        for (itDir = directories.begin(); itDir != directories.end(); ++itDir)
+        {
+            html << "\t\t\t<tr>\r\n";
+            html << "\t\t\t\t<td><a href=\"" + _request.getRequestLine().getUri() + "/" + itDir->filename + "/\">" + "📁 " + itDir->filename + "</a></td>\r\n";
+            html << "\t\t\t\t<td>--</td>\r\n";  
+            html << "\t\t\t\t<td>" + itDir->lastModified + "</td>\r\n";
+            html << "\t\t\t</tr>\r\n";
+        }
+
+        std::set<FileData>::iterator itFiles;
+        for (itFiles = files.begin(); itFiles != files.end(); ++itFiles)
+        {
+            html << "\t\t\t<tr>\r\n";
+            std::string extension = getExtension(itFiles->filename);
+            std::string emoji;
+            if (extension == "html")
+                emoji = "🌐 ";
+            else if (extension == "jpg" || extension == "jpeg" || extension == "png" || extension == "bmp" || extension == "gif")
+                emoji = "🖼️ ";
+            html << "\t\t\t\t<td><a href=\"" + _request.getRequestLine().getUri() + "/" + itFiles->filename + "\">" + emoji + itFiles->filename + "</a></td>\r\n";
+            html << "\t\t\t\t<td>" + toString(itFiles->size) + " bytes</td>\r\n"; 
+            html << "\t\t\t\t<td>" + itFiles->lastModified + "</td>\r\n";
+            html << "\t\t\t</tr>\r\n";
+        }
+
+        html << "\t\t\t</tbody>\r\n";
+        html << "\t\t</table>\r\n";
+    }
+    
     html << "\t</div>\r\n";
     html << "</body>\r\n";
     html << "</html>\r\n";
