@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:13:31 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/25 00:38:50 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/25 00:58:55 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,7 +106,10 @@ class HttpResponse
 
         void    processRequestPOST();
         void    processImageUpload();
+        
         void    processRequestDELETE();
+        void    deleteFile(const std::string &file);
+        void    curlDelete();
         
     public:
         HttpResponse(HttpRequest &request,
