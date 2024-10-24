@@ -6,16 +6,13 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:05:38 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/22 15:23:08 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/24 22:56:29 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "HttpResponse.hpp"
 #include "HttpRequest.hpp"
 #include "webserv.hpp"
-#include "ServerConfig.hpp"
-#include "HttpRequestLine.hpp"
-#include "LocationConfig.hpp"
 #include <string>
 #include <sys/stat.h>
 #include <dirent.h>
@@ -24,28 +21,7 @@
 #include <set>
 
 void HttpResponse::processRequestGET()
-{
-    _serverConfig = checkLocConfigAndRequest();
-    if (!_serverConfig.isValid())
-    {
-        if (_status == INIT)
-            setStatusCode(INTERNAL_SERVER_ERROR);
-        return ;
-    }
-    
-    _locationConfig = getLocationConfig();
-    if (_locationConfig.getPath().empty())
-    {
-        setStatusCode(NOT_FOUND);
-        return ;
-    }
-    
-    if (!isMethodAllowed(_locationConfig, _request.getRequestLine().getMethod()))
-    {
-        setStatusCode(METHOD_NOT_ALLOWED);
-        return ;
-    }
-    
+{   
     if (isRedirect(_locationConfig))
     {
         getRedirectContent();

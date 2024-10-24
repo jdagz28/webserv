@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:18:22 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/23 00:17:27 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/24 23:59:48 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -334,4 +334,16 @@ bool HttpRequest::isForUpload()
 const std::map<std::string, MultiFormData> &HttpRequest::getMultiFormData() const
 {
     return (_multiFormData);
+}
+
+std::string HttpRequest::getFormData(const std::string &method)
+{
+    std::map<std::string, std::string>::const_iterator it;
+    it = _formData.find(method);
+    if (it != _formData.end())
+    {
+        _formData.erase(method);
+        return (std::string("DELETE"));
+    }
+    return (std::string());
 }
