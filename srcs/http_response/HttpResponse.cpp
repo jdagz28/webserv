@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:19:13 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/22 13:30:32 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/25 00:29:27 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,6 +64,23 @@ int HttpResponse::checkMethod(const std::string &method)
 void HttpResponse::execMethod()
 {
     std::string method = _request.getRequestLine().getMethod();
+    _serverConfig = checkLocConfigAndRequest();
+    if (!_serverConfig.isValid())
+    {
+        if (_status == INIT)
+            setStatusCode(INTERNAL_SERVER_ERROR);
+        return ;
+    }
+
+    _locationConfig = getLocationConfig();
+    if (_locationConfig.getPath().empty())
+    {
+        setStatusCode(NOT_FOUND);
+        return ;
+    }
+    
+    if (!isMethodAllowed(_locationConfig, method))
+        return ;
     
     switch (checkMethod(method))
     {
@@ -71,7 +88,17 @@ void HttpResponse::execMethod()
             processRequestGET();
             break ;
         case POST:
+            _request.setMaxBodySize(_locationConfig.getClientMaxBodySize());
+            _request.parseRequestBody();
+            if (_request.getFormData("_method") == "DELETE")
+            {
+                processRequestDELETE();
+                break ; 
+            }
             processRequestPOST();
+            break ;
+        case DELETE:
+            processRequestDELETE();
             break ;
         default:
             setStatusCode(METHOD_NOT_ALLOWED);

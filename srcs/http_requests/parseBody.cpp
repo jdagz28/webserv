@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/25 12:44:49 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/23 00:17:07 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/25 00:28:17 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -192,6 +192,7 @@ void HttpRequest::parseRequestBody()
         setStatusCode(UNSUPPORTED_MEDIA_TYPE);
         return ;
     }
+    // printBuffer();
     if (_parseStep != REQUEST_BODY)
         _parseStep = REQUEST_BODY;
     while (true)
@@ -227,19 +228,22 @@ void HttpRequest::parseRequestBody()
 
 void HttpRequest::parseFormData(const std::string &line)
 {
-    std::stringstream ss(line);
-    std::string pair;
+    std::string key;
+    std::string token;
+    std::istringstream iss(line);
+    int i = 0; 
 
-    while (std::getline(ss, pair, '&'))
+    while (std::getline(iss, token, '&'))
     {
-        size_t equalPos = pair.find('=');
-        if (equalPos == std::string::npos)
-        {
-            setStatusCode(BAD_REQUEST);
-            return ;
+        size_t equalPos = token.find('=');
+        if (equalPos != std::string::npos)
+        {    
+            key = token.substr(0, equalPos);
+            token = token.substr(key.size() + 1);
         }
-        std::string key = pair.substr(0, equalPos);
-        std::string value = pair.substr(equalPos + 1);
-        _formData[key] = value;
+        if (key == "files")
+            key = key + '_' + toString(i);
+        _formData[key] = token;
+        i++;
     }
 }

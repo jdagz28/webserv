@@ -6,16 +6,13 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:02:29 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/21 09:53:49 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/24 22:56:08 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "HttpResponse.hpp"
 #include "HttpRequest.hpp"
 #include "webserv.hpp"
-#include "ServerConfig.hpp"
-#include "HttpRequestLine.hpp"
-#include "LocationConfig.hpp"
 #include <string>
 #include <ctime>
 #include <sstream>

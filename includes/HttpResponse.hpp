@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:13:31 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/23 00:14:11 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/25 00:38:50 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,38 +75,39 @@ class HttpResponse
         std::string checkRoot(const ServerConfig &server, const std::string &path);
         std::string getDirectiveLoc(const std::string &directive);
         
-        void getResourceContent(const std::string &file_path);
-        bool isSupportedMedia(const std::string &uri);
-        void getResource(const std::string &target_path);
+        bool    isSupportedMedia(const std::string &uri);
+        bool    checkSlash(const std::string &defaultLoc, const std::string &page);
+        void    getResourceContent(const std::string &file_path);
+        void    getResource(const std::string &target_path);
         std::string extractResourceName(const std::string &uri);
         std::string buildResourcePath(const std::string &basePath, const std::string &resourceName);
-        bool checkSlash(const std::string &defaultLoc, const std::string &page);
         std::string verifyPath(std::string path);
 
         std::string generateStatusLine();
-        void addContentTypeHeader(const std::string &type);
-        std::string getHttpDateGMT();
-        void addKeepAliveHeader();
-        void addAllowHeader();
         std::string generateHeaderLines();
+        std::string getHttpDateGMT();
+        void    addContentTypeHeader(const std::string &type);
+        void    addKeepAliveHeader();
+        void    addAllowHeader();
 
-        bool isRedirect(const LocationConfig &location);
-        bool validateRedirect();
-        bool isRedirectExternal();
-        void getRedirectContent();
-        void setRedirect(std::string status, const std::string &path);
+        bool    isRedirect(const LocationConfig &location);
+        bool    validateRedirect();
+        bool    isRedirectExternal();
+        void    getRedirectContent();
+        void    setRedirect(std::string status, const std::string &path);
 
-        void generateDirList(std::string path);
-        void generateDirPage(const std::string &path, std::set<FileData> &directories, std::set<FileData> &files);
-        bool isAutoIndex();
-        bool checkDirIndex();
+        void    generateDirList(std::string path);
+        void    generateDirPage(const std::string &path, std::set<FileData> &directories, std::set<FileData> &files);
+        bool    isAutoIndex();
+        bool    checkDirIndex();
 
-        void getErrorPage();
+        void    getErrorPage();
         std::string generateErrorPage(const std::string &status, const std::string &statusMessage);
 
-        
         void    processRequestPOST();
-        void processImageUpload();
+        void    processImageUpload();
+        void    processRequestDELETE();
+        
     public:
         HttpResponse(HttpRequest &request,
                         Config &config,

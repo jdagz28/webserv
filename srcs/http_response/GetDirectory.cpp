@@ -6,16 +6,13 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 15:15:53 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/23 11:41:26 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/25 00:38:41 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "HttpResponse.hpp"
 #include "HttpRequest.hpp"
 #include "webserv.hpp"
-#include "ServerConfig.hpp"
-#include "HttpRequestLine.hpp"
-#include "LocationConfig.hpp"
 #include <string>
 #include <sys/stat.h>
 #include <dirent.h>
@@ -100,7 +97,8 @@ void HttpResponse::generateDirPage(const std::string &path, std::set<FileData> &
 
     if (path == "website/directory/uploads")
     {
-        html << "\t\t<form method=\"POST\" action=\"/delete\">\r\n";
+        html << "\t\t<form method=\"POST\" action=\"/directory/uploads\">\r\n";
+        html << "\t\t<input type=\"hidden\" name=\"_method\" value=\"DELETE\">\r\n";
         html << "\t\t<table class=\"table\">\r\n";
         html << "\t\t\t<thead>\r\n";
         html << "\t\t\t<tr><th>Select</th><th>Name</th><th>Size</th><th>Last Modified</th></tr>\r\n";
@@ -126,7 +124,7 @@ void HttpResponse::generateDirPage(const std::string &path, std::set<FileData> &
         html << "\t\t</table>\r\n";
 
         html << "\t\t<div class=\"button-wrapper\">\r\n";
-        html << "\t\t\t<button type=\"submit\" class=\"file-delete-button\">Delete Selected Files</button>\r\n";
+        html << "\t\t\t<button type=\"submit\" class=\"file-delete-button\">DELETE</button>\r\n";
         html << "\t\t</div>\r\n";
         html << "\t\t</form>\r\n";
     }

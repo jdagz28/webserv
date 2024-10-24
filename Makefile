@@ -6,7 +6,7 @@
 #    By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/05 02:06:08 by jdagoy            #+#    #+#              #
-#    Updated: 2024/10/22 15:17:09 by jdagoy           ###   ########.fr        #
+#    Updated: 2024/10/24 22:57:28 by jdagoy           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -73,7 +73,8 @@ HTTPRESPONSE_SRCS	:= HttpResponse.cpp \
 						GetDirectory.cpp\
 						generateResponse.cpp \
 						Error.cpp \
-						Post.cpp
+						Post.cpp \
+						Delete.cpp
 HTTPRESPONSE_OBJS_LIST := $(patsubst %.cpp, %.o, $(HTTPRESPONSE_SRCS))
 HTTPRESPONSE_OBJS	:= $(addprefix $(OBJ_DIR), $(HTTPRESPONSE_OBJS_LIST))
 

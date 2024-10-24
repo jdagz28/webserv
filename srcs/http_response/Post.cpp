@@ -6,16 +6,13 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:57:50 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/23 00:16:28 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/24 23:34:09 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "HttpResponse.hpp"
 #include "HttpRequest.hpp"
 #include "webserv.hpp"
-#include "ServerConfig.hpp"
-#include "HttpRequestLine.hpp"
-#include "LocationConfig.hpp"
 #include <string>
 #include <ctime>
 #include <cstdlib>
@@ -26,26 +23,6 @@
 
 void    HttpResponse::processRequestPOST()
 {
-    _serverConfig = checkLocConfigAndRequest();
-    if (!_serverConfig.isValid())
-    {
-        if (_status == INIT)
-            setStatusCode(INTERNAL_SERVER_ERROR);
-        return ;
-    }
-
-    _locationConfig = getLocationConfig();
-    if (_locationConfig.getPath().empty())
-    {
-        setStatusCode(NOT_FOUND);
-        return ;
-    }
-    
-    if (!isMethodAllowed(_locationConfig, _request.getRequestLine().getMethod()))
-        return ;
-    _request.setMaxBodySize(_locationConfig.getClientMaxBodySize());
-
-    _request.parseRequestBody();
     if (_request.getStatusCode() >= 400)
     {
         setStatusCode(_request.getStatusCode());
