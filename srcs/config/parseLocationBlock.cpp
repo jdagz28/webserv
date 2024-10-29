@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/04 14:50:02 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/22 15:10:29 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/29 16:37:34 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -197,7 +197,7 @@ void Config::parseClientBodySize(std::string &value, LocationConfig &locationCon
     }
     value = value.substr(0, value.length() - 1);
     int converted = strToInt(value);
-    if (converted < 0 && converted > 10)
+    if (converted < 0 || converted > 10)
     {
         _error = std::string("invalid value in ") + GREEN + "\"" + "client_max_body_size" + "\"" + RESET;
         throw configException(_error, _configPath, _parsedLine);
