@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
+/*   By: romvan-d <romvan-d@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/05 00:23:30 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/25 00:00:41 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/30 14:49:35 by romvan-d         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,13 @@
 
 int server_socket = -1;
 
+void *get_in_addr(struct sockaddr *sa)
+{
+	if (sa->sa_family == AF_INET) {
+		return &(((struct sockaddr_in*)sa)->sin_addr);
+	}	
+	return &(((struct sockaddr_in6*)sa)->sin6_addr);
+}
 
 std::string getConfigPath(int argc, char **argv)
 {
@@ -57,6 +64,14 @@ int main(int argc, char **argv)
 
     try
     {
+		fd_set	master_fd;
+		fd_set	read_fds;
+		int		fd_max;
+		timeval	timeout;
+		int		new_fd;
+		
+		timeout.tv_sec = 10;
+		timeout.tv_usec = 0;
         std::string configPath = getConfigPath(argc, argv);
         
         Config  config(configPath);
@@ -67,6 +82,8 @@ int main(int argc, char **argv)
         signal(SIGINT, signal_handler);
         signal(SIGTERM, signal_handler);
 
+		FD_ZERO(&master_fd);
+		FD_ZERO(&read_fds);
         server_socket = socket(AF_INET, SOCK_STREAM, 0);
         if (server_socket < 0)
         {
@@ -101,38 +118,71 @@ int main(int argc, char **argv)
             return (1);
         }   
         
+		FD_SET(server_socket, &master_fd);
+		fd_max = server_socket;
+		
         // printConfigData(config);
         std::cout << "Listening on port: " << PORT << std::endl;
         while (true)
         {
-            int client_socket = accept(server_socket, (struct sockaddr*)&client_addr, &client_len);
-            if (client_socket < 0)
-            {
-                perror("Failed to accept connection");
-                continue;
-            }
-            // std::cout << "Connection accepted" << std::endl;
+            read_fds = master_fd; // copy current FD because select deletes it
+			if (select(fd_max + 1, &read_fds, NULL, NULL, NULL) == -1)
+			{
+				std::cerr << "Error: Failed to go through select" << std::endl;
+				close(server_socket);
+				return (1);
+			}
+			for (int i = 0; i <= fd_max; i++)
+			{
+				if (FD_ISSET(i, &read_fds))
+				{
+					if (i == server_socket)
+					{
+						
+						new_fd = accept(server_socket, (struct sockaddr*)&client_addr, &client_len);
+						if (new_fd == - 1)
+						{
+							perror("Failed to accept connection");
+							continue;
+						}
+						else
+						{
+							FD_SET(new_fd, &master_fd);
+							if (new_fd > fd_max)
+							{
+								fd_max = new_fd;
+							}
+							printf("hello\n");
+						}
 
-            // std::cout << "Receiving request..." << std::endl;
-            HttpRequest request(client_socket);
-            // printHttpRequest(request);
-            // std::cout << "Request parsed." << std::endl;
+					}
+					else
+					{
+						std::cout <<"test" << std::endl;
+				 		// std::cout << "Connection accepted" << std::endl;
+						// std::cout << "Receiving request..." << std::endl;
+						HttpRequest request(i);
+						// printHttpRequest(request);
+						// std::cout << "Request parsed." << std::endl;
 
-            // std::cout << "Generating response..." << std::endl;
-            HttpResponse response(request, config, client_socket);
-            response.execMethod();
-            response.generateHttpResponse();
-            
-            // printHttpResponse(response.getHttpResponse());
-            // std::cout << "Sending response..." << std::endl;
-            response.sendResponse();
+						// std::cout << "Generating response..." << std::endl;
+						HttpResponse response(request, config, i);
+						response.execMethod();
+						response.generateHttpResponse();
+						
+						// printHttpResponse(response.getHttpResponse());
+						// std::cout << "Sending response..." << std::endl;
+						response.sendResponse();
 
-            close(client_socket);
-            // std::cout << "Connection closed" << std::endl;
-        }
-
+						close(i);
+						FD_CLR(i, &master_fd);
+						// std::cout << "Connection closed" << std::endl;
+					}
+        		}
+			}
         close(server_socket);
     }
+	}
     catch (const std::exception &e)
     {
         std::cerr << e.what() << std::endl;
@@ -140,4 +190,3 @@ int main(int argc, char **argv)
     }
     return (EXIT_SUCCESS);
 }
-
