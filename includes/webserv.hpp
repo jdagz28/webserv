@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 22:28:27 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/04 15:04:06 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/21 04:48:37 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,8 +23,7 @@
 #define CRLF "\r\n"
 #define MAX_URI_LENGTH 1000
 #define MAX_HEADER_LENGTH 1000
-
-#include <iostream>
+#define DEFAULT_SERVERNAME "webserv"
 
 const std::string RED = "\033[0;31m";
 const std::string GREEN = "\033[0;32m";

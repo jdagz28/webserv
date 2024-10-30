@@ -6,16 +6,13 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:57:50 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/25 11:43:31 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/24 23:34:09 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "HttpResponse.hpp"
 #include "HttpRequest.hpp"
 #include "webserv.hpp"
-#include "ServerConfig.hpp"
-#include "HttpRequestLine.hpp"
-#include "LocationConfig.hpp"
 #include <string>
 #include <ctime>
 #include <cstdlib>
@@ -26,9 +23,6 @@
 
 void    HttpResponse::processRequestPOST()
 {
-    if (!checkLocConfigAndRequest())
-        return ;
-    _request.parseRequestBody();
     if (_request.getStatusCode() >= 400)
     {
         setStatusCode(_request.getStatusCode());
@@ -42,7 +36,7 @@ void    HttpResponse::processRequestPOST()
     std::string type = _request.getHeader("content-type");
     if (type == "application/x-www-form-urlencoded")
     {
-        if (isRedirect())
+        if (isRedirect(_locationConfig))
         {
             getRedirectContent();
             return ;
@@ -51,9 +45,7 @@ void    HttpResponse::processRequestPOST()
     else if (_request.isMultiPartFormData())
     {
         if (_request.isForUpload())
-        {
             processImageUpload();
-        }
     }
 }
 
@@ -61,7 +53,7 @@ void HttpResponse::processImageUpload()
 {
     std::srand(static_cast<unsigned>(std::time(0)));
     
-    std::string directory = "./website/uploads/";
+    std::string directory = "./website/directory/uploads/";
     struct stat st;
     if (stat(directory.c_str(), &st) == -1 || !S_ISDIR(st.st_mode))
     {

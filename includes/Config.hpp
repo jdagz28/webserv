@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 22:38:46 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/15 13:04:15 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/22 14:04:13 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,9 +65,8 @@ class Config
         void    parseLocationBlock(std::ifstream &infile, LocationConfig &locationConfig);
         void    parseLocationDirective(const std::string &token, std::istringstream &iss, std::ifstream &infile, LocationConfig &locationConfig);
         void    checkAllowedMethod(const std::string &value, LocationConfig &locationConfig);
-        void    parseLimitExcept(std::istringstream &iss, LocationConfig &locationConfig);
-        void    parseTypes(std::istringstream &iss);
-        void    parseLimitExceptTypes(std::ifstream &infile, LocationConfig &locationConfig);
+        void    parseTypes(const std::string &value,  std::ifstream &infile, LocationConfig &locationConfig);
+        void    parseLimitExcept(const std::string &value, std::ifstream &infile, LocationConfig &locationConfig);
         void    parseRedirect(const std::string &value, LocationConfig &locationConfig);
         void    parseAutoindex(const std::string &value, LocationConfig &locationConfig);
         void    parseIndex(const std::string &value, LocationConfig &locationConfig);

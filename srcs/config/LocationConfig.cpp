@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/07 23:05:41 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/15 13:03:31 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/23 00:16:12 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,7 @@ const std::map<std::string, std::string> &LocationConfig::getDirectives() const
     return (_directives);
 }
 
-const std::string &LocationConfig::getPath() const
+const std::string LocationConfig::getPath() const
 {
     return (_path);
 }
@@ -80,6 +80,18 @@ const std::vector<std::string> &LocationConfig::getAllowedMethods() const
 {
     return(_allowedMethods);
 }
+
+bool LocationConfig::isLimitExcept() const
+{
+    std::map<std::string, std::string>::const_iterator directive;
+    for (directive = _directives.begin(); directive != _directives.end(); directive++)
+    {
+        if (directive->first == "limit_except")
+            return (true);
+    }
+    return (false); 
+}
+
 
 const std::string LocationConfig::getDefaultName() const
 {
@@ -114,8 +126,11 @@ const std::string LocationConfig::getAutoIndex() const
     return (std::string()); 
 }
 
+
 bool LocationConfig::isMethodAllowed(const std::string &method) const
 {
+    if (isLimitExcept() && _allowedMethods.empty())
+        return (false);
     if (_allowedMethods.empty())
         return (true);
     std::vector<std::string>::const_iterator it;
@@ -149,13 +164,13 @@ std::string LocationConfig::getRedirect() const
     return (std::string());
 }
 
-int LocationConfig::getClientMaxBodySize()
+size_t LocationConfig::getClientMaxBodySize()
 {
     std::map<std::string, std::string>::const_iterator directive;
     for (directive = _directives.begin(); directive != _directives.end(); directive++)
     {
         if (directive->first == "client_max_body_size")
-            return (strToInt(directive->second));
+            return (static_cast<size_t>(strToInt(directive->second)));
     }
     return (-1);
 }

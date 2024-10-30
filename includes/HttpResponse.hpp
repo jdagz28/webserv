@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:13:31 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/25 10:21:32 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/25 00:58:55 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <set>
 #include "Config.hpp"
 #include "webserv.hpp"
 
@@ -43,6 +44,8 @@ class HttpResponse
     private:
         HttpRequest                             &_request;
         Config                                  &_config;
+        ServerConfig                            _serverConfig;
+        LocationConfig                          _locationConfig;
         StatusCode                              _status;
         int                                     _client_socket; //!
         std::vector<std::string>                _allowedMethods; 
@@ -61,47 +64,53 @@ class HttpResponse
         void    processRequestGET();
 
         int checkMethod(const std::string &method);
-        bool    isMethodAllowed(const ServerConfig &server, const std::string &path, const HttpRequestLine &request);
+        bool    isMethodAllowed(const LocationConfig &location, const std::string &requestMethod);
         bool    isKeepAlive() const;
-        bool    checkLocConfigAndRequest();
+        ServerConfig    checkLocConfigAndRequest();
+        LocationConfig  getLocationConfig();
+        std::string cleanURI(std::string uri);
         
         std::string comparePath(const ServerConfig &server, const HttpRequestLine &request);
-        std::string resolvePath();
+        std::string resolvePath(const ServerConfig &server);
         std::string checkRoot(const ServerConfig &server, const std::string &path);
+        std::string getDirectiveLoc(const std::string &directive);
         
-        std::string getDirective(const std::string &directive);
-        std::string getDirectiveLoc(const ServerConfig &server, const std::string &directive);
-        
-        void getResourceContent(const std::string &file_path);
-        bool isSupportedMedia(const std::string &uri);
-        void getResource(const std::string &target_path);
+        bool    isSupportedMedia(const std::string &uri);
+        bool    checkSlash(const std::string &defaultLoc, const std::string &page);
+        void    getResourceContent(const std::string &file_path);
+        void    getResource(const std::string &target_path);
         std::string extractResourceName(const std::string &uri);
-        bool checkSlash(const std::string &defaultLoc, const std::string &page);
+        std::string buildResourcePath(const std::string &basePath, const std::string &resourceName);
+        std::string verifyPath(std::string path);
 
         std::string generateStatusLine();
-        void addContentTypeHeader(const std::string &type);
-        std::string getHttpDateGMT();
-        void addKeepAliveHeader();
-        void addAllowHeader();
         std::string generateHeaderLines();
+        std::string getHttpDateGMT();
+        void    addContentTypeHeader(const std::string &type);
+        void    addKeepAliveHeader();
+        void    addAllowHeader();
 
-        bool isRedirect();
-        bool validateRedirect();
-        bool isRedirectExternal();
-        void getRedirectContent();
-        void setRedirect(std::string status, const std::string &path);
+        bool    isRedirect(const LocationConfig &location);
+        bool    validateRedirect();
+        bool    isRedirectExternal();
+        void    getRedirectContent();
+        void    setRedirect(std::string status, const std::string &path);
 
-        void generateDirList(std::string path);
-        bool isAutoIndex();
-        bool checkDirIndex();
+        void    generateDirList(std::string path);
+        void    generateDirPage(const std::string &path, std::set<FileData> &directories, std::set<FileData> &files);
+        bool    isAutoIndex();
+        bool    checkDirIndex();
 
-        void getErrorPage();
+        void    getErrorPage();
         std::string generateErrorPage(const std::string &status, const std::string &statusMessage);
 
-        
         void    processRequestPOST();
-        // std::string generateFilename(const std::string &extension);
-        void processImageUpload();
+        void    processImageUpload();
+        
+        void    processRequestDELETE();
+        void    deleteFile(const std::string &file);
+        void    curlDelete();
+        
     public:
         HttpResponse(HttpRequest &request,
                         Config &config,

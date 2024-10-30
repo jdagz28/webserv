@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/01 03:36:00 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/25 12:49:46 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/10 21:33:28 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,28 @@
 HttpRequestLine::HttpRequestLine()
     : _method(""), _uri(""), _version(""), _error(0), _errormsg("")
 {
+}
+
+HttpRequestLine::HttpRequestLine(const HttpRequestLine &copy)
+{
+    _method = copy._method;
+    _uri = copy._uri;
+    _version = copy._version;
+    _error = copy._error;
+    _errormsg = copy._errormsg;
+}
+
+HttpRequestLine &HttpRequestLine::operator=(const HttpRequestLine &copy)
+{
+    if (this != &copy)
+    {
+        _method = copy._method;
+        _uri = copy._uri;
+        _version = copy._version;
+        _error = copy._error;
+        _errormsg = copy._errormsg;
+    }
+    return (*this);
 }
 
 HttpRequestLine::~HttpRequestLine()
@@ -59,21 +81,4 @@ const std::string &HttpRequestLine::getErrormsg() const
 int HttpRequestLine::getError() const
 {
     return (_error);
-}
-
-void HttpRequestLine::validate()
-{
-    if (_method != "GET" || _method != "POST" || _method != "DELETE")
-    {
-        _error = 1;
-        _errormsg = "Error: Invalid method.";
-        return ;
-    }
-    //TODO: URI checks?
-    if (_version != "HTTP/1.1")
-    {
-        _error = 1;
-        _errormsg = "Error: Invalid version.";
-        return ;
-    }
 }

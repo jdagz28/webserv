@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/02 22:18:43 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/13 04:46:29 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/10 21:50:29 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -153,8 +153,7 @@ std::string getMimeType(const std::string &extension)
     const std::map<std::string, std::string>& mime_types = MimeTypes();
 
     std::map<std::string, std::string>::const_iterator it = mime_types.find(extension);
-    if (it != mime_types.end()) {
+    if (it != mime_types.end())
         return (it->second);
-    }
     return (std::string());  
 }
