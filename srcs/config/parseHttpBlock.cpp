@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/01 11:20:02 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/03 15:38:43 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/30 12:53:12 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,6 +101,14 @@ void Config::parseHttpDirective(const std::string &token, std::istringstream &is
         parseErrorPages(iss);
     else if (token == "server")
     {
+        std::string check;
+        iss >> check;
+        if (check != "server" && !check.empty())
+        {
+            _error = "invalid server block";
+            throw configException(_error, _configPath, _parsedLine);
+        }
+        
         ServerConfig    serverConfig;
         parseServerBlock(infile, serverConfig);
         _serverConfig.push_back(serverConfig);
