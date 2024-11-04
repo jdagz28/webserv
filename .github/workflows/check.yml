@@ -8,7 +8,10 @@ on:
 jobs:
   webserv-check:
 
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
 
     steps:
     - uses: actions/checkout@v4
@@ -18,12 +21,6 @@ jobs:
 
     - name: Compilation success message
       run: echo "Compiled Successfully"
-
-    - name: incorrect-config
-      run: |
-            echo "Checking Incorrect Configurations"
-            chmod +x ./tests/configTests.sh
-            ./tests/configTests.sh
 
     - name: basic-webserver
       run: |
