@@ -19,6 +19,12 @@ jobs:
     - name: Compilation success message
       run: echo "Compiled Successfully"
 
+    - name: incorrect-config
+      run: |
+            echo "Checking Incorrect Configurations"
+            chmod +x ./tests/configTests.sh
+            ./tests/configTests.sh
+
     - name: basic-webserver
       run: |
             ./webserv &
@@ -35,5 +41,4 @@ jobs:
             echo "405 Method Not Allowed"
             curl -v localhost:4242/uploads
 
-    # run nginx container
-    # compare response status lines, etc.
+
