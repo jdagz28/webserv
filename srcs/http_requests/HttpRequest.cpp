@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpRequest.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
+/*   By: romvan-d <romvan-d@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:18:22 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/24 23:59:48 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/10/30 15:24:22 by romvan-d         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,10 +120,11 @@ size_t getContentLengthBuffer(const std::string &header)
 void HttpRequest::requestToBuffer()
 {
     std::vector<unsigned char> buffer(1024);
-    
-    ssize_t bytesRead = recv(_client_socket, &buffer[0], buffer.size(), 0);
+    std::cout << "hello bug 1 here \n" << std::endl;
+	ssize_t bytesRead = recv(_client_socket, &buffer[0], buffer.size(), 0);
     if (bytesRead == -1)
     {
+		std::cout << "hello bug 1 here \n" << std::endl;
         _errorMsg = strerror(errno);
         return ;
     }
@@ -135,6 +136,7 @@ void HttpRequest::requestToBuffer()
     contentLength -= bytesRead;
     while (contentLength)
     {
+		std::cout << "hello bug 1 here \n" << std::endl;
         bytesRead = recv(_client_socket, &buffer[0], buffer.size(), 0);
         if (bytesRead == -1)
         {
