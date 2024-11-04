@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/02 11:19:31 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/21 09:39:00 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/11/04 09:56:09 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,6 +131,12 @@ void Config::parseServerDirective(const std::string &token, std::istringstream &
         std::string value;
         std::getline(iss, value);
         trimWhitespaces(value);
+
+        if (value.empty())
+        {
+            _error = std::string("empty ") + GREEN + "\"location\" " + RESET + "path";
+            throw configException(_error, _configPath, _parsedLine);
+        }
         if (serverConfig.isPathAlreadySet(value))
         {
             _error = std::string("duplicate location ") + GREEN + "\"" + value + "\"" + RESET;
