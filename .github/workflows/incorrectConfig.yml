@@ -1,0 +1,30 @@
+name: Incorrect Configs
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  webserv-check:
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: make
+      run: make
+
+    - name: Compilation success message
+      run: echo "Compiled Successfully"
+
+    - name: incorrect-config
+      run: |
+            cd tests
+            echo "Checking Incorrect Configurations"
+            chmod +x ./configTests.sh
+            ./configTests.sh
