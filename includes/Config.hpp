@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 22:38:46 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/11/05 09:36:00 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/11/05 10:36:55 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,6 +84,7 @@ class Config
         const std::vector<ServerConfig>& getServerConfig() const;
         time_t  getKeepAliveTimeout() const;
         std::string getErrorPages() const;
+        const std::vector<int>& getPortsToServe() const;
 
         class configException : public std::exception
         {
