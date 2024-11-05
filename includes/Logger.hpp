@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/05 10:16:19 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/11/05 13:01:34 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/11/05 13:21:02 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ class Logger
         void request(const HttpRequest &request);
         void response(HttpResponse &response);
 
-        void generateAccessLog();
+        //! void generateAccessLog();
 };
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/05 10:15:02 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/11/05 13:03:34 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/11/05 13:21:21 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,4 +96,5 @@ void Logger::response(HttpResponse &response)
     _log["content-type"] = contentType;
     _log["content-length"] = contentLen;
     _log["date"] = date;
+    _terminalLog.push_back(message);
 }
