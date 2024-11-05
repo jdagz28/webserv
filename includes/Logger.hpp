@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/05 10:16:19 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/11/05 11:40:00 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/11/05 13:01:34 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include "ServerConfig.hpp"
 #include "LocationConfig.hpp"
 #include "HttpRequest.hpp"
+#include "HttpResponse.hpp"
 
 
 
@@ -24,8 +25,7 @@
 class Logger 
 {
     private:
-        std::map<std::string, std::string> _accessLog;
-        std::map<std::string, std::string> _errorLog;
+        std::map<std::string, std::string> _log;
         std::vector<std::string>           _terminalLog;
 
         Logger(const Logger &copy);
@@ -41,6 +41,9 @@ class Logger
         void configError(const std::string &error);
 
         void request(const HttpRequest &request);
+        void response(HttpResponse &response);
+
+        void generateAccessLog();
 };
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:11:06 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/21 12:41:33 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/11/05 12:51:55 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,4 +162,20 @@ void HttpResponse::addContentTypeHeader(const std::string &type)
         _headers["Content-Type"] = "text/html";
     else
         _headers["Content-Type"] = getMimeType(type);
+}
+
+std::string HttpResponse::getHeader(const std::string &header)
+{
+    std::map<std::string, std::string>::iterator it;
+    for (it = _headers.begin(); it != _headers.end(); it++)
+    {
+        if (it->first == header)
+            return (it->second);
+    }
+    return (std::string());
+}
+
+std::string HttpResponse::getStatusLine()
+{
+    return (generateStatusLine());
 }
