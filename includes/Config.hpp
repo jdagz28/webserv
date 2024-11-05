@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 22:38:46 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/22 14:04:13 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/11/05 09:36:00 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,7 @@ class Config
         int                                     _serverCount;
         time_t                                  _keepAliveTimeOut;
         std::map<StatusCode, std::string>       _errorPages;
+        std::vector<int>                        _portsToServe;
         
         Config(const Config &copy);
         Config  &operator=(const Config &copy); 
