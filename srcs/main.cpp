@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/05 00:23:30 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/11/05 10:41:14 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/11/05 11:40:53 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 #include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
 #include <csignal>
+#include "Logger.hpp"
 
 #define PORT   4242 //1919    
 
@@ -55,6 +56,7 @@ int main(int argc, char **argv)
         return (EXIT_FAILURE);
     }
 
+    Logger log;
     try
     {
         std::string configPath = getConfigPath(argc, argv);
@@ -102,7 +104,7 @@ int main(int argc, char **argv)
         }   
         
         // printConfigData(config);
-        std::cout << "Listening on port: " << PORT << std::endl;
+        log.checkConfig(config);
         while (true)
         {
             int client_socket = accept(server_socket, (struct sockaddr*)&client_addr, &client_len);
@@ -115,6 +117,7 @@ int main(int argc, char **argv)
 
             // std::cout << "Receiving request..." << std::endl;
             HttpRequest request(client_socket);
+            log.request(request);
             // printHttpRequest(request);
             // std::cout << "Request parsed." << std::endl;
 
@@ -136,6 +139,7 @@ int main(int argc, char **argv)
     catch (const std::exception &e)
     {
         std::cerr << e.what() << std::endl;
+        log.configError(e.what());
         return (EXIT_FAILURE);
     }
     return (EXIT_SUCCESS);
