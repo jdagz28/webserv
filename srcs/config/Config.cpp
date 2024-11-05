@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 22:38:59 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/11/05 09:37:17 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/11/05 10:42:21 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -238,4 +238,9 @@ std::string Config::getErrorPages() const
         errorPages += "Error Code: " + toString(it->first) + " Error Page: " + it->second + "\n";
     }
     return (errorPages);
+}
+
+const std::vector<int>& Config::getPortsToServe() const
+{
+    return (_portsToServe);
 }
