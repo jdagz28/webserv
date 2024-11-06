@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/05 10:15:02 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/11/05 13:21:21 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/11/06 23:28:43 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,7 +82,11 @@ void Logger::response(HttpResponse &response)
     std::string date = response.getHeader("Date");
     std::string server = response.getHeader("Server");
 
-    std::string message = GREEN + "\n🌐 RESPONSE\n";
+    std::string color = GREEN;
+    if (response.getStatusCode() >= 400)
+        color = RED;
+
+    std::string message = color + "\n🌐 RESPONSE\n";
     message += statusLine;
     message += "Server: " + server + "\n";
     message += "Content-Type: " + contentType + "\n";

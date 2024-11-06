@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:11:06 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/11/05 12:51:55 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/11/06 23:33:10 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ void HttpResponse::generateHttpResponse()
         _headers["Content-Length"] = toString(_body.size());
     addKeepAliveHeader();
     addAllowHeader();
-
+    
     std::string statusLine = generateStatusLine();
     std::string headerLines = generateHeaderLines();
     std::string empty = CRLF;
@@ -82,7 +82,7 @@ void HttpResponse::addKeepAliveHeader()
 
 void HttpResponse::addAllowHeader()
 {
-    if (getStatusCode() != METHOD_NOT_ALLOWED) 
+    if (getStatusCode() == METHOD_NOT_ALLOWED) 
         return ;
     
     const std::vector<ServerConfig> &serverConfigs = _config.getServerConfig();

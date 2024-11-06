@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:19:13 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/25 00:29:27 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/11/06 23:32:09 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ HttpResponse::HttpResponse(HttpRequest &request,
                             int client_socket)
     : _request(request), _config(config), _status(INIT), _client_socket(client_socket), _allowedMethods(), _headers(), _body("")
 {
-    if (_request.getStatusCode() !=  OK || _request.getStatusCode() != INIT)
+    if (_request.getStatusCode() !=  OK && _request.getStatusCode() != INIT)
     {
         _status = _request.getStatusCode();
         generateHttpResponse();
