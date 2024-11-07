@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/05 00:23:30 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/11/07 10:43:07 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/11/07 11:49:39 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,7 +115,8 @@ int main(int argc, char **argv)
             }
             HttpRequest request(client_socket);
             log.request(request);
-            printHttpRequest(request);
+            // printHttpRequest(request);
+            
             HttpResponse response(request, config, client_socket);
 
             log.response(response);
