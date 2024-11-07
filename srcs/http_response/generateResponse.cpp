@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:11:06 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/11/06 23:33:10 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/11/07 10:39:07 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,7 +121,7 @@ void HttpResponse::addAllowHeader()
                 {
                     if (i != 0)
                         allowed_method += ", ";
-                    allowed_method += allowed_method[i];
+                    allowed_method += allowedMethods[i];
                 }
                 _headers["Allow"] = allowed_method;
             }
