@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/25 12:42:30 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/10 21:54:29 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/12/02 09:13:51 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,10 +122,25 @@ void HttpRequest::parseRequestHeaders(const std::string &line)
     std::stringstream ss(fieldValue);
     std::string value;
     std::vector<std::string> values;
-    while (std::getline(ss, value, ','))
+    
+    if (fieldName == "cookie")
     {
-        trimWhitespaces(value);
-        values.push_back(value);
+        while (std::getline(ss, value, ';'))
+        {
+            trimWhitespaces(value);
+            values.push_back(value);
+            std::string cookieKey = value.substr(0, value.find('='));
+            std::string cookieValue = value.substr(value.find('=') + 1);
+            _cookies[cookieKey] = cookieValue;
+        }
     }
-    _headers[fieldName] = values;
+    else
+    {
+        while (std::getline(ss, value, ','))
+        {
+            trimWhitespaces(value);
+            values.push_back(value);
+        }
+        _headers[fieldName] = values;
+    }
 }

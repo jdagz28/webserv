@@ -6,7 +6,7 @@
 #    By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/05 02:06:08 by jdagoy            #+#    #+#              #
-#    Updated: 2024/11/05 11:15:52 by jdagoy           ###   ########.fr        #
+#    Updated: 2024/12/02 09:23:20 by jdagoy           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -60,7 +60,8 @@ HTTPREQUEST_DIR		:= $(SRC_DIR)http_requests/
 HTTPREQUEST_SRCS	:= HttpRequest.cpp \
 						HttpRequestLine.cpp\
 						parseBody.cpp\
-						parseHeader.cpp
+						parseHeader.cpp\
+						Cookies.cpp
 HTTPREQUEST_OBJS_LIST := $(patsubst %.cpp, %.o, $(HTTPREQUEST_SRCS))
 HTTPREQUEST_OBJS	:= $(addprefix $(OBJ_DIR), $(HTTPREQUEST_OBJS_LIST))
 

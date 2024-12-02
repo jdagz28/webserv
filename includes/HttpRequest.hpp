@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:11:42 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/24 23:59:53 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/12/02 09:24:03 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,7 @@ class HttpRequest
         HtmlRequestParseStep                                                _parseStep;
         std::map<std::string, MultiFormData>                                _multiFormData;
         size_t                                                              _maxBodySize;
+        std::map<std::string, std::string>                                  _cookies; 
         
 
         HttpRequest();
@@ -57,12 +58,11 @@ class HttpRequest
 
         std::string parseFieldname(const std::string &line, size_t *pos);
         std::string parseFieldValue(const std::string &line, size_t *pos);
-        void splitFormLine(const std::string &line, MultiFormData *form);
-        void parseUntilBinary(const std::string &boundary, MultiFormData *form);
-        void parseBinary(const std::string &boundary, MultiFormData *form);
-        void parseMultipartForm(const std::string &boundary);
+        void    splitFormLine(const std::string &line, MultiFormData *form);
+        void    parseUntilBinary(const std::string &boundary, MultiFormData *form);
+        void    parseBinary(const std::string &boundary, MultiFormData *form);
+        void    parseMultipartForm(const std::string &boundary);
         
-    
     public:
         HttpRequest(int client_socket);
         HttpRequest(const HttpRequest &copy);
@@ -92,7 +92,7 @@ class HttpRequest
         
         void    parseRequestBody();
         void    printBuffer() const;
-
+        const std::string printCookies() const;
 };
 
 

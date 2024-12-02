@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/05 10:15:02 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/11/05 13:21:21 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/12/02 09:32:00 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,17 +59,21 @@ void Logger::request(const HttpRequest &request)
 
     std::string requestLine = line.getMethod() + " " + line.getUri() + " " + line.getVersion() + "\n";
     std::string host = "Host: " + request.getHost() + "\n";
+    std::string cookies = "Cookies: " + request.printCookies() + "\n";
     
     std::string message = "==========================================\n";
     message += YELLOW + "📡 REQUEST\n";
     message += requestLine;
     message += host;
+    message += cookies;
+
     
     std::cout << message;
     
     _log["request line"] = requestLine;
     _log["host"] = host;
     _log["referer"] = request.getHeader("referer");
+    _log["cookies"] = cookies;
     //! client address 
     _terminalLog.push_back(message);
 }
