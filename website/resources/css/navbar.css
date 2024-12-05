@@ -1,11 +1,11 @@
 .navbar {
     display: flex;
-    justify-content: center; /* Keep navigation items centered */
+    justify-content: center; 
     align-items: center;
     padding: 1rem;
     background-color: #fff;
     box-shadow: 0 10px 30px 0 rgba(138, 155, 165, 0.15);
-    position: relative; /* Allow absolute positioning for the language selector */
+    position: relative; /
 }
 
 .nav-list {
@@ -31,9 +31,9 @@
 /* Language Selector */
 .language-selector {
     position: absolute;
-    right: 1rem; /* Align the language selector to the right */
+    right: 1rem; 
     top: 50%;
-    transform: translateY(-50%); /* Vertically center the language selector */
+    transform: translateY(-50%); 
     font-size: 1rem;
 }
 
@@ -50,17 +50,17 @@
 }
 
 #dropdown-btn img {
-    margin-right: 10px; /* Space between flag and text */
+    margin-right: 10px; 
 }
 
 .btn-text {
-    vertical-align: middle; /* Align text with flag */
+    vertical-align: middle;
 }
 
 .dropdown-content {
     display: none;
     position: absolute;
-    right: 0; /* Align dropdown to the right */
+    right: 0; 
     background-color: #f9f9f9;
     box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
     z-index: 1;
@@ -89,10 +89,10 @@
 }
 
 .arrow-down::before {
-    content: "\25BC"; /* Unicode for downward arrow */
-    margin-left: 5px; /* Space between text and arrow */
+    content: "\25BC"; 
+    margin-left: 5px; 
     font-size: 0.8rem;
     display: inline-block;
-    color: white; /* Match the button text color */
+    color: white; 
     vertical-align: middle;
 }

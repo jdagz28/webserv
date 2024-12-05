@@ -2,15 +2,15 @@ html {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
+h1 {
+    margin-bottom: 2rem;
+}
+
 .landing {
     font-size: 5rem;
     margin-top: 20rem;
     text-align: center;
     align-items: center;
-}
-
-h1 {
-    font-size: 2rem;
 }
 
 body {
@@ -24,3 +24,51 @@ body {
     object-fit: contain;
 }
 
+main {
+    padding-left: 10%; 
+    padding-right: 10%; 
+    margin: 0 auto; 
+    max-width: 1200px;
+    font-size
+}
+
+/* Container for delete commands */
+.delete-commands {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; 
+    max-width: 600px; 
+    padding-left: 20px;
+}
+
+/* Individual command box */
+.command-box {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 5px 10px;
+    background-color: #f9f9f9;
+    font-size: 0.8rem;
+}
+
+/* Copy button styling */
+.copy-btn {
+    background-color: #253849;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    padding: 5px 10px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.copy-btn:hover {
+    background-color: #45a049;
+}
+
+/* Command text styling */
+.command-text {
+    font-family: monospace; 
+    color: #333;
+}
