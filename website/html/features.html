@@ -72,22 +72,24 @@
             <li class="features-list"><a href="/html/search.html">Google Search</a></li>
             <li class="features-list"><a href="/html/upload.html">Image Upload</a></li>
         </ul>
+        <div class="delete-commands">
+            <div class="command-box">
+                <button class="copy-btn" onclick="copyToClipboard('curl -X POST -H "Content-Type: application/x-www-form-urlencoded" -d "q=test localhost:4242/search')">Copy</button>
+                    <span class="command-text">curl -X POST -H "Content-Type: application/x-www-form-urlencoded" -d "q=test localhost:4242/search</span>
+            </div>
+            <div class="command-box">
+                <button class="copy-btn" onclick="copyToClipboard('curl -X POST -F "file=@./test.jpg" localhost:4242/html/upload/')">Copy</button>
+                    <span class="command-text">curl -X POST -F "file=@./test.jpg" localhost:4242/html/upload/</span>
+            </div>
+        </div>
         <hr class="dotted">
         <h2>DELETE</h2>
-<div class="delete-commands">
-    <div class="command-box">
-        <button class="copy-btn" onclick="copyToClipboard('curl -i -X DELETE localhost:4242/upload/hello.py')">Copy</button>
-        <span class="command-text">curl -i -X DELETE localhost:4242/upload/hello.py</span>
-    </div>
-    <div class="command-box">
-        <button class="copy-btn" onclick="copyToClipboard('curl -i -X DELETE localhost:4242/index.html')">Copy</button>
-        <span class="command-text">curl -i -X DELETE localhost:4242/index.html</span>
-    </div>
-    <div class="command-box">
-        <button class="copy-btn" onclick="copyToClipboard('curl -i -X DELETE localhost:4242/upload/nothing.html')">Copy</button>
-        <span class="command-text">curl -i -X DELETE localhost:4242/upload/nothing.html</span>
-    </div>
-</div>
+        <div class="delete-commands">
+            <div class="command-box">
+                <button class="copy-btn" onclick="copyToClipboard('curl -i -X DELETE localhost:4242/directory/uploads/test.jpg')">Copy</button>
+                    <span class="command-text">curl -i -X DELETE localhost:4242/directory/uploads/test.jpg</span>
+            </div>
+        </div>
 
         <hr class="dotted">
 
