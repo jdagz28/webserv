@@ -1,0 +1,98 @@
+.navbar {
+    display: flex;
+    justify-content: center; /* Keep navigation items centered */
+    align-items: center;
+    padding: 1rem;
+    background-color: #fff;
+    box-shadow: 0 10px 30px 0 rgba(138, 155, 165, 0.15);
+    position: relative; /* Allow absolute positioning for the language selector */
+}
+
+.nav-list {
+    display: flex;
+    justify-content: center;
+    list-style-type: none;
+}
+
+.nav-item a {
+    color: #000; 
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-right: 2rem;
+    list-style-type: none;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.nav-item a:hover {
+    color: #4CAF50;
+}
+
+/* Language Selector */
+.language-selector {
+    position: absolute;
+    right: 1rem; /* Align the language selector to the right */
+    top: 50%;
+    transform: translateY(-50%); /* Vertically center the language selector */
+    font-size: 1rem;
+}
+
+#dropdown-btn {
+    background-color: #253849;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 15px;
+    cursor: pointer;
+    align-items: flex-end;
+    gap: 5px;
+    font-size: 1rem;
+}
+
+#dropdown-btn img {
+    margin-right: 10px; /* Space between flag and text */
+}
+
+.btn-text {
+    vertical-align: middle; /* Align text with flag */
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0; /* Align dropdown to the right */
+    background-color: #f9f9f9;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    min-width: 130px;
+}
+
+.dropdown-content li {
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.dropdown-content li:hover {
+    background-color: #ddd;
+}
+
+/* Show dropdown on hover */
+.language-selector:hover .dropdown-content {
+    display: block;
+}
+
+.arrow-down::before {
+    content: "\25BC"; /* Unicode for downward arrow */
+    margin-left: 5px; /* Space between text and arrow */
+    font-size: 0.8rem;
+    display: inline-block;
+    color: white; /* Match the button text color */
+    vertical-align: middle;
+}

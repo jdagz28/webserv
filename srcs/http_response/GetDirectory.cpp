@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 15:15:53 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/25 00:38:41 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/12/05 22:20:00 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,6 +68,7 @@ void HttpResponse::generateDirPage(const std::string &path, std::set<FileData> &
     html << "\t<meta charset=\"UTF-8\">\r\n";
     html << "\t<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\r\n";
     html << "\t<link rel=\"stylesheet\" href=\"/resources/css/styles.css\">\r\n";
+    html << "\t<link rel=\"stylesheet\" href=\"/resources/css/navbar.css\">\r\n";
     html << "\t<link rel=\"stylesheet\" href=\"/resources/css/directory.css\">\r\n";
     html << "\t<title>Index of " << path << "</title>\r\n";
     html << "</head>\r\n\r\n";
@@ -79,6 +80,21 @@ void HttpResponse::generateDirPage(const std::string &path, std::set<FileData> &
     html << "\t\t\t<li class=\"nav-item\"><a href=\"/directory\">Directory</a></li>\r\n";
     html << "\t\t\t<li class=\"nav-item\"><a href=\"/html/search.html\">Search</a></li>\r\n";
     html << "\t\t\t<li class=\"nav-item\"><a href=\"/\">About Us</a></li>\r\n";
+    html << "\t\t\t<li class=\"nav-item language-selector dropdown\">\r\n";
+    html << "\t\t\t\t<button id=\"dropdown-btn\">\r\n";
+    html << "\t\t\t\t\t<img src=\"https://flagsapi.com/US/shiny/64.png\" alt=\"Flag\" style=\"width: 25px; height: 20px; vertical-align: middle;\">\r\n";
+    html << "\t\t\t\t\t<span class=\"btn-text\">English</span>\r\n";
+    html << "\t\t\t\t\t<span class=\"arrow-down\"></span>\r\n";
+    html << "\t\t\t\t</button>\r\n";
+    html << "\t\t\t\t<ul class=\"dropdown-content\" id=\"dropdown-content\">\r\n";
+    html << "\t\t\t\t\t<li data-lang=\"en\">\r\n";
+    html << "\t\t\t\t\t\t<img src=\"https://flagsapi.com/US/shiny/64.png\" alt=\"English Flag\" style=\"width: 25px; height: 20px; vertical-align: middle;\"> English\r\n";
+    html << "\t\t\t\t\t</li>\r\n";
+    html << "\t\t\t\t\t<li data-lang=\"fr\">\r\n";
+    html << "\t\t\t\t\t\t<img src=\"https://flagsapi.com/FR/shiny/64.png\" alt=\"French Flag\" style=\"width: 25px; height: 20px; vertical-align: middle;\"> Français\r\n";
+    html << "\t\t\t\t\t</li>\r\n";
+    html << "\t\t\t\t</ul>\r\n";
+    html << "\t\t\t</li>\r\n";
     html << "\t\t</ul>\r\n";
     html << "\t</nav>\r\n\r\n";
     html << "\t<div class=\"directory\">\r\n";

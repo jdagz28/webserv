@@ -50,7 +50,7 @@
 .file-delete-button {
     margin-top: 0;
     padding: 10px 20px;
-    background-color: #4CAF50;
+    background-color: gray;
     color: white;
     border: none;
     border-radius: 4px;
@@ -64,11 +64,11 @@
 }
 
 .file-delete-button:hover {
-    background-color: #45a049;
+    background-color: red;
 }
 
 .file-delete-wrapper:hover {
-    border-color: #4CAF50;
+    border-color: red;
 }
 
 input[type="checkbox"] {
