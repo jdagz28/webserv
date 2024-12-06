@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:57:50 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/24 23:34:09 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/12/06 02:21:30 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,11 @@ void    HttpResponse::processRequestPOST()
     std::string type = _request.getHeader("content-type");
     if (type == "application/x-www-form-urlencoded")
     {
+        if (_request.getRequestLine().getUri() == "/set-language")
+        {
+            std::cout << "Setting language\n"; //!
+        }
+        
         if (isRedirect(_locationConfig))
         {
             getRedirectContent();

@@ -83,9 +83,8 @@
     background-color: #ddd;
 }
 
-/* Show dropdown on hover */
-.language-selector:hover .dropdown-content {
-    display: block;
+.language-selector .dropdown-content.show {
+    display: block; /* Show when toggled */
 }
 
 .arrow-down::before {

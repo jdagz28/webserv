@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/05 10:15:02 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/12/05 22:57:42 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/12/06 02:23:17 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ void Logger::request(const HttpRequest &request)
     message += YELLOW + "📡 REQUEST\n";
     message += requestLine;
     message += host;
-    if (cookies != "Cookies: \n")
+    if (!(request.printCookies().empty()))
         message += cookies;
 
     
@@ -74,7 +74,7 @@ void Logger::request(const HttpRequest &request)
     _log["request line"] = requestLine;
     _log["host"] = host;
     _log["referer"] = request.getHeader("referer");
-    if (cookies != "Cookies: \n")
+    if (!(request.printCookies().empty()))
         _log["cookies"] = cookies;
     //! client address 
     _terminalLog.push_back(message);
