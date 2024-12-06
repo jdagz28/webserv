@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/02 08:50:11 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/12/02 09:30:27 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/12/06 12:56:54 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,4 +32,9 @@ const std::string HttpRequest::printCookies() const
         }
     }
     return (cookies);
+}
+
+const std::map<std::string, std::string> &HttpRequest::getCookies() const
+{
+    return (_cookies);
 }

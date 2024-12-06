@@ -6,7 +6,7 @@
 #    By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/05 02:06:08 by jdagoy            #+#    #+#              #
-#    Updated: 2024/12/02 09:23:20 by jdagoy           ###   ########.fr        #
+#    Updated: 2024/12/06 13:08:23 by jdagoy           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -75,7 +75,8 @@ HTTPRESPONSE_SRCS	:= HttpResponse.cpp \
 						generateResponse.cpp \
 						Error.cpp \
 						Post.cpp \
-						Delete.cpp
+						Delete.cpp \
+						setCookies.cpp
 HTTPRESPONSE_OBJS_LIST := $(patsubst %.cpp, %.o, $(HTTPRESPONSE_SRCS))
 HTTPRESPONSE_OBJS	:= $(addprefix $(OBJ_DIR), $(HTTPRESPONSE_OBJS_LIST))
 

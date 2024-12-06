@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/05 10:15:02 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/12/06 02:23:17 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/12/06 13:15:00 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,6 +87,7 @@ void Logger::response(HttpResponse &response)
     std::string contentLen = response.getHeader("Content-Length");
     std::string date = response.getHeader("Date");
     std::string server = response.getHeader("Server");
+    std::string cookies = response.getHeader("Set-Cookie");
 
     std::string color = GREEN;
     if (response.getStatusCode() >= 400)
@@ -97,7 +98,9 @@ void Logger::response(HttpResponse &response)
     message += "Server: " + server + "\n";
     message += "Content-Type: " + contentType + "\n";
     message += "Content-Length: " + contentLen + "\n";
-    message += "Date: " + date + "\n" + RESET;
+    message += "Date: " + date + "\n";
+    if (!cookies.empty())
+        message += "Set-Cookie: " + cookies + "\n" + RESET;
     message += "==========================================\n";
     std::cout << message;
 
@@ -106,5 +109,7 @@ void Logger::response(HttpResponse &response)
     _log["content-type"] = contentType;
     _log["content-length"] = contentLen;
     _log["date"] = date;
+    if (!cookies.empty())
+        _log["cookies"] = cookies;
     _terminalLog.push_back(message);
 }

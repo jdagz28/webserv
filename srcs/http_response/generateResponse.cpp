@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:11:06 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/11/07 11:49:24 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/12/06 13:07:33 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,8 @@ void HttpResponse::generateHttpResponse()
     
     std::string statusLine = generateStatusLine();
     std::string headerLines = generateHeaderLines();
+    if (_request.getCookies().size() > 0)
+        setCookies();
     std::string empty = CRLF;
 
     if (!_responseMsg.empty())
