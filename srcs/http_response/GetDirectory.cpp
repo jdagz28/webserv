@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 15:15:53 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/25 00:38:41 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/01/06 02:51:27 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,6 +69,7 @@ void HttpResponse::generateDirPage(const std::string &path, std::set<FileData> &
     html << "\t<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\r\n";
     html << "\t<link rel=\"stylesheet\" href=\"/resources/css/styles.css\">\r\n";
     html << "\t<link rel=\"stylesheet\" href=\"/resources/css/directory.css\">\r\n";
+    html << "\t<link rel=\"stylesheet\" href=\"/resources/css/navbar.css\">\r\n";
     html << "\t<title>Index of " << path << "</title>\r\n";
     html << "</head>\r\n\r\n";
     html << "<body>\r\n";

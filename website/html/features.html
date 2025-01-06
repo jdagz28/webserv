@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../resources/css/styles.css">
+    <link rel="stylesheet" href="../resources/css/navbar.css">
     <title>Homepage</title>
 </head>
 
@@ -48,12 +49,36 @@
                 <li class="features-list"><a href="/directory/">autoindex</a></li>
             </ul>
         </ul>
+        <hr class="dotted">
 
         <h2>POST</h2>
         <ul>
             <li class="features-list"><a href="/html/search.html">Google Search</a></li>
             <li class="features-list"><a href="/html/upload.html">Image Upload</a></li>
         </ul>
+        <div class="delete-commands">
+            <div class="command-box">
+                <button class="copy-btn" onclick="copyToClipboard('curl -X POST -H "Content-Type: application/x-www-form-urlencoded" -d "q=test localhost:4242/search')">Copy</button>
+                    <span class="command-text">curl -X POST -H "Content-Type: application/x-www-form-urlencoded" -d "q=test localhost:4242/search</span>
+            </div>
+            <div class="command-box">
+                <button class="copy-btn" onclick="copyToClipboard('curl -X POST -F "file=@./test.jpg" localhost:4242/html/upload/')">Copy</button>
+                    <span class="command-text">curl -X POST -F "file=@./test.jpg" localhost:4242/html/upload/</span>
+            </div>
+        </div>
+        <hr class="dotted">
+        <h2>DELETE</h2>
+        <div class="delete-commands">
+            <div class="command-box">
+                <button class="copy-btn" onclick="copyToClipboard('curl -i -X DELETE localhost:4242/directory/uploads/test.jpg')">Copy</button>
+                    <span class="command-text">curl -i -X DELETE localhost:4242/directory/uploads/test.jpg</span>
+            </div>
+        </div>
+
+        <hr class="dotted">
+
+        <h2>CGI</h2>
+
         
     </main>
 
