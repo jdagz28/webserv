@@ -46,13 +46,12 @@
     font-size: 14px;
     padding: 10px 20px;
     cursor: pointer;
+    font-size: 16px;
+    font-weight: 700;
+    text-transform: uppercase;
 }
 
 .search-btn:hover {
-    background-color: #e6e6e6;
-}
-
-.search-btn:focus {
-    outline: none;
-    box-shadow: 0 0 5px #4285f4;
+    background-color: #4CAF50;
+    color: white;
 }

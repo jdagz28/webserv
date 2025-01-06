@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../resources/css/styles.css">
     <link rel="stylesheet" href="../resources/css/navbar.css">
-    <title>Homepage</title>
+    <title>Features</title>
 </head>
 
 <body>
@@ -16,7 +16,7 @@
             <li class="nav-item"><a href="/html/features.html">Features</a></li>
             <li class="nav-item"><a href="/directory">Directory</a></li>
             <li class="nav-item"><a href="/html/search.html">Search</a></li>
-            <li class="nav-item"><a href="/">About Us</a></li>
+            <li class="nav-item"><a href="/html/about.html">About Us</a></li>
         </ul>
     </nav>
 
@@ -56,7 +56,7 @@
             <li class="features-list"><a href="/html/search.html">Google Search</a></li>
             <li class="features-list"><a href="/html/upload.html">Image Upload</a></li>
         </ul>
-        <div class="delete-commands">
+        <div class="commands-container">
             <div class="command-box">
                 <button class="copy-btn" onclick="copyToClipboard('curl -X POST -H "Content-Type: application/x-www-form-urlencoded" -d "q=test localhost:4242/search')">Copy</button>
                     <span class="command-text">curl -X POST -H "Content-Type: application/x-www-form-urlencoded" -d "q=test localhost:4242/search</span>
@@ -68,7 +68,7 @@
         </div>
         <hr class="dotted">
         <h2>DELETE</h2>
-        <div class="delete-commands">
+        <div class="commands-container">
             <div class="command-box">
                 <button class="copy-btn" onclick="copyToClipboard('curl -i -X DELETE localhost:4242/directory/uploads/test.jpg')">Copy</button>
                     <span class="command-text">curl -i -X DELETE localhost:4242/directory/uploads/test.jpg</span>

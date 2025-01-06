@@ -79,7 +79,7 @@ void HttpResponse::generateDirPage(const std::string &path, std::set<FileData> &
     html << "\t\t\t<li class=\"nav-item\"><a href=\"/html/features.html\">Features</a></li>\r\n";
     html << "\t\t\t<li class=\"nav-item\"><a href=\"/directory\">Directory</a></li>\r\n";
     html << "\t\t\t<li class=\"nav-item\"><a href=\"/html/search.html\">Search</a></li>\r\n";
-    html << "\t\t\t<li class=\"nav-item\"><a href=\"/\">About Us</a></li>\r\n";
+    html << "\t\t\t<li class=\"nav-item\"><a href=\"/html/about.html\">About Us</a></li>\r\n";
     html << "\t\t</ul>\r\n";
     html << "\t</nav>\r\n\r\n";
     html << "\t<div class=\"directory\">\r\n";

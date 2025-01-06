@@ -29,11 +29,10 @@ main {
     padding-right: 10%; 
     margin: 0 auto; 
     max-width: 1200px;
-    font-size
 }
 
 /* Container for delete commands */
-.delete-commands {
+.commands-container {
     display: flex;
     flex-direction: column;
     gap: 10px; 
@@ -71,4 +70,52 @@ main {
 .command-text {
     font-family: monospace; 
     color: #333;
+}
+
+/* Cards Container */
+.cards-container {
+    display: flex; 
+    gap:3em; 
+    justify-content: center; 
+    align-items: flex-start; 
+    margin-top: 5em; 
+}
+
+.card {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    max-width: 300px;
+    text-align: center;
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #ffffff;
+    border-radius: 10px;
+}
+
+.card img {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    width: 500px; 
+    height: 250px; 
+    object-fit: cover;
+}
+
+.card h2 {
+    margin: 15px 0;
+}
+
+.social-icons {
+    display: flex;
+    gap: 10px; 
+    justify-content: center;
+    align-items: center;
+    padding-bottom: 1.5em;
+}
+
+.icon {
+    font-size: 32px;
+    color: #333;
+    text-decoration: none;
+}
+
+.icon:hover {
+    color: #45a049; 
 }
