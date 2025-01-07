@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
+/*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/05 00:23:30 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/11/07 11:49:39 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/01/07 13:59:00 by jdagz28          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,11 +63,13 @@ int main(int argc, char **argv)
         
         Config  config(configPath);
         
-        struct sockaddr_in server_addr, client_addr;
-        socklen_t client_len = sizeof(client_addr);
-
         signal(SIGINT, signal_handler);
         signal(SIGTERM, signal_handler);
+        
+        /*
+         ! Moved to Socket
+        struct sockaddr_in server_addr, client_addr;
+        socklen_t client_len = sizeof(client_addr);
 
         server_socket = socket(AF_INET, SOCK_STREAM, 0);
         if (server_socket < 0)
@@ -101,18 +103,22 @@ int main(int argc, char **argv)
             std::cerr << "Error: Could not listen to socket." << std::endl;
             close(server_socket);
             return (1);
-        }   
+        }
+        */   
         
         // printConfigData(config);
         log.checkConfig(config);
         while (true)
         {
+            /* //! Moved to Socket
             int client_socket = accept(server_socket, (struct sockaddr*)&client_addr, &client_len);
             if (client_socket < 0)
             {
                 perror("Failed to accept connection");
                 continue;
             }
+            */
+
             HttpRequest request(client_socket);
             log.request(request);
             // printHttpRequest(request);
@@ -122,7 +128,7 @@ int main(int argc, char **argv)
             log.response(response);
             response.sendResponse();
 
-            close(client_socket);
+            // close(client_socket); //! Moved to Socket
             // std::cout << "Connection closed" << std::endl;
         }
 

@@ -6,7 +6,7 @@
 /*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 02:56:15 by jdagz28           #+#    #+#             */
-/*   Updated: 2025/01/07 03:56:47 by jdagz28          ###   ########.fr       */
+/*   Updated: 2025/01/07 13:56:00 by jdagz28          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,4 +83,27 @@ void    Socket::bindSocket()
         throw std::exception();
     }
     std::cout << "Socket successfully bound to " << _ip << ":" << _port << std::endl; //! DELETE
+}
+
+void    Socket::listenSocket()
+{
+    if (listen(_socketFD, SOCKET_MAXCONNECIONS) == -1)
+    {
+        _socketStatus = -1;
+        std::cerr << "Error: Could not listen to socket." << std::endl;
+        throw std::exception();
+    }
+}
+
+void    Socket::acceptSocket()
+{
+    struct sockaddr_in client_addr;
+    socklen_t client_len = sizeof(client_addr);
+    int client_socket = accept(_socketFD, (struct sockaddr*)&client_addr, &client_len);
+    if (client_socket == -1)
+    {
+        _socketStatus = -1;
+        std::cerr << "Error: Failed to accept connection" << std::endl;
+        throw std::exception();
+    }
 }
