@@ -2,30 +2,8 @@ html {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
-.navbar {
-    padding: 1rem;
-    background-color: #fff;
-    box-shadow: 0 10px 30px 0 rgba(138, 155, 165, 0.15);
-}
-
-.nav-list {
-    display: flex;
-    justify-content: center;
-    list-style-type: none;
-}
-
-.nav-item a {
-    color: #000; 
-    font-size: 1.5rem;
-    font-weight: bold;
-    margin-right: 2rem;
-    list-style-type: none;
-    text-decoration: none;
-    transition: color 0.3s ease;
-}
-
-.nav-item a:hover {
-    color: #4CAF50;
+h1 {
+    margin-bottom: 2rem;
 }
 
 .landing {
@@ -33,10 +11,6 @@ html {
     margin-top: 20rem;
     text-align: center;
     align-items: center;
-}
-
-h1 {
-    font-size: 2rem;
 }
 
 body {
@@ -48,4 +22,100 @@ body {
     width: 100vh;
     height: 100vh;
     object-fit: contain;
+}
+
+main {
+    padding-left: 10%; 
+    padding-right: 10%; 
+    margin: 0 auto; 
+    max-width: 1200px;
+}
+
+/* Container for delete commands */
+.commands-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; 
+    max-width: 900px; 
+    padding-left: 20px;
+}
+
+/* Individual command box */
+.command-box {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 5px 10px;
+    background-color: #f9f9f9;
+    font-size: 0.8rem;
+}
+
+/* Copy button styling */
+.copy-btn {
+    background-color: #253849;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    padding: 5px 10px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.copy-btn:hover {
+    background-color: #45a049;
+}
+
+/* Command text styling */
+.command-text {
+    font-family: monospace; 
+    color: #333;
+}
+
+/* Cards Container */
+.cards-container {
+    display: flex; 
+    gap:3em; 
+    justify-content: center; 
+    align-items: flex-start; 
+    margin-top: 5em; 
+}
+
+.card {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    max-width: 300px;
+    text-align: center;
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #ffffff;
+    border-radius: 10px;
+}
+
+.card img {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    width: 500px; 
+    height: 250px; 
+    object-fit: cover;
+}
+
+.card h2 {
+    margin: 15px 0;
+}
+
+.social-icons {
+    display: flex;
+    gap: 10px; 
+    justify-content: center;
+    align-items: center;
+    padding-bottom: 1.5em;
+}
+
+.icon {
+    font-size: 32px;
+    color: #333;
+    text-decoration: none;
+}
+
+.icon:hover {
+    color: #45a049; 
 }
