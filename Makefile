@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+         #
+#    By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/05 02:06:08 by jdagoy            #+#    #+#              #
-#    Updated: 2024/11/05 11:15:52 by jdagoy           ###   ########.fr        #
+#    Updated: 2025/01/07 15:56:03 by jdagz28          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -29,7 +29,9 @@ HEADER_LIST			:= webserv.hpp \
 						HttpRequest.hpp \
 						HttpRequestLine.hpp \
 						HttpResponse.hpp \
-						Logger.hpp
+						Logger.hpp \
+						Server.hpp\
+						Socket.hpp
 HEADER_FILES		:= $(addprefix $(INC_DIR), $(HEADER_LIST))
 
 
@@ -48,6 +50,12 @@ CONFIG_SRCS			:= Config.cpp \
 						parseLocationBlock.cpp
 CONFIG_OBJS_LIST 	:= $(patsubst %.cpp, %.o, $(CONFIG_SRCS))
 CONFIG_OBJS			:= $(addprefix $(OBJ_DIR), $(CONFIG_OBJS_LIST))
+
+SERVER_DIR			:= $(SRC_DIR)server/
+SERVER_SRCS			:= Server.cpp \
+						Socket.cpp
+SERVER_OBJS_LIST 	:= $(patsubst %.cpp, %.o, $(SERVER_SRCS))
+SERVER_OBJS			:= $(addprefix $(OBJ_DIR), $(SERVER_OBJS_LIST))
 
 DEBUG_DIR			:= $(SRC_DIR)debug/
 DEBUG_SRCS			:= configPrint.cpp \
@@ -95,6 +103,9 @@ $(OBJ_DIR)%.o: $(SRC_DIR)%.cpp $(HEADER_FILES)
 $(OBJ_DIR)%.o: $(CONFIG_DIR)%.cpp $(HEADER_FILES)
 	$(CXX) $(CXXFLAGS) -c $(INCLUDES) $< -o $@
 
+$(OBJ_DIR)%.o: $(SERVER_DIR)%.cpp $(HEADER_FILES)
+	$(CXX) $(CXXFLAGS) -c $(INCLUDES) $< -o $@
+
 $(OBJ_DIR)%.o: $(DEBUG_DIR)%.cpp $(HEADER_FILES)
 	$(CXX) $(CXXFLAGS) -c $(INCLUDES) $< -o $@
 
@@ -107,8 +118,8 @@ $(OBJ_DIR)%.o: $(HTTPRESPONSE_DIR)%.cpp $(HEADER_FILES)
 $(OBJ_DIR)%.o: $(LOGGER_DIR)%.cpp $(HEADER_FILES)
 	$(CXX) $(CXXFLAGS) -c $(INCLUDES) $< -o $@
 
-$(NAME): $(OBJ_DIR) $(OBJS) $(CONFIG_OBJS) $(DEBUG_OBJS) $(HTTPREQUEST_OBJS) $(HTTPRESPONSE_OBJS) $(LOGGER_OBJS)
-	$(CXX) $(CXXFLAGS) $(OBJS) $(CONFIG_OBJS) $(DEBUG_OBJS) $(HTTPREQUEST_OBJS)  $(HTTPRESPONSE_OBJS) $(LOGGER_OBJS) -o $(NAME)
+$(NAME): $(OBJ_DIR) $(OBJS) $(CONFIG_OBJS) $(SERVER_OBJS) $(DEBUG_OBJS) $(HTTPREQUEST_OBJS) $(HTTPRESPONSE_OBJS) $(LOGGER_OBJS)
+	$(CXX) $(CXXFLAGS) $(OBJS) $(CONFIG_OBJS) $(SERVER_OBJS) $(DEBUG_OBJS) $(HTTPREQUEST_OBJS)  $(HTTPRESPONSE_OBJS) $(LOGGER_OBJS) -o $(NAME)
 
 clean:
 	$(RM) $(OBJ_DIR)

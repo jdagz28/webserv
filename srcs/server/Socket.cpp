@@ -6,13 +6,14 @@
 /*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 02:56:15 by jdagz28           #+#    #+#             */
-/*   Updated: 2025/01/07 13:56:00 by jdagz28          ###   ########.fr       */
+/*   Updated: 2025/01/07 15:51:17 by jdagz28          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Socket.hpp"
 #include <iostream>
 #include <cstring>
+#include <arpa/inet.h> 
 
 
 Socket::Socket(const std::string &ip, int port)
@@ -56,8 +57,15 @@ void    Socket::createSocket()
 ;
 }
 
+
 void    Socket::initAddressInfo()
 {
+    struct in_addr addr;
+    if (inet_pton(AF_INET, _ip.c_str(), &addr) <= 0) {
+        std::cerr << "Error: Invalid IP address provided: " << _ip << std::endl;
+        throw std::invalid_argument("Invalid IP address: " + _ip);
+    }
+    
     memset(&_addressInfo, 0, sizeof(_addressInfo));
     _addressInfo.sin_family = AF_INET;
     _addressInfo.sin_port = htons(_port);
@@ -106,4 +114,9 @@ void    Socket::acceptSocket()
         std::cerr << "Error: Failed to accept connection" << std::endl;
         throw std::exception();
     }
+}
+
+int     Socket::getSocketFD() const
+{
+    return _socketFD;
 }

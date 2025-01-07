@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerConfig.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
+/*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 02:19:46 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/21 09:40:24 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/01/07 15:53:49 by jdagz28          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,11 @@ void    ServerConfig::setPort(int port)
     _port = port;
 }
 
+void    ServerConfig::setIP(const std::string &ip)
+{
+    _ip = ip;
+}
+
 void    ServerConfig::setServerName(const std::string &name)
 {
     std::vector<std::string>::iterator it;
@@ -91,6 +96,11 @@ const std::map<std::string, std::vector<std::string> > &ServerConfig::getDirecti
 int ServerConfig::getPort() const
 {
     return (_port);
+}
+
+const std::string ServerConfig::getIP() const
+{
+    return (_ip);
 }
 
 std::string ServerConfig::getServerName() const

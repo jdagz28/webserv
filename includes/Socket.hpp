@@ -6,7 +6,7 @@
 /*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 02:41:19 by jdagz28           #+#    #+#             */
-/*   Updated: 2025/01/07 13:43:52 by jdagz28          ###   ########.fr       */
+/*   Updated: 2025/01/07 15:51:04 by jdagz28          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,8 @@ class Socket
         void    bindSocket();
         void    listenSocket();
         void    acceptSocket();
+
+        int     getSocketFD() const;
 };
 
 
