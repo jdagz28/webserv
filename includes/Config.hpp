@@ -6,7 +6,7 @@
 /*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 22:38:46 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/01/08 13:14:22 by jdagz28          ###   ########.fr       */
+/*   Updated: 2025/01/08 15:51:44 by jdagz28          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,6 @@ class Config
         std::map<StatusCode, std::string>       _errorPages;
         std::vector<int>                        _portsToServe;
         
-        Config(const Config &copy);
         Config  &operator=(const Config &copy); 
         
         bool    validPath(const std::string &configPath);
@@ -79,6 +78,7 @@ class Config
 
     public:
         Config(const std::string &configPath);
+        Config(const Config &copy);
         ~Config();
 
         const std::vector<ServerConfig>& getServerConfig() const;
@@ -93,6 +93,7 @@ class Config
                 std::string configPath;
                 std::string parsedLine;
                 mutable std::string errorMsg;
+                
             public:
                 configException(const std::string &msg)
                     : exceptMsg(msg), configPath(""), parsedLine(""), errorMsg("") {};
@@ -101,7 +102,7 @@ class Config
                 {
                     parsedLine = toString(line);
                 };
-                ~configException();
+                ~configException() throw() {};
                 const char *what() const throw();
         };
 

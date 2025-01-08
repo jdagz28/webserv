@@ -6,7 +6,7 @@
 /*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 02:56:15 by jdagz28           #+#    #+#             */
-/*   Updated: 2025/01/08 13:23:24 by jdagz28          ###   ########.fr       */
+/*   Updated: 2025/01/08 16:12:32 by jdagz28          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,11 +14,13 @@
 #include <iostream>
 #include <cstring>
 #include <arpa/inet.h> 
+#include <cerrno>
 
 
 Socket::Socket(const std::string &ip, int port)
-    : _socketStatus(0), _socketFD(-1), _ip(ip), _port(port), _addressInfo()
+    : _socketStatus(0), _socketFD(-1),  _addressInfo(), _ip(ip), _port(port)
 {
+    initSocket();
 }
 
 Socket::~Socket()
@@ -41,6 +43,8 @@ void    Socket::initSocket()
     if (_socketFD == -1)
     {
         _socketStatus = -1;
+        std::cerr << "Error: failed to create socket. Errno: " 
+                  << errno << " (" << std::strerror(errno) << ")" << std::endl;
         throw SocketException("Error: failed to create socket");
     }
 }
@@ -51,17 +55,20 @@ void    Socket::createSocket()
     if (_socketFD == -1)
         throw SocketException("Error: failed to create socket");
     bindSocket();
-;
+    std::cout << "Socket created and bound to " << _ip << ":" << _port << std::endl; //! DELETE
 }
 
 
 void    Socket::initAddressInfo()
 {
     struct in_addr addr;
-    if (inet_pton(AF_INET, _ip.c_str(), &addr) <= 0)
+    if (!_ip.empty())
     {
+        if (inet_pton(AF_INET, _ip.c_str(), &addr) <= 0)
+        {
         std::string msg = "Error: Invalid IP address provided: " + _ip + "\n";
-        throw SocketException(msg);;
+        throw SocketException(msg);
+        }
     }
     
     memset(&_addressInfo, 0, sizeof(_addressInfo));
@@ -98,7 +105,7 @@ void    Socket::listenSocket()
     }
 }
 
-void    Socket::acceptSocket()
+int    Socket::acceptSocket()
 {
     struct sockaddr_in client_addr;
     socklen_t client_len = sizeof(client_addr);
@@ -108,15 +115,13 @@ void    Socket::acceptSocket()
         _socketStatus = -1;
         throw SocketException("Error: Failed to accept connection");
     }
+    return (client_socket);
 }
 
 int     Socket::getSocketFD() const
 {
     return _socketFD;
 }
-
-Socket::SocketException::~SocketException()
-{}
 
 const char *Socket::SocketException::what() const throw()
 {

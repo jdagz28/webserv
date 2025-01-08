@@ -6,12 +6,11 @@
 /*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/05 00:23:30 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/01/08 13:24:21 by jdagz28          ###   ########.fr       */
+/*   Updated: 2025/01/08 15:38:25 by jdagz28          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <iostream>
-#include <cstdlib>
 #include <string>
 #include <cstring>
 #include "Config.hpp"
@@ -20,6 +19,7 @@
 #include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
 #include "Logger.hpp"
+#include "Server.hpp"
 
 // #define PORT   4242 //1919    
 
@@ -50,7 +50,15 @@ int main(int argc, char **argv)
         
         Config  config(configPath);
 
+        Server server(config);
         
+        server.initServer();
+
+        while(true)
+        {
+            server.runServer();
+        }
+
         /*
          ! Moved to Socket
         struct sockaddr_in server_addr, client_addr;
@@ -92,9 +100,9 @@ int main(int argc, char **argv)
         */   
         
         // printConfigData(config);
-        log.checkConfig(config);
-        while (true)
-        {
+        // log.checkConfig(config);
+        // while (true)
+        // {
             /* //! Moved to Socket
             int client_socket = accept(server_socket, (struct sockaddr*)&client_addr, &client_len);
             if (client_socket < 0)
@@ -104,25 +112,25 @@ int main(int argc, char **argv)
             }
             */
 
-            HttpRequest request(client_socket);
-            log.request(request);
+            // HttpRequest request(client_socket);
+            // log.request(request);
             // printHttpRequest(request);
             
-            HttpResponse response(request, config, client_socket);
+            // HttpResponse response(request, config, client_socket);
 
-            log.response(response);
-            response.sendResponse();
+            // log.response(response);
+            // response.sendResponse();
 
             // close(client_socket); //! Moved to Socket
             // std::cout << "Connection closed" << std::endl;
-        }
+        // }
 
-        close(server_socket);
+        // close(server_socket);
     }
     catch (const std::exception &e)
     {
         std::cerr << e.what() << std::endl;
-        log.configError(e.what());
+        // log.configError(e.what());
         return (EXIT_FAILURE);
     }
     return (EXIT_SUCCESS);

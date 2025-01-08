@@ -6,7 +6,7 @@
 /*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 02:41:19 by jdagz28           #+#    #+#             */
-/*   Updated: 2025/01/08 13:21:11 by jdagz28          ###   ########.fr       */
+/*   Updated: 2025/01/08 15:36:03 by jdagz28          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ class Socket
         void    createSocket();
         void    bindSocket();
         void    listenSocket();
-        void    acceptSocket();
+        int     acceptSocket();
 
         int     getSocketFD() const;
 
@@ -58,7 +58,7 @@ class Socket
             public:
                 SocketException(const std::string &msg)
                     : _exceptMsg(msg) {};
-                ~SocketException();
+                ~SocketException() throw() {};
                 const char *what() const throw();
         };
 };

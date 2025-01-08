@@ -6,7 +6,7 @@
 /*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 22:38:59 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/01/08 13:14:59 by jdagz28          ###   ########.fr       */
+/*   Updated: 2025/01/08 15:33:55 by jdagz28          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -211,9 +211,6 @@ const std::vector<ServerConfig>& Config::getServerConfig() const
 {
     return (_serverConfig);
 }
-
-Config::configException::~configException()
-{}
 
 const char *Config::configException::what() const throw()
 {

@@ -6,7 +6,7 @@
 /*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 02:24:21 by jdagz28           #+#    #+#             */
-/*   Updated: 2025/01/08 13:15:39 by jdagz28          ###   ########.fr       */
+/*   Updated: 2025/01/08 15:57:22 by jdagz28          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,12 @@
 #include <vector>
 #include <csignal>
 #include <exception>
+#include <cstdlib>
 #include "Config.hpp"
 #include "webserv.hpp"
 #include "Socket.hpp"
+#include "HttpRequest.hpp"
+#include "HttpResponse.hpp"
 
 typedef int socketFD;
 typedef int clientFD;
@@ -28,7 +31,7 @@ class Server
 {
     private:
         int                             _serverStatus;
-        const Config                    &_config;
+        Config                          _config;
         std::map<socketFD, Socket *>    _sockets;
         std::map<clientFD, Socket *>    _clients;
         
@@ -37,8 +40,7 @@ class Server
         Server &operator=(const Server &copy);
         
         void    createSockets();
-        void    setSignals();
-        void    signalHandler(int signum);
+        // void    setSignals();
         void    clearSockets();
 
     public:
@@ -49,6 +51,8 @@ class Server
         void    runServer();
         void    closeServer();
 
+        void    signalHandler(int signum);
+
         class ServerException : public std::exception
         {
             private:
@@ -56,7 +60,7 @@ class Server
             public:
                 ServerException(const std::string &msg)
                     : _exceptMsg(msg) {};
-                ~ServerException();
+                ~ServerException() throw() {};
                 const char *what() const throw();
         };
 
