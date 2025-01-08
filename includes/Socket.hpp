@@ -6,7 +6,7 @@
 /*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 02:41:19 by jdagz28           #+#    #+#             */
-/*   Updated: 2025/01/07 15:51:04 by jdagz28          ###   ########.fr       */
+/*   Updated: 2025/01/08 13:21:11 by jdagz28          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <netinet/in.h>
+#include <exception>
 #include "webserv.hpp"
 
 #define SOCKET_MAXCONNECIONS 1024
@@ -49,6 +50,17 @@ class Socket
         void    acceptSocket();
 
         int     getSocketFD() const;
+
+        class SocketException : public std::exception
+        {
+            private:
+                std::string     _exceptMsg;
+            public:
+                SocketException(const std::string &msg)
+                    : _exceptMsg(msg) {};
+                ~SocketException();
+                const char *what() const throw();
+        };
 };
 
 

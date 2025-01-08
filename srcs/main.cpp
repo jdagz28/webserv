@@ -6,7 +6,7 @@
 /*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/05 00:23:30 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/01/07 16:19:17 by jdagz28          ###   ########.fr       */
+/*   Updated: 2025/01/08 13:24:21 by jdagz28          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,10 +19,9 @@
 #include "webserv.hpp"
 #include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
-#include <csignal>
 #include "Logger.hpp"
 
-#define PORT   4242 //1919    
+// #define PORT   4242 //1919    
 
 int server_socket = -1;
 
@@ -34,18 +33,6 @@ std::string getConfigPath(int argc, char **argv)
     else
         return (argv[1]);
     return ("");
-}
-
-void    signal_handler(int signum)
-{
-    std::cout << "Received signal " << signum << std::endl;
-    std::cout << "===== Shutting down server =====" << std::endl;
-    if (server_socket != -1)
-    {
-        close(server_socket);
-        std::cout << "Server socket closed." << std::endl;
-    }
-    exit(signum);
 }
 
 int main(int argc, char **argv)
@@ -62,9 +49,7 @@ int main(int argc, char **argv)
         std::string configPath = getConfigPath(argc, argv);
         
         Config  config(configPath);
-        
-        signal(SIGINT, signal_handler);
-        signal(SIGTERM, signal_handler);
+
         
         /*
          ! Moved to Socket

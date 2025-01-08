@@ -6,7 +6,7 @@
 /*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 02:56:15 by jdagz28           #+#    #+#             */
-/*   Updated: 2025/01/07 15:51:17 by jdagz28          ###   ########.fr       */
+/*   Updated: 2025/01/08 13:23:24 by jdagz28          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,8 +28,7 @@ Socket::~Socket()
         if(close(_socketFD) == -1)
         {
             _socketStatus = -1;
-            std::cerr << "Error: failed to close socket" << std::endl;
-            throw std::exception();
+            throw SocketException("Error: failed to close socket");
         }
         _socketFD = -1;
     }
@@ -42,8 +41,7 @@ void    Socket::initSocket()
     if (_socketFD == -1)
     {
         _socketStatus = -1;
-        std::cerr << "Error: failed to create socket" << std::endl;
-        throw std::exception();
+        throw SocketException("Error: failed to create socket");
     }
 }
 
@@ -51,8 +49,7 @@ void    Socket::createSocket()
 {
     initSocket();
     if (_socketFD == -1)
-        throw std::exception();
-    
+        throw SocketException("Error: failed to create socket");
     bindSocket();
 ;
 }
@@ -61,9 +58,10 @@ void    Socket::createSocket()
 void    Socket::initAddressInfo()
 {
     struct in_addr addr;
-    if (inet_pton(AF_INET, _ip.c_str(), &addr) <= 0) {
-        std::cerr << "Error: Invalid IP address provided: " << _ip << std::endl;
-        throw std::invalid_argument("Invalid IP address: " + _ip);
+    if (inet_pton(AF_INET, _ip.c_str(), &addr) <= 0)
+    {
+        std::string msg = "Error: Invalid IP address provided: " + _ip + "\n";
+        throw SocketException(msg);;
     }
     
     memset(&_addressInfo, 0, sizeof(_addressInfo));
@@ -80,15 +78,13 @@ void    Socket::bindSocket()
     if (setsockopt(_socketFD, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
     {
         _socketStatus = -1;
-        std::cerr << "Error: setsockopt failed" << std::endl;
-        throw std::exception();
+        throw SocketException("Error: setsockopt failed");
     }
 
     if (bind(_socketFD, (struct sockaddr*)&_addressInfo, sizeof(_addressInfo)) == -1)
     {
         _socketStatus = -1;
-        std::cerr << "Error: failed to bind socket" << std::endl;
-        throw std::exception();
+        throw SocketException("Error: failed to bind socket");
     }
     std::cout << "Socket successfully bound to " << _ip << ":" << _port << std::endl; //! DELETE
 }
@@ -98,8 +94,7 @@ void    Socket::listenSocket()
     if (listen(_socketFD, SOCKET_MAXCONNECIONS) == -1)
     {
         _socketStatus = -1;
-        std::cerr << "Error: Could not listen to socket." << std::endl;
-        throw std::exception();
+        throw SocketException("Error: Could not listen to socket.");
     }
 }
 
@@ -111,12 +106,19 @@ void    Socket::acceptSocket()
     if (client_socket == -1)
     {
         _socketStatus = -1;
-        std::cerr << "Error: Failed to accept connection" << std::endl;
-        throw std::exception();
+        throw SocketException("Error: Failed to accept connection");
     }
 }
 
 int     Socket::getSocketFD() const
 {
     return _socketFD;
+}
+
+Socket::SocketException::~SocketException()
+{}
+
+const char *Socket::SocketException::what() const throw()
+{
+    return _exceptMsg.c_str();
 }

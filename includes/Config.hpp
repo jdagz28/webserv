@@ -6,7 +6,7 @@
 /*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 22:38:46 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/01/07 15:32:29 by jdagz28          ###   ########.fr       */
+/*   Updated: 2025/01/08 13:14:22 by jdagz28          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,7 +101,7 @@ class Config
                 {
                     parsedLine = toString(line);
                 };
-                ~configException() throw() {};
+                ~configException();
                 const char *what() const throw();
         };
 

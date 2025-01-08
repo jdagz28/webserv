@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
+/*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 22:38:59 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/11/05 10:44:34 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/01/08 13:14:59 by jdagz28          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -211,6 +211,9 @@ const std::vector<ServerConfig>& Config::getServerConfig() const
 {
     return (_serverConfig);
 }
+
+Config::configException::~configException()
+{}
 
 const char *Config::configException::what() const throw()
 {
