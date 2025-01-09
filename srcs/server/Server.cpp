@@ -6,7 +6,7 @@
 /*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 02:24:09 by jdagz28           #+#    #+#             */
-/*   Updated: 2025/01/09 11:39:20 by jdagz28          ###   ########.fr       */
+/*   Updated: 2025/01/09 12:32:55 by jdagz28          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,7 +104,6 @@ void    Server::runServer()
 
     try
     {
-        std::cout << "Server is running..." << std::endl; //! DELETE
         handleConnections();
     }
     catch (const std::exception& e)
@@ -118,16 +117,31 @@ void    Server::handleConnections()
 {
     while (true)
     {
-        // Check for activity on server sockets
+        fd_set readFDs;
+        int maxFD = 0;
+
         std::map<socketFD, Socket *>::iterator it;
         for (it = _sockets.begin(); it != _sockets.end(); it++)
         {
-            std::cout << "Checking socket: " << it->first << std::endl; //! DELETE
+            FD_SET(it->first, &readFDs);
+            if (it->first > maxFD)
+                maxFD = it->first;
+        }
+
+        int activity = select(maxFD + 1, &readFDs, NULL, NULL, NULL);
+        if (activity == -1)
+        {
+            _serverStatus = -1;
+            throw ServerException("Error: select failed");
+        }
+
+
+        // Check for activity on server sockets
+        for (it = _sockets.begin(); it != _sockets.end(); it++)
+        {
             try 
             {
-                std::cout << "Accepting connection on socket: " << it->first << std::endl; //! DELETE
                 clientFD client = it->second->acceptSocket();
-                std::cout << "Accepted connection on socket: " << it->first << std::endl; //! DELETE
                 _clients[client] = it->second;
 
                 // Handle client connection
