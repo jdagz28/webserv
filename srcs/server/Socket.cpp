@@ -6,7 +6,7 @@
 /*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 02:56:15 by jdagz28           #+#    #+#             */
-/*   Updated: 2025/01/08 16:12:32 by jdagz28          ###   ########.fr       */
+/*   Updated: 2025/01/09 11:50:47 by jdagz28          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@ Socket::Socket(const std::string &ip, int port)
     : _socketStatus(0), _socketFD(-1),  _addressInfo(), _ip(ip), _port(port)
 {
     initSocket();
+    createSocket();
 }
 
 Socket::~Socket()
@@ -54,42 +55,48 @@ void    Socket::createSocket()
     initSocket();
     if (_socketFD == -1)
         throw SocketException("Error: failed to create socket");
+    std::cout << "Binding socket to " << _ip << ":" << _port << std::endl; //! DELETE
     bindSocket();
     std::cout << "Socket created and bound to " << _ip << ":" << _port << std::endl; //! DELETE
 }
 
 
 void    Socket::initAddressInfo()
-{
-    struct in_addr addr;
-    if (!_ip.empty())
-    {
-        if (inet_pton(AF_INET, _ip.c_str(), &addr) <= 0)
-        {
-        std::string msg = "Error: Invalid IP address provided: " + _ip + "\n";
-        throw SocketException(msg);
-        }
-    }
-    
+{   
     memset(&_addressInfo, 0, sizeof(_addressInfo));
     _addressInfo.sin_family = AF_INET;
     _addressInfo.sin_port = htons(_port);
-    _addressInfo.sin_addr.s_addr = INADDR_ANY;
 
+    if (_ip.empty())
+        _addressInfo.sin_addr.s_addr = INADDR_ANY;
+    else
+    {
+        if (inet_pton(AF_INET, _ip.c_str(), &_addressInfo.sin_addr) <= 0)
+        {
+            std::string msg = "Error: Invalid IP address provided: " + _ip + "\n";
+            throw SocketException(msg);
+        }
+    }
     std::cout << "Initialized address info: IP = " << _ip << ", Port = " << _port << std::endl; //! DELETE
 }
 
 void    Socket::bindSocket()
 {
+    std::cout << "Binding socket to " << _ip << ":" << _port << std::endl; //! DELETE
+    
     int opt = 1;
     if (setsockopt(_socketFD, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
     {
+        std::cerr << "Error: setsockopt failed. Errno: " 
+                  << errno << " (" << std::strerror(errno) << ")" << std::endl; //! DELETE
         _socketStatus = -1;
         throw SocketException("Error: setsockopt failed");
     }
 
     if (bind(_socketFD, (struct sockaddr*)&_addressInfo, sizeof(_addressInfo)) == -1)
     {
+        std::cerr << "Error: failed to bind socket. Errno: " 
+                  << errno << " (" << std::strerror(errno) << ")" << std::endl; //! DELETE
         _socketStatus = -1;
         throw SocketException("Error: failed to bind socket");
     }
@@ -103,18 +110,31 @@ void    Socket::listenSocket()
         _socketStatus = -1;
         throw SocketException("Error: Could not listen to socket.");
     }
+    std::cout << "Socket FD " << _socketFD << " is now listening." << std::endl;
 }
 
 int    Socket::acceptSocket()
 {
     struct sockaddr_in client_addr;
     socklen_t client_len = sizeof(client_addr);
+
+    std::cout << "Debug: Listening socket FD: " << _socketFD << std::endl; //! DELETE
+    
     int client_socket = accept(_socketFD, (struct sockaddr*)&client_addr, &client_len);
     if (client_socket == -1)
     {
+        std::cerr << "Error: Failed to accept connection. Errno: " 
+                  << errno << " (" << std::strerror(errno) << ")" << std::endl;
         _socketStatus = -1;
         throw SocketException("Error: Failed to accept connection");
     }
+    std::cout << "Accepted connection from "
+              << inet_ntoa(client_addr.sin_addr) << ":" << ntohs(client_addr.sin_port) 
+              << " on socket FD: " << client_socket << std::endl; //! DELETE
+
+    std::cout << "Accepted connection from "
+              << inet_ntoa(client_addr.sin_addr) << ":" << ntohs(client_addr.sin_port) 
+              << " on socket FD: " << client_socket << std::endl; //! DELETE
     return (client_socket);
 }
 

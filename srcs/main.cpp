@@ -6,7 +6,7 @@
 /*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/05 00:23:30 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/01/08 15:38:25 by jdagz28          ###   ########.fr       */
+/*   Updated: 2025/01/09 11:18:01 by jdagz28          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,11 +53,7 @@ int main(int argc, char **argv)
         Server server(config);
         
         server.initServer();
-
-        while(true)
-        {
-            server.runServer();
-        }
+        server.runServer();
 
         /*
          ! Moved to Socket

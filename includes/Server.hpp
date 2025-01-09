@@ -6,7 +6,7 @@
 /*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 02:24:21 by jdagz28           #+#    #+#             */
-/*   Updated: 2025/01/08 15:57:22 by jdagz28          ###   ########.fr       */
+/*   Updated: 2025/01/09 10:55:45 by jdagz28          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,7 @@ class Server
         void    createSockets();
         // void    setSignals();
         void    clearSockets();
+        void    handleConnections();
 
     public:
         Server(const Config &config);
