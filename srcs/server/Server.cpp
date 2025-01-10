@@ -6,7 +6,7 @@
 /*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 02:24:09 by jdagz28           #+#    #+#             */
-/*   Updated: 2025/01/10 15:50:37 by jdagz28          ###   ########.fr       */
+/*   Updated: 2025/01/10 23:20:26 by jdagz28          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include <iostream>
 #include <algorithm>
 #include <arpa/inet.h> 
+#include <fcntl.h>
 
 
 Server::Server(const Config &config) 
@@ -160,9 +161,8 @@ void    Server::handleConnections()
     while (true)
     {
         reInitMonitoredFDs();
-        int maxFD = getMaxFD();
 
-        int activity = select(maxFD + 1, &_readFDs, NULL, NULL, NULL);
+        int activity = select(getMaxFD() + 1, &_readFDs, NULL, NULL, NULL);
         if (activity == -1)
         {
             _serverStatus = -1;
@@ -177,35 +177,40 @@ void    Server::handleConnections()
                 std::vector<socketFD>::iterator masterFD;
                 masterFD = std::find(_masterFDs.begin(), _masterFDs.end(), it->first);
 
-                if (masterFD != _masterFDs.end() && FD_ISSET(*masterFD, &_readFDs))
+                if (masterFD != _masterFDs.end() && FD_ISSET(*masterFD, &_readFDs)) 
                 {
+                    // Create connction
                     clientFD client = it->second->acceptSocket();
-                    // _clients[client] = it->second;
                     _monitoredFDs[client] = it->second;
-                    std::cout << "Accepted connection from " << inet_ntoa(it->second->getAddressInfo().sin_addr) << " on port " << ntohs(it->second->getAddressInfo().sin_port) << std::endl; //! DELETE
-                }
-                else
-                {
-                    //Find the client that the data has arrived
-                    int clientFD = -1;
-                    if (FD_ISSET(it->first, &_readFDs))
+                    // Set client FD to non-blocking mode
+                    if (fcntl(client, F_SETFL, O_NONBLOCK) == -1)
                     {
-                        clientFD = it->first;;
-                    
-                        // Handle client connection
-                        HttpRequest request(clientFD);
-                        HttpResponse response(request, _config, clientFD);
-                        response.sendResponse();
+                        close (client);
+                        std::cout << "Error: Failed to set client socket to non-blocking mode" << std::endl; //! DELETE
+                        throw ServerException("Error: Failed to set client socket to non-blocking mode");
                     }
-
+                    
+                    std::cout << "Accepted connection from " << inet_ntoa(it->second->getAddressInfo().sin_addr) 
+                            << " on port " << ntohs(it->second->getAddressInfo().sin_port) << std::endl; //! DELETE
                 }
-                
+                else if (FD_ISSET(it->first, &_readFDs))
+                {
+                    // Serve client
+                    // Find the client that the data has arrived
+                    int clientFD = it->first;;
+            
+                    // Handle client connection
+                    HttpRequest request(clientFD);
+                    HttpResponse response(request, _config, clientFD);
+                    response.sendResponse();
+                }
             } 
             catch (const std::exception& e)
             {
                 _serverStatus = -1;
                 std::cerr << e.what() << std::endl;
             }
+            
         }
     }
 }
