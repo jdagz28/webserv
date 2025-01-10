@@ -6,7 +6,7 @@
 /*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 02:41:19 by jdagz28           #+#    #+#             */
-/*   Updated: 2025/01/08 15:36:03 by jdagz28          ###   ########.fr       */
+/*   Updated: 2025/01/10 15:30:11 by jdagz28          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,7 @@ class Socket
         int     acceptSocket();
 
         int     getSocketFD() const;
+        struct sockaddr_in getAddressInfo() const;
 
         class SocketException : public std::exception
         {

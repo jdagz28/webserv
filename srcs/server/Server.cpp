@@ -6,16 +6,18 @@
 /*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 02:24:09 by jdagz28           #+#    #+#             */
-/*   Updated: 2025/01/10 14:59:04 by jdagz28          ###   ########.fr       */
+/*   Updated: 2025/01/10 15:50:37 by jdagz28          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 #include <iostream>
+#include <algorithm>
+#include <arpa/inet.h> 
 
 
 Server::Server(const Config &config) 
-    : _serverStatus(0), _config(config), _monitoredFDs(), _log(), _readFDs()
+    : _serverStatus(0), _config(config), _masterFDs(), _monitoredFDs(), _log(), _readFDs()
 {
     _log.checkConfig(config);
 }
@@ -29,7 +31,6 @@ Server::~Server()
 void    Server::clearSockets()
 {
     std::map<socketFD, Socket *>::iterator it;
-
     for (it = _monitoredFDs.begin(); it != _monitoredFDs.end(); it++)
     {
         std::cout << "Closing socket: " << it->first << std::endl; //! DELETE
@@ -59,7 +60,10 @@ void    Server::createSockets()
         {
             Socket *socket = new Socket(it->getIP(), it->getPort());
             if (_monitoredFDs.size() <= MAX_CLIENTS)
+            {
                 _monitoredFDs[socket->getSocketFD()] = socket;
+                _masterFDs.push_back(socket->getSocketFD());
+            }
         }
         catch(const std::exception& e)
         {
@@ -127,6 +131,8 @@ void    Server::addMasterFD()
 
 void    Server::reInitMonitoredFDs()
 {
+    FD_ZERO(&_readFDs);
+
     std::map<socketFD, Socket *>::iterator it;
     for (it = _monitoredFDs.begin(); it != _monitoredFDs.end(); it++)
     {
@@ -163,22 +169,37 @@ void    Server::handleConnections()
             throw ServerException("Error: select failed");
         }
 
-
-        // Check for activity on server sockets
         std::map<socketFD, Socket *>::iterator it;
         for (it = _monitoredFDs.begin(); it != _monitoredFDs.end(); it++)
         {
             try 
             {
-                clientFD client = it->second->acceptSocket();
-                _clients[client] = it->second;
+                std::vector<socketFD>::iterator masterFD;
+                masterFD = std::find(_masterFDs.begin(), _masterFDs.end(), it->first);
 
-                // Handle client connection
-                HttpRequest request(client);
-                HttpResponse response(request, _config, client);
-                response.sendResponse();
+                if (masterFD != _masterFDs.end() && FD_ISSET(*masterFD, &_readFDs))
+                {
+                    clientFD client = it->second->acceptSocket();
+                    // _clients[client] = it->second;
+                    _monitoredFDs[client] = it->second;
+                    std::cout << "Accepted connection from " << inet_ntoa(it->second->getAddressInfo().sin_addr) << " on port " << ntohs(it->second->getAddressInfo().sin_port) << std::endl; //! DELETE
+                }
+                else
+                {
+                    //Find the client that the data has arrived
+                    int clientFD = -1;
+                    if (FD_ISSET(it->first, &_readFDs))
+                    {
+                        clientFD = it->first;;
+                    
+                        // Handle client connection
+                        HttpRequest request(clientFD);
+                        HttpResponse response(request, _config, clientFD);
+                        response.sendResponse();
+                    }
 
-                close(client); 
+                }
+                
             } 
             catch (const std::exception& e)
             {

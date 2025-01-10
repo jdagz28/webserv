@@ -6,7 +6,7 @@
 /*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 02:56:15 by jdagz28           #+#    #+#             */
-/*   Updated: 2025/01/09 11:50:47 by jdagz28          ###   ########.fr       */
+/*   Updated: 2025/01/10 15:51:31 by jdagz28          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,7 @@ void    Socket::initAddressInfo()
             throw SocketException(msg);
         }
     }
-    std::cout << "Initialized address info: IP = " << _ip << ", Port = " << _port << std::endl; //! DELETE
+    
 }
 
 void    Socket::bindSocket()
@@ -110,7 +110,6 @@ void    Socket::listenSocket()
         _socketStatus = -1;
         throw SocketException("Error: Could not listen to socket.");
     }
-    std::cout << "Socket FD " << _socketFD << " is now listening." << std::endl;
 }
 
 int    Socket::acceptSocket()
@@ -141,6 +140,11 @@ int    Socket::acceptSocket()
 int     Socket::getSocketFD() const
 {
     return _socketFD;
+}
+
+struct sockaddr_in Socket::getAddressInfo() const
+{
+    return _addressInfo;
 }
 
 const char *Socket::SocketException::what() const throw()

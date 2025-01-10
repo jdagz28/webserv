@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpResponse.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
+/*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:19:13 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/11/07 11:51:23 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/01/10 15:39:32 by jdagz28          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -282,7 +282,7 @@ void HttpResponse::sendResponse()
     ssize_t bytesSent = send(_client_socket, _responseMsg.data(), _responseMsg.size(), 0);
     if (bytesSent < 0)
     {
-        std::cerr << "ERROR: sending bytes" << std::endl;
+        std::cerr << "ERROR: sending bytes" << std::endl; //!Change
         return;
     }
     // std::cout << bytesSent << " bytes sent" << std::endl;
