@@ -6,7 +6,7 @@
 /*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/05 00:23:30 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/01/09 11:18:01 by jdagz28          ###   ########.fr       */
+/*   Updated: 2025/01/10 14:58:13 by jdagz28          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,9 +16,6 @@
 #include "Config.hpp"
 #include "debug.hpp"
 #include "webserv.hpp"
-#include "HttpRequest.hpp"
-#include "HttpResponse.hpp"
-#include "Logger.hpp"
 #include "Server.hpp"
 
 // #define PORT   4242 //1919    

@@ -6,7 +6,7 @@
 /*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 02:24:21 by jdagz28           #+#    #+#             */
-/*   Updated: 2025/01/09 10:55:45 by jdagz28          ###   ########.fr       */
+/*   Updated: 2025/01/10 14:57:11 by jdagz28          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,17 +23,21 @@
 #include "Socket.hpp"
 #include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
+#include "Logger.hpp"
 
 typedef int socketFD;
 typedef int clientFD;
+typedef int FD;
 
 class Server 
 {
     private:
         int                             _serverStatus;
         Config                          _config;
-        std::map<socketFD, Socket *>    _sockets;
+        std::map<socketFD, Socket *>    _monitoredFDs;
         std::map<clientFD, Socket *>    _clients;
+        Logger                          _log;
+        fd_set                          _readFDs;
         
         Server();
         Server(const Server &copy);
@@ -43,6 +47,10 @@ class Server
         // void    setSignals();
         void    clearSockets();
         void    handleConnections();
+
+        void    addMasterFD();
+        void    reInitMonitoredFDs();
+        int getMaxFD();
 
     public:
         Server(const Config &config);

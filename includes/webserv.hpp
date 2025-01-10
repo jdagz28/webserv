@@ -6,7 +6,7 @@
 /*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 22:28:27 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/01/07 15:41:52 by jdagz28          ###   ########.fr       */
+/*   Updated: 2025/01/10 14:26:26 by jdagz28          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@
 #define MAX_HEADER_LENGTH 1000
 #define DEFAULT_SERVERNAME "webserv"
 #define LOCALHOST "127.0.0.1"
+#define MAX_CLIENTS 100
 
 const std::string RED = "\033[0;31m";
 const std::string GREEN = "\033[0;32m";
