@@ -6,7 +6,7 @@
 /*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 02:24:21 by jdagz28           #+#    #+#             */
-/*   Updated: 2025/01/13 13:02:14 by jdagz28          ###   ########.fr       */
+/*   Updated: 2025/01/13 22:42:03 by jdagz28          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,9 +36,7 @@ class Server
         Config                          _config;
         std::vector<socketFD>           _masterFDs;
         std::map<socketFD, Socket *>    _monitoredFDs;
-        // std::map<clientFD, Socket *>    _clients; //! better with clientFd and Event struct
         Logger                          _log;
-        fd_set                          _readFDs;
         
         Server();
         Server(const Server &copy);
@@ -48,10 +46,6 @@ class Server
         void    setSignals();
         void    clearSockets();
         void    handleConnections();
-
-        void    addMasterFD();
-        void    reInitMonitoredFDs();
-        int getMaxFD();
 
     public:
         Server(const Config &config);

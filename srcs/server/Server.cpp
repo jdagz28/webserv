@@ -6,7 +6,7 @@
 /*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 02:24:09 by jdagz28           #+#    #+#             */
-/*   Updated: 2025/01/13 13:06:57 by jdagz28          ###   ########.fr       */
+/*   Updated: 2025/01/13 22:48:15 by jdagz28          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,10 +15,12 @@
 #include <algorithm>
 #include <arpa/inet.h> 
 #include <fcntl.h>
+#include <sys/epoll.h>
+#include <cstring>
 
 
 Server::Server(const Config &config) 
-    : _config(config), _masterFDs(), _monitoredFDs(), _log(), _readFDs()
+    : _config(config), _masterFDs(), _monitoredFDs(), _log()
 {
     _log.checkConfig(config);
 }
@@ -108,7 +110,6 @@ void    Server::runServer()
 
     try
     {
-        addMasterFD();
         handleConnections();
     }
     catch (const std::exception& e)
@@ -118,97 +119,106 @@ void    Server::runServer()
     }
 }
 
-void    Server::addMasterFD()
-{   
-    std::map<socketFD, Socket *>::iterator it;
-    for (it = _monitoredFDs.begin(); it != _monitoredFDs.end(); it++)
-    {
-        if (_monitoredFDs.size() <= MAX_CLIENTS)
-            FD_SET(it->first, &_readFDs);
-    }
-}
-
-void    Server::reInitMonitoredFDs()
+int setNonBlocking(int fd)
 {
-    FD_ZERO(&_readFDs);
-
-    std::map<socketFD, Socket *>::iterator it;
-    for (it = _monitoredFDs.begin(); it != _monitoredFDs.end(); it++)
-    {
-        if (_monitoredFDs.size() <= MAX_CLIENTS)
-            FD_SET(it->first, &_readFDs);
-    }
-}
-
-int Server::getMaxFD()
-{
-    int max = -1;
-    
-    std::map<socketFD, Socket *>::iterator it;
-    for (it = _monitoredFDs.begin(); it != _monitoredFDs.end(); it++)
-    {
-        if (it->first > max)
-            max = it->first;
-    }
-
-    return (max);
+    int flags = fcntl(fd, F_GETFL, 0);
+    if (flags == -1)
+        return (-1);
+    if (fcntl(fd, F_SETFL, flags | O_NONBLOCK) == -1)
+        return (-1);
+    return (0);
 }
 
 void    Server::handleConnections()
 {
-    while (true)
+    int epollFD = epoll_create(1);
+    if (epollFD == -1)
+        throw ServerException("Error: Failed to create epoll instance");
+    
+    // Add master FDs (listen sockets) to epoll 
+    std::vector<socketFD>::iterator it;
+    for (it = _masterFDs.begin(); it != _masterFDs.end(); it++)
     {
-        reInitMonitoredFDs();
-
-        int activity = select(getMaxFD() + 1, &_readFDs, NULL, NULL, NULL);
-        if (activity == -1)
-        {
-            _serverStatus = -1;
-            throw ServerException("Error: select failed");
-        }
-
-        std::map<socketFD, Socket *>::iterator it;
-        for (it = _monitoredFDs.begin(); it != _monitoredFDs.end(); it++)
-        {
-            try 
-            {
-                std::vector<socketFD>::iterator masterFD;
-                masterFD = std::find(_masterFDs.begin(), _masterFDs.end(), it->first);
-
-                if (masterFD != _masterFDs.end() && FD_ISSET(*masterFD, &_readFDs)) 
-                {
-                    // Create connction
-                    clientFD client = it->second->acceptSocket();
-                    _monitoredFDs[client] = it->second;
-                    // Set client FD to non-blocking mode
-                    if (fcntl(client, F_SETFL, O_NONBLOCK) == -1)
-                    {
-                        close (client);
-                        std::cout << "Error: Failed to set client socket to non-blocking mode" << std::endl; //! DELETE
-                        throw ServerException("Error: Failed to set client socket to non-blocking mode");
-                    }
-                    
-                    std::cout << "Accepted connection from " << inet_ntoa(it->second->getAddressInfo().sin_addr) 
-                            << " on port " << ntohs(it->second->getAddressInfo().sin_port) << std::endl; //! DELETE
-                }
-                else if (FD_ISSET(it->first, &_readFDs))
-                {
-                    // Serve client
-                    // Find the client that the data has arrived
-                    int clientFD = it->first;;
+        if (setNonBlocking(*it) == -1)
+            throw ServerException("Error: Failed to set master socket to non-blocking mode");
             
-                    // Handle client connection
-                    HttpRequest request(clientFD);
-                    HttpResponse response(request, _config, clientFD);
-                    response.sendResponse();
-                }
-            } 
-            catch (const std::exception& e)
-            {
-                _serverStatus = -1;
-                std::cerr << e.what() << std::endl;
-            }
-            
+        struct epoll_event event;
+        memset(&event, 0, sizeof(event));
+        event.data.fd = *it;
+        event.events = EPOLLIN | EPOLLOUT;
+
+        if (epoll_ctl(epollFD, EPOLL_CTL_ADD, *it, &event) == -1)
+        {
+            close(epollFD);
+            throw ServerException("Error: Failed to add master socket to epoll instance");
         }
     }
+
+    struct epoll_event events[MAX_CLIENTS];
+
+    while (true)
+    {
+        int nEvents = epoll_wait(epollFD, events, MAX_CLIENTS, -1);
+        if (nEvents == -1)
+        {
+            close(epollFD);
+            throw ServerException("Error: Failed to wait for events");
+        }
+
+        for (int i = 0; i < nEvents; i++)
+        {
+            int fd = events[i].data.fd;
+
+            // Check for new connections
+            it = std::find(_masterFDs.begin(), _masterFDs.end(), fd);
+            if (it != _masterFDs.end())
+            {
+                clientFD client = _monitoredFDs[fd]->acceptSocket();
+                if (setNonBlocking(client) == -1)
+                {
+                    throw ServerException("Error: Failed to set client socket to non-blocking mode");
+                    continue ;
+                }
+
+                // Add cliet socket to epoll for monitoring (both read and write)
+                struct epoll_event clientEvent;
+                memset(&clientEvent, 0, sizeof(clientEvent));
+                clientEvent.data.fd = client;
+                clientEvent.events = EPOLLIN | EPOLLOUT;
+
+                if (epoll_ctl(epollFD, EPOLL_CTL_ADD, client, &clientEvent) == -1)
+                {
+                    throw ServerException("Error: Failed to add client socket to epoll instance");
+                    continue ;
+                }
+
+                _monitoredFDs[client] = _monitoredFDs[fd];
+
+                std::cout << "Accepted connection from " << inet_ntoa(_monitoredFDs[fd]->getAddressInfo().sin_addr)
+                          << " on port " << ntohs(_monitoredFDs[fd]->getAddressInfo().sin_port) << std::endl; //! DELETE
+            }
+            else
+            {
+                // Handle client
+                if (events[i].events & EPOLLIN)
+                {
+                    try
+                    {
+                        HttpRequest request(fd);
+                        _log.request(request);
+
+                        HttpResponse response(request, _config, fd);                       
+                        response.sendResponse();
+                        _log.response(response);
+
+                    }
+                    catch(const std::exception& e)
+                    {
+                        std::cerr << e.what() << std::endl;
+                    }
+                }
+            }
+        }
+    }
+    close(epollFD);
 }
