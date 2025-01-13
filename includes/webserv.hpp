@@ -6,7 +6,7 @@
 /*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 22:28:27 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/01/10 14:26:26 by jdagz28          ###   ########.fr       */
+/*   Updated: 2025/01/13 11:41:01 by jdagz28          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,6 +94,7 @@ bool validProtocol(const std::string &str);
 int strToInt(const std::string &str);
 bool isSpace(unsigned char ch);
 std::string toLower(const std::string &str);
+void    signalHandler(int signum);
 
 // MIMETYPES.CPP
 std::string getMimeType(const std::string &extension);

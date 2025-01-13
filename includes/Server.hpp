@@ -6,7 +6,7 @@
 /*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 02:24:21 by jdagz28           #+#    #+#             */
-/*   Updated: 2025/01/10 15:44:17 by jdagz28          ###   ########.fr       */
+/*   Updated: 2025/01/13 11:49:33 by jdagz28          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,8 +45,8 @@ class Server
         Server &operator=(const Server &copy);
         
         void    createSockets();
-        // void    setSignals();
-        void    clearSockets();
+        void    setSignals();
+        static void    clearSockets();
         void    handleConnections();
 
         void    addMasterFD();
@@ -61,7 +61,7 @@ class Server
         void    runServer();
         void    closeServer();
 
-        void    signalHandler(int signum);
+    static void    signalHandler(int signum);
 
         class ServerException : public std::exception
         {

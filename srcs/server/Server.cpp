@@ -6,7 +6,7 @@
 /*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 02:24:09 by jdagz28           #+#    #+#             */
-/*   Updated: 2025/01/10 23:20:26 by jdagz28          ###   ########.fr       */
+/*   Updated: 2025/01/13 11:49:45 by jdagz28          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 
 
 Server::Server(const Config &config) 
-    : _serverStatus(0), _config(config), _masterFDs(), _monitoredFDs(), _log(), _readFDs()
+    : _config(config), _masterFDs(), _monitoredFDs(), _log(), _readFDs()
 {
     _log.checkConfig(config);
 }
@@ -74,29 +74,29 @@ void    Server::createSockets()
     }
 }
 
-// void    Server::signalHandler(int signum)
-// {
-//     std::cout << "Received signal " << signum << std::endl;
-//     std::cout << "===== Shutting down server =====" << std::endl;
-//     clearSockets();
-//     exit(signum);
-// }
+void    Server::signalHandler(int signum)
+{
+    std::cout << "Received signal " << signum << std::endl;
+    std::cout << "===== Shutting down server =====" << std::endl;
+    clearSockets();
+    exit(signum);
+}
 
-// void    Server::setSignals()
-// {
-//     try
-//     {
-//         if (signal(SIGINT, signalHandler) == SIG_ERR)
-//             throw ServerException("Error: Failed to set signal handler for SIGINT");
-//         if (signal(SIGTERM, signalHandler) == SIG_ERR)
-//             throw ServerException("Error: Failed to set signal handler for SIGTERM");
-//     }
-//     catch(const std::exception& e)
-//     {
-//         _serverStatus = -1;
-//         std::cerr << e.what() << std::endl;
-//     }
-// }
+void    Server::setSignals()
+{
+    try
+    {
+        if (signal(SIGINT, signalHandler) == SIG_ERR)
+            throw ServerException("Error: Failed to set signal handler for SIGINT");
+        if (signal(SIGTERM, signalHandler) == SIG_ERR)
+            throw ServerException("Error: Failed to set signal handler for SIGTERM");
+    }
+    catch(const std::exception& e)
+    {
+        _serverStatus = -1;
+        std::cerr << e.what() << std::endl;
+    }
+}
 
 const char *Server::ServerException::what() const throw()
 {
