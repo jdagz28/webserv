@@ -6,7 +6,7 @@
 /*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 02:24:09 by jdagz28           #+#    #+#             */
-/*   Updated: 2025/01/13 11:49:45 by jdagz28          ###   ########.fr       */
+/*   Updated: 2025/01/13 13:06:57 by jdagz28          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ void    Server::initServer()
     std::map<socketFD, Socket *>::iterator it;
     for (it = _monitoredFDs.begin(); it != _monitoredFDs.end(); it++)
         it->second->listenSocket();
-    // setSignals();
+    setSignals();
 }
 
 void    Server::createSockets()
@@ -76,9 +76,9 @@ void    Server::createSockets()
 
 void    Server::signalHandler(int signum)
 {
-    std::cout << "Received signal " << signum << std::endl;
+    std::cout << std::endl << "Exiting... Received signal " << signum << std::endl;
     std::cout << "===== Shutting down server =====" << std::endl;
-    clearSockets();
+    // clearSockets();
     exit(signum);
 }
 
@@ -88,8 +88,6 @@ void    Server::setSignals()
     {
         if (signal(SIGINT, signalHandler) == SIG_ERR)
             throw ServerException("Error: Failed to set signal handler for SIGINT");
-        if (signal(SIGTERM, signalHandler) == SIG_ERR)
-            throw ServerException("Error: Failed to set signal handler for SIGTERM");
     }
     catch(const std::exception& e)
     {

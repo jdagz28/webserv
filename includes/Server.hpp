@@ -6,7 +6,7 @@
 /*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 02:24:21 by jdagz28           #+#    #+#             */
-/*   Updated: 2025/01/13 11:49:33 by jdagz28          ###   ########.fr       */
+/*   Updated: 2025/01/13 13:02:14 by jdagz28          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ class Server
         
         void    createSockets();
         void    setSignals();
-        static void    clearSockets();
+        void    clearSockets();
         void    handleConnections();
 
         void    addMasterFD();
