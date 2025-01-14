@@ -6,7 +6,7 @@
 /*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/14 13:30:47 by jdagz28           #+#    #+#             */
-/*   Updated: 2025/01/14 14:35:29 by jdagz28          ###   ########.fr       */
+/*   Updated: 2025/01/14 22:44:09 by jdagz28          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 #include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
 #include "webserv.hpp"
-
+#include "Logger.hpp"
 
 class Event
 {
@@ -26,13 +26,14 @@ class Event
         Config          _config;
         HttpRequest*    _request;
         HttpResponse*   _response;
-        
+       
 
     public:
         Event(clientFD fd, const Config &config);
         ~Event();
 
-        void    handleEvent(uint32_t events);
+        void    handleEvent(uint32_t events, Logger *log);
+        std::string getResponseKeepAlive();
 };
 
 

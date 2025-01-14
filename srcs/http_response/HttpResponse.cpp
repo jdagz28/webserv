@@ -6,7 +6,7 @@
 /*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:19:13 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/01/10 15:39:32 by jdagz28          ###   ########.fr       */
+/*   Updated: 2025/01/14 22:28:04 by jdagz28          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -287,11 +287,13 @@ void HttpResponse::sendResponse()
     }
     // std::cout << bytesSent << " bytes sent" << std::endl;
     // _responseMsg.erase(_responseMsg.begin(), _responseMsg.begin() + bytesSent);
-    // if (_headers["Connection"] != "keep-alive")
-    // {
-    //     if (close(_client_socket) < 0)
-    //         std::cerr << "ERROR: closing socket" << std::endl;
-    // }
+    if (_headers["Connection"] != "keep-alive")
+    {
+        if (close(_client_socket) < 0)
+            std::cerr << "ERROR: closing socket" << std::endl; //! CHECK
+        else
+            std::cout << "Socket closed" << _client_socket << std::endl; //! CHECK
+    }
 }
 
 std::string HttpResponse::getHttpResponse()

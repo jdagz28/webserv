@@ -6,11 +6,12 @@
 /*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/14 13:36:17 by jdagz28           #+#    #+#             */
-/*   Updated: 2025/01/14 14:47:18 by jdagz28          ###   ########.fr       */
+/*   Updated: 2025/01/14 22:45:01 by jdagz28          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Event.hpp"
+#include "debug.hpp"
 #include <iostream>
 #include <sys/epoll.h>
 
@@ -28,17 +29,21 @@ Event::~Event()
         delete _response;
 }
 
-void    Event::handleEvent(uint32_t events)
+void    Event::handleEvent(uint32_t events, Logger *log)
 {
     try
     {
-        if (_fd <= 0) 
-            throw std::runtime_error("Invalid file descriptor in Event::handleEvent");
+        if (_fd < 0) 
+            throw std::runtime_error("Invalid file descriptor in Event::handleEvent"); //!CHANGE
 
         if (events & EPOLLIN)
         {
             _request = new HttpRequest(_fd);
+            log->request(*_request);
             _response = new HttpResponse(*_request, _config, _fd);
+            _response->sendResponse();
+            log->response(*_response);
+            // printHttpResponse(_response->getHttpResponse());
         }
 
         if (events & EPOLLOUT)
@@ -52,4 +57,11 @@ void    Event::handleEvent(uint32_t events)
         std::cerr << e.what() << std::endl;
     }
     
+}
+
+std::string Event::getResponseKeepAlive()
+{
+    std::string response = _response->getHeader("Keep-Alive");
+
+    return (response);
 }

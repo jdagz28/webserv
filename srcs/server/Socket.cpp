@@ -6,7 +6,7 @@
 /*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 02:56:15 by jdagz28           #+#    #+#             */
-/*   Updated: 2025/01/13 22:32:43 by jdagz28          ###   ########.fr       */
+/*   Updated: 2025/01/14 21:08:35 by jdagz28          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,24 @@ Socket::~Socket()
             throw SocketException("Error: failed to close socket");
         _socketFD = -1;
     }
+}
+
+Socket::Socket(const Socket &copy)
+    : _socketStatus(copy._socketStatus), _socketFD(copy._socketFD), _addressInfo(copy._addressInfo), _ip(copy._ip), _port(copy._port)
+{}
+
+Socket &Socket::operator=(const Socket &copy)
+{
+    if (this != &copy)
+    {
+        _socketStatus = copy._socketStatus;
+        _socketFD = copy._socketFD;
+        _addressInfo = copy._addressInfo;
+        _ip = copy._ip;
+        _port = copy._port;
+    }
+
+    return (*this);
 }
 
 void    Socket::initSocket()

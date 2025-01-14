@@ -3,14 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   Logger.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
+/*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/05 10:16:19 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/11/05 13:21:02 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/01/14 22:45:12 by jdagz28          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef LOGGER_HPP
+#define LOGGER_HPP
 #include <iostream>
 #include "Config.hpp"
 #include "ServerConfig.hpp"

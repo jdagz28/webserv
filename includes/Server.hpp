@@ -6,7 +6,7 @@
 /*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 02:24:21 by jdagz28           #+#    #+#             */
-/*   Updated: 2025/01/14 13:49:37 by jdagz28          ###   ########.fr       */
+/*   Updated: 2025/01/14 22:35:38 by jdagz28          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,7 @@ class Server
         void    createSockets();
         void    setSignals();
         void    clearSockets();
+        void    clearClients();
         void    handleConnections();
 
     public:

@@ -6,7 +6,7 @@
 /*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 02:41:19 by jdagz28           #+#    #+#             */
-/*   Updated: 2025/01/10 15:30:11 by jdagz28          ###   ########.fr       */
+/*   Updated: 2025/01/14 21:07:01 by jdagz28          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,13 +34,13 @@ class Socket
 
 
         Socket();
-        Socket(const Socket &copy);
-        Socket &operator=(const Socket &copy);
 
         void    initAddressInfo();
 
     public:
         Socket(const std::string &ip, int port);
+        Socket(const Socket &copy);
+        Socket &operator=(const Socket &copy);
         ~Socket();
 
         void    initSocket();
