@@ -6,7 +6,7 @@
 /*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 02:24:21 by jdagz28           #+#    #+#             */
-/*   Updated: 2025/01/13 22:42:03 by jdagz28          ###   ########.fr       */
+/*   Updated: 2025/01/14 13:49:37 by jdagz28          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,10 +24,7 @@
 #include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
 #include "Logger.hpp"
-
-typedef int socketFD;
-typedef int clientFD;
-typedef int FD;
+#include "Event.hpp"
 
 class Server 
 {
@@ -36,6 +33,7 @@ class Server
         Config                          _config;
         std::vector<socketFD>           _masterFDs;
         std::map<socketFD, Socket *>    _monitoredFDs;
+        std::map<clientFD, Event *>     _clients;
         Logger                          _log;
         
         Server();

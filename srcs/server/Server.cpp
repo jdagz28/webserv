@@ -6,7 +6,7 @@
 /*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 02:24:09 by jdagz28           #+#    #+#             */
-/*   Updated: 2025/01/13 22:48:15 by jdagz28          ###   ########.fr       */
+/*   Updated: 2025/01/14 15:22:46 by jdagz28          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 
 
 Server::Server(const Config &config) 
-    : _config(config), _masterFDs(), _monitoredFDs(), _log()
+    : _config(config), _masterFDs(), _monitoredFDs(), _clients(), _log()
 {
     _log.checkConfig(config);
 }
@@ -143,9 +143,8 @@ void    Server::handleConnections()
             throw ServerException("Error: Failed to set master socket to non-blocking mode");
             
         struct epoll_event event;
-        memset(&event, 0, sizeof(event));
         event.data.fd = *it;
-        event.events = EPOLLIN | EPOLLOUT;
+        event.events = EPOLLIN | EPOLLOUT | EPOLLET;
 
         if (epoll_ctl(epollFD, EPOLL_CTL_ADD, *it, &event) == -1)
         {
@@ -182,9 +181,8 @@ void    Server::handleConnections()
 
                 // Add cliet socket to epoll for monitoring (both read and write)
                 struct epoll_event clientEvent;
-                memset(&clientEvent, 0, sizeof(clientEvent));
                 clientEvent.data.fd = client;
-                clientEvent.events = EPOLLIN | EPOLLOUT;
+                clientEvent.events = EPOLLIN | EPOLLOUT | EPOLLET;
 
                 if (epoll_ctl(epollFD, EPOLL_CTL_ADD, client, &clientEvent) == -1)
                 {
@@ -193,30 +191,51 @@ void    Server::handleConnections()
                 }
 
                 _monitoredFDs[client] = _monitoredFDs[fd];
-
+                _clients[client] = new Event(client, _config);
                 std::cout << "Accepted connection from " << inet_ntoa(_monitoredFDs[fd]->getAddressInfo().sin_addr)
                           << " on port " << ntohs(_monitoredFDs[fd]->getAddressInfo().sin_port) << std::endl; //! DELETE
+                std::cout << "Added client FD: " << client << " to _clients" << std::endl; //! DELETE
             }
             else
             {
-                // Handle client
-                if (events[i].events & EPOLLIN)
+                // Handle client events
+
+                // Check if client is a read or write event
+                uint32_t eventFlags = events[i].events;
+
+                try
                 {
-                    try
+                    // Handle read
+                    if (eventFlags & EPOLLIN)
                     {
-                        HttpRequest request(fd);
-                        _log.request(request);
+                        if (_clients.find(fd) == _clients.end())
+                            throw std::runtime_error("Client FD not found in _clients: " + toString(fd));
+                        _clients[fd]->handleEvent(eventFlags);
 
-                        HttpResponse response(request, _config, fd);                       
-                        response.sendResponse();
-                        _log.response(response);
-
+                        // after event processing is complete, modify the epoll to monitor EPOLLOUT
+                        struct epoll_event clientEvent;
+                        clientEvent.data.fd = fd;
+                        clientEvent.events = EPOLLOUT | EPOLLET;
+                        if (epoll_ctl(epollFD, EPOLL_CTL_MOD, fd, &clientEvent) == -1)
+                            throw ServerException("Error: Failed to modify epoll instance to monitor EPOLLOUT");
                     }
-                    catch(const std::exception& e)
+                    //Handle write event
+                    else if (eventFlags & EPOLLOUT)
                     {
-                        std::cerr << e.what() << std::endl;
+                        _clients[fd]->handleEvent(eventFlags);
+                        if (_clients.find(fd) != _clients.end())
+                        {
+                            delete _clients[fd];
+                            _clients.erase(fd);
+                            _monitoredFDs.erase(fd);
+                        }
                     }
                 }
+                catch(const std::exception& e)
+                {
+                    std::cerr << e.what() << '\n';
+                }
+                
             }
         }
     }

@@ -6,7 +6,7 @@
 /*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 22:28:27 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/01/13 11:41:01 by jdagz28          ###   ########.fr       */
+/*   Updated: 2025/01/14 13:34:15 by jdagz28          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,9 @@ const std::string YELLOW = "\033[1;33m";
 const std::string BLUE = "\033[0;34m";
 const std::string RESET = "\033[0m";
 
+typedef int socketFD;
+typedef int clientFD;
+typedef int FD;
 
 enum HtmlRequestParseStep
 {

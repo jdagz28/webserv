@@ -6,7 +6,7 @@
 #    By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/05 02:06:08 by jdagoy            #+#    #+#              #
-#    Updated: 2025/01/07 15:56:03 by jdagz28          ###   ########.fr        #
+#    Updated: 2025/01/14 14:05:38 by jdagz28          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -31,7 +31,8 @@ HEADER_LIST			:= webserv.hpp \
 						HttpResponse.hpp \
 						Logger.hpp \
 						Server.hpp\
-						Socket.hpp
+						Socket.hpp\
+						Event.hpp
 HEADER_FILES		:= $(addprefix $(INC_DIR), $(HEADER_LIST))
 
 
@@ -53,7 +54,8 @@ CONFIG_OBJS			:= $(addprefix $(OBJ_DIR), $(CONFIG_OBJS_LIST))
 
 SERVER_DIR			:= $(SRC_DIR)server/
 SERVER_SRCS			:= Server.cpp \
-						Socket.cpp
+						Socket.cpp \
+						Event.cpp
 SERVER_OBJS_LIST 	:= $(patsubst %.cpp, %.o, $(SERVER_SRCS))
 SERVER_OBJS			:= $(addprefix $(OBJ_DIR), $(SERVER_OBJS_LIST))
 
