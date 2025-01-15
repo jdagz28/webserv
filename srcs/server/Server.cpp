@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
+/*   By: jdagoy <jdagoy@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/01/07 02:24:09 by jdagz28           #+#    #+#             */
-/*   Updated: 2025/01/14 22:46:00 by jdagz28          ###   ########.fr       */
+/*   Created: 2025/01/07 02:24:09 by jdagoy           #+#    #+#             */
+/*   Updated: 2025/01/15 13:55:28 by jdagoy          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,9 @@ Server::Server(const Config &config)
     : _config(config), _masterFDs(), _monitoredFDs(), _clients(), _log()
 {
     _log.checkConfig(config);
+    _eventsQueue = epoll_create(1);
+    if (_eventsQueue == -1)
+        throw ServerException("Error: Failed to create epoll instance");
 }
 
 Server::~Server()
@@ -56,10 +59,6 @@ void    Server::clearSockets()
 void    Server::initServer()
 {
     createSockets();
-
-    std::map<socketFD, Socket *>::iterator it;
-    for (it = _monitoredFDs.begin(); it != _monitoredFDs.end(); it++)
-        it->second->listenSocket();
     setSignals();
 }
 
@@ -73,11 +72,13 @@ void    Server::createSockets()
         try
         {
             Socket *socket = new Socket(it->getIP(), it->getPort());
-            if (_monitoredFDs.size() <= MAX_CLIENTS)
-            {
-                _monitoredFDs[socket->getSocketFD()] = socket;
-                _masterFDs.push_back(socket->getSocketFD());
-            }
+            if (setNonBlocking(socket->getSocketFD()) == -1)
+                throw ServerException("Error: Failed to set master socket to non-blocking mode");
+            socket->bindSocket();
+            socket->listenSocket();
+
+            _monitoredFDs[socket->getSocketFD()] = socket;
+            _masterFDs.push_back(socket->getSocketFD());
         }
         catch(const std::exception& e)
         {
@@ -91,7 +92,6 @@ void    Server::signalHandler(int signum)
 {
     std::cout << std::endl << "Exiting... Received signal " << signum << std::endl;
     std::cout << "===== Shutting down server =====" << std::endl;
-    // clearSockets();
     exit(signum);
 }
 
@@ -121,7 +121,66 @@ void    Server::runServer()
 
     try
     {
-        handleConnections();
+        // Add master FDs (listen sockets) to epoll 
+        std::vector<socketFD>::iterator it;
+        for (it = _masterFDs.begin(); it != _masterFDs.end(); it++)
+        {       
+            struct epoll_event event;
+            bzero(&event, sizeof(event));
+            event.data.fd = *it;
+            event.events = EPOLLIN | EPOLLET ;
+
+            if (epoll_ctl(_eventsQueue, EPOLL_CTL_ADD, *it, &event) == -1)
+            {
+                close(_eventsQueue);
+                throw ServerException("Error: Failed to add master socket to epoll instance");
+            }
+        }
+        
+        while (true)
+        {
+            int nEvents = epoll_wait(_eventsQueue, _eventsList, MAX_CLIENTS, -1);
+            if (nEvents == -1)
+            {
+                if (errno == EINTR)
+                    continue;;
+                throw ServerException("Error: Failed queueing for events");
+            }
+            
+            for (int i = 0; i < nEvents; i++)
+            {
+                clientFD fd = _eventsList[i].data.fd;
+                uint32_t eventFlags = _eventsList[i].events;
+
+                // Check for new connections
+                if (_monitoredFDs.find(fd) != _monitoredFDs.end())
+                {
+                    clientFD newClient = _monitoredFDs[fd]->acceptSocket();
+                    if (newClient == -1)
+                        throw ServerException("Error: Failed to accept connection");
+                    if (setNonBlocking(newClient) == -1)
+                        throw ServerException("Error: Failed to set client socket to non-blocking mode");
+                    
+                    _clients[newClient] = new Event(newClient, _config);
+                    std::cout << "Accepted connection from " << inet_ntoa(_monitoredFDs[fd]->getAddressInfo().sin_addr) //! DELETE
+                        << " on port " << ntohs(_monitoredFDs[fd]->getAddressInfo().sin_port) << std::endl; //! DELETE
+                    std::cout << "Added client FD: " << newClient << " to _clients" << std::endl; //! DELETE
+                
+                    // Add newClient socket to queue
+                    struct epoll_event newEvent;
+                    bzero(&newEvent, sizeof(newEvent));
+                    newEvent.data.fd = newClient;
+                    newEvent.events = EPOLLIN | EPOLLET ;
+
+                    if (epoll_ctl(_eventsQueue, EPOLL_CTL_ADD, newClient, &newEvent) == -1)
+                        throw ServerException("Error: Failed to add client socket to epoll instance");
+                }
+                else if (_clients.find(fd) != _clients.end())
+                    _clients[fd]->handleEvent(eventFlags, &_log);
+                else
+                    throw ServerException("Error: FD not found in _monitoredFDs or _clients");
+            }
+        }
     }
     catch (const std::exception& e)
     {
@@ -130,7 +189,7 @@ void    Server::runServer()
     }
 }
 
-int setNonBlocking(int fd)
+int Server::setNonBlocking(int fd)
 {
     int flags = fcntl(fd, F_GETFL, 0);
     if (flags == -1)
@@ -139,154 +198,4 @@ int setNonBlocking(int fd)
         return (-1);
         
     return (0);
-}
-
-void    Server::handleConnections()
-{
-    int epollFD = epoll_create(1);
-    if (epollFD == -1)
-        throw ServerException("Error: Failed to create epoll instance");
-    
-    // Add master FDs (listen sockets) to epoll 
-    std::vector<socketFD>::iterator it;
-    for (it = _masterFDs.begin(); it != _masterFDs.end(); it++)
-    {
-        if (setNonBlocking(*it) == -1)
-            throw ServerException("Error: Failed to set master socket to non-blocking mode");
-            
-        struct epoll_event event;
-        event.data.fd = *it;
-        event.events = EPOLLIN | EPOLLET | EPOLLONESHOT;
-
-        if (epoll_ctl(epollFD, EPOLL_CTL_ADD, *it, &event) == -1)
-        {
-            close(epollFD);
-            throw ServerException("Error: Failed to add master socket to epoll instance");
-        }
-    }
-
-    struct epoll_event events[MAX_CLIENTS];
-
-    while (true)
-    {
-        int nEvents = epoll_wait(epollFD, events, MAX_CLIENTS, -1);
-        if (nEvents == -1)
-        {
-            close(epollFD);
-            throw ServerException("Error: Failed to wait for events");
-        }
-
-        for (int i = 0; i < nEvents; i++)
-        {
-            int fd = events[i].data.fd;
-
-            // Check for new connections
-            it = std::find(_masterFDs.begin(), _masterFDs.end(), fd);
-            if (it != _masterFDs.end())
-            {
-                clientFD client = _monitoredFDs[fd]->acceptSocket();
-                if (client == -1)
-                {
-                    std::cerr << "Error accepting connection: " << strerror(errno) << std::endl;
-                    continue;
-                }
-                if (setNonBlocking(client) == -1)
-                {
-                    std::cerr << "Error setting client socket to non-blocking mode: " << strerror(errno) << std::endl;
-                    close(client);
-                    continue;
-                }
-
-                _clients[client] = new Event(client, _config);
-                std::cout << "Accepted connection from " << inet_ntoa(_monitoredFDs[fd]->getAddressInfo().sin_addr)
-                        << " on port " << ntohs(_monitoredFDs[fd]->getAddressInfo().sin_port) << std::endl; //! DELETE
-                std::cout << "Added client FD: " << client << " to _clients" << std::endl; //! DELETE
-                    
-                // Add cliet socket to epoll for monitoring (both read and write)
-                struct epoll_event clientEvent;
-                clientEvent.data.fd = client;
-                clientEvent.events = EPOLLIN | EPOLLET | EPOLLONESHOT;
-
-                if (epoll_ctl(epollFD, EPOLL_CTL_ADD, client, &clientEvent) == -1)
-                {
-                    std::cerr << "Error adding client socket to epoll instance: " << strerror(errno) << std::endl;
-                    delete _clients[client];
-                    _clients.erase(client);
-                    close(client);
-                }
-
-            }
-            else
-            {
-                // Handle client events
-
-                // Check if client is a read or write event
-                uint32_t eventFlags = events[i].events;
-
-                if (_clients.find(fd) == _clients.end())
-                {
-                    std::cerr << "Error: Client FD not found in _clients: " << fd << std::endl;
-                    continue;
-                }
-
-                try
-                {
-                    // Handle read
-                    if (eventFlags & EPOLLIN)
-                    {
-                        std::cout << "EPOLLIN triggered for FD: " << fd << std::endl; //! DELETE
-                        _clients[fd]->handleEvent(EPOLLIN, &_log);
-
-                        // after event processing is complete, modify the epoll to monitor EPOLLOUT
-                        struct epoll_event clientEvent;
-                        clientEvent.data.fd = fd;
-                        clientEvent.events = EPOLLOUT | EPOLLET | EPOLLONESHOT;
-
-                        if (epoll_ctl(epollFD, EPOLL_CTL_MOD, fd, &clientEvent) == -1)
-                            throw ServerException("Error: Failed to modify epoll instance to monitor EPOLLOUT");
-                    }
-                    //Handle write event
-                    if (eventFlags & EPOLLOUT)
-                    {
-                        std::cout << "EPOLLOUT triggered for FD: " << fd << std::endl; //! DELETE
-                        _clients[fd]->handleEvent(EPOLLOUT, &_log);
-
-                        if (_clients[fd]->getResponseKeepAlive().empty())
-                        {
-                            std::cerr << "Error: Response header is empty" << std::endl;
-                            delete _clients[fd];
-                            _clients.erase(fd);
-                            close(fd);
-                            std::cout << "Closed connection for client FD: " << fd << std::endl; //! DELETE
-                        }
-                        else
-                        {
-                            // after event processing is complete, modify the epoll to monitor EPOLLIN
-                            struct epoll_event clientEvent;
-                            clientEvent.data.fd = fd;
-                            clientEvent.events = EPOLLIN | EPOLLET | EPOLLONESHOT;
-
-                            if (epoll_ctl(epollFD, EPOLL_CTL_MOD, fd, &clientEvent) == -1)
-                            {
-                                std::cerr << "Error rearming FD " << fd << ": " << strerror(errno) << std::endl; //! DELETE
-                                delete _clients[fd];
-                                _clients.erase(fd);
-                                close(fd);
-                            }
-                        }
-                    }
-                }
-                catch(const std::exception& e)
-                {
-                    std::cerr << e.what() << std::endl;
-                    delete _clients[fd]; 
-                    _clients.erase(fd);
-                    _monitoredFDs.erase(fd);
-                    close(fd);
-                }
-                
-            }
-        }
-    }
-    close(epollFD);
 }

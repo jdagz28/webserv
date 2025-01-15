@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Socket.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
+/*   By: jdagoy <jdagoy@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/01/07 02:41:19 by jdagz28           #+#    #+#             */
-/*   Updated: 2025/01/14 21:07:01 by jdagz28          ###   ########.fr       */
+/*   Created: 2025/01/07 02:41:19 by jdagoy           #+#    #+#             */
+/*   Updated: 2025/01/15 13:05:32 by jdagoy          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,8 +20,6 @@
 #include <netinet/in.h>
 #include <exception>
 #include "webserv.hpp"
-
-#define SOCKET_MAXCONNECIONS 1024
 
 class Socket
 {

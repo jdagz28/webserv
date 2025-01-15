@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Socket.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
+/*   By: jdagoy <jdagoy@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/01/07 02:56:15 by jdagz28           #+#    #+#             */
-/*   Updated: 2025/01/14 21:08:35 by jdagz28          ###   ########.fr       */
+/*   Created: 2025/01/07 02:56:15 by jdagoy           #+#    #+#             */
+/*   Updated: 2025/01/15 13:07:19 by jdagoy          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,13 +75,12 @@ void    Socket::createSocket()
     initSocket();
     if (_socketFD == -1)
         throw SocketException("Error: failed to create socket");
-    bindSocket();
 }
 
 
 void    Socket::initAddressInfo()
 {   
-    memset(&_addressInfo, 0, sizeof(_addressInfo));
+    bzero(&_addressInfo, sizeof(_addressInfo));
     _addressInfo.sin_family = AF_INET;
     _addressInfo.sin_port = htons(_port);
 
@@ -101,6 +100,8 @@ void    Socket::initAddressInfo()
 void    Socket::bindSocket()
 {   
     int opt = 1;
+    if (setsockopt(_socketFD, SOL_SOCKET, SO_KEEPALIVE, &opt, sizeof(opt)) == -1)
+        throw SocketException("Error: setsockopt failed");
     if (setsockopt(_socketFD, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
         throw SocketException("Error: setsockopt failed");
 
@@ -110,7 +111,7 @@ void    Socket::bindSocket()
 
 void    Socket::listenSocket()
 {
-    if (listen(_socketFD, SOCKET_MAXCONNECIONS) == -1)
+    if (listen(_socketFD, SOMAXCONN) == -1)
     {
         _socketStatus = -1;
         throw SocketException("Error: Could not listen to socket.");

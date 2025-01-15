@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Event.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
+/*   By: jdagoy <jdagoy@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/01/14 13:36:17 by jdagz28           #+#    #+#             */
-/*   Updated: 2025/01/14 22:45:01 by jdagz28          ###   ########.fr       */
+/*   Created: 2025/01/14 13:36:17 by jdagoy           #+#    #+#             */
+/*   Updated: 2025/01/15 14:04:34 by jdagoy          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,32 +31,51 @@ Event::~Event()
 
 void    Event::handleEvent(uint32_t events, Logger *log)
 {
-    try
-    {
-        if (_fd < 0) 
-            throw std::runtime_error("Invalid file descriptor in Event::handleEvent"); //!CHANGE
+    if (_fd < 0) 
+        throw std::runtime_error("Invalid file descriptor in Event::handleEvent"); //!CHANGE
 
-        if (events & EPOLLIN)
+    if (events & EPOLLIN)
+    {
+        std::cout << "EPOLLIN" << std::endl; //! DELETE
+        _request = new HttpRequest(_fd);
+                    
+        if (!_request->getRequestLine().getUri().empty())
         {
-            _request = new HttpRequest(_fd);
             log->request(*_request);
+            
             _response = new HttpResponse(*_request, _config, _fd);
             _response->sendResponse();
-            log->response(*_response);
+            log->response(*_response);  
             // printHttpResponse(_response->getHttpResponse());
         }
+    }
 
-        if (events & EPOLLOUT)
-        {
-            if (_response)
-                _response->sendResponse();
-        }
-    }
-    catch(const std::exception& e)
+    if (events & EPOLLOUT)
     {
-        std::cerr << e.what() << std::endl;
+        std::cout << "EPOLLOUT" << std::endl; //! DELETE
+        if (_response)
+        {
+            _response->sendResponse();
+            log->response(*_response);
+            delete _response;
+            _response = NULL;
+
+            if (!_request->isConnectionClosed())
+            {
+                std::cout << "Keep-Alive: keeping connection alive for fd" << _fd <<  std::endl; //! DELETE
+                return ;
+            }
+        }
+        close(_fd);
+        delete this;
     }
-    
+
+    if (events & (EPOLLERR | EPOLLHUP))
+    {
+        std::cout << "EPOLLERR" << std::endl; //! DELETE
+        close(_fd);
+        delete this;
+    }
 }
 
 std::string Event::getResponseKeepAlive()

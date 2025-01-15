@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jdagz28 <jdagz28@student.42.fr>            +#+  +:+       +#+        */
+/*   By: jdagoy <jdagoy@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/01/07 02:24:21 by jdagz28           #+#    #+#             */
-/*   Updated: 2025/01/14 22:35:38 by jdagz28          ###   ########.fr       */
+/*   Created: 2025/01/07 02:24:21 by jdagoy           #+#    #+#             */
+/*   Updated: 2025/01/15 13:37:36 by jdagoy          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 #include <csignal>
 #include <exception>
 #include <cstdlib>
+#include <sys/epoll.h>  
 #include "Config.hpp"
 #include "webserv.hpp"
 #include "Socket.hpp"
@@ -35,6 +36,8 @@ class Server
         std::map<socketFD, Socket *>    _monitoredFDs;
         std::map<clientFD, Event *>     _clients;
         Logger                          _log;
+        int                             _eventsQueue;
+        epoll_event                     _eventsList[MAX_CLIENTS];
         
         Server();
         Server(const Server &copy);
@@ -44,7 +47,8 @@ class Server
         void    setSignals();
         void    clearSockets();
         void    clearClients();
-        void    handleConnections();
+        int setNonBlocking(int fd);
+
 
     public:
         Server(const Config &config);
