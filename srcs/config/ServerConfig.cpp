@@ -151,12 +151,16 @@ LocationConfig ServerConfig::getLocationConfig(const std::string &path) const
     return (LocationConfig());   
 }
 
-const std::string ServerConfig::getErrorPage(StatusCode status) const
+const std::string ServerConfig::getErrorPage(int status) const
 {    
-    std::map<int, std::string>::const_iterator it = _errorPages.find(status);
-    if (it == _errorPages.end())
-        return (std::string());
-    return (it->second);
+    std::map<int, std::string>::const_iterator it;
+    for (it = _errorPages.begin(); it != _errorPages.end(); it++)
+    {
+        if (it->first == status)
+            return (it->second);
+    }
+
+    return (std::string());
 }
 
 void ServerConfig::setLocationPath(const std::string &path)

@@ -53,7 +53,7 @@ class ServerConfig
         std::string checkServerName(const std::string &requestHost) const;
         const std::vector<LocationConfig> &getLocationConfig() const;
         LocationConfig getLocationConfig(const std::string &path) const;
-        const std::string getErrorPage(StatusCode status) const;
+        const std::string getErrorPage(int status) const;
         bool    isPathAlreadySet(const std::string &path) const;
         bool    isValid() const;
 };

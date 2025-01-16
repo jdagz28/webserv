@@ -17,9 +17,7 @@
 
 Event::Event(clientFD fd, const Config &config)
     : _fd(fd), _config(config), _request(NULL), _response(NULL)
-{
-    std::cout << "Event created" << std::endl; //! DELETE
-}
+{}
 
 Event::~Event()
 {
@@ -36,7 +34,6 @@ void    Event::handleEvent(uint32_t events, Logger *log)
 
     if (events & EPOLLIN)
     {
-        std::cout << "EPOLLIN" << std::endl; //! DELETE
         _request = new HttpRequest(_fd);
                     
         if (!_request->getRequestLine().getUri().empty())
@@ -52,7 +49,6 @@ void    Event::handleEvent(uint32_t events, Logger *log)
 
     if (events & EPOLLOUT)
     {
-        std::cout << "EPOLLOUT" << std::endl; //! DELETE
         if (_response)
         {
             _response->sendResponse();
@@ -61,10 +57,7 @@ void    Event::handleEvent(uint32_t events, Logger *log)
             _response = NULL;
 
             if (!_request->isConnectionClosed())
-            {
-                std::cout << "Keep-Alive: keeping connection alive for fd" << _fd <<  std::endl; //! DELETE
                 return ;
-            }
         }
         close(_fd);
         delete this;
@@ -72,7 +65,6 @@ void    Event::handleEvent(uint32_t events, Logger *log)
 
     if (events & (EPOLLERR | EPOLLHUP))
     {
-        std::cout << "EPOLLERR" << std::endl; //! DELETE
         close(_fd);
         delete this;
     }

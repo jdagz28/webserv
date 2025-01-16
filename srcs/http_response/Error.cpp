@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 22:50:55 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/11/07 11:49:00 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/01/16 04:13:24 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@
 void HttpResponse::getErrorPage()
 {
     std::string ErrorPagePath = _serverConfig.getErrorPage(_status);
+
     if (!ErrorPagePath.empty())
         getResourceContent(ErrorPagePath);
     else
@@ -40,6 +41,7 @@ std::string HttpResponse::generateErrorPage(const std::string &status, const std
         + "\t<meta charset=\"UTF-8\">\r\n"
         + "\t<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\r\n"
         + "\t<link rel=\"stylesheet\" href=\"/resources/css/styles.css\">\r\n"
+        + "\t<link rel=\"stylesheet\" href=\"/resources/css/navbar.css\">\r\n"
         + "\t<title> Error " + status + "</title>\r\n"
         + "</head>\r\n\r\n"
         + "<body>\r\n"
@@ -49,7 +51,7 @@ std::string HttpResponse::generateErrorPage(const std::string &status, const std
         + "\t\t\t<li class=\"nav-item\"><a href=\"/html/features.html\">Features</a></li>\r\n"
         + "\t\t\t<li class=\"nav-item\"><a href=\"/directory\">Directory</a></li>\r\n"
         + "\t\t\t<li class=\"nav-item\"><a href=\"/html/search.html\">Search</a></li>\r\n"
-        + "\t\t\t<li class=\"nav-item\"><a href=\"/\">About Us</a></li>\r\n"
+        + "\t\t\t<li class=\"nav-item\"><a href=\"/html/about.html\">About Us</a></li>\r\n"
         + "\t\t</ul>\r\n"
         + "\t</nav>\r\n\r\n"
         + "\t<h1 class=\"landing\">" + status + ": " + statusMessage + "</h1>\r\n\r\n"

@@ -162,9 +162,8 @@ void    Server::runServer()
                         throw ServerException("Error: Failed to set client socket to non-blocking mode");
                     
                     _clients[newClient] = new Event(newClient, _config);
-                    std::cout << "Accepted connection from " << inet_ntoa(_monitoredFDs[fd]->getAddressInfo().sin_addr) //! DELETE
-                        << " on port " << ntohs(_monitoredFDs[fd]->getAddressInfo().sin_port) << std::endl; //! DELETE
-                    std::cout << "Added client FD: " << newClient << " to _clients" << std::endl; //! DELETE
+                    // std::cout << "Accepted connection from " << inet_ntoa(_monitoredFDs[fd]->getAddressInfo().sin_addr) //! DELETE
+                    //     << " on port " << ntohs(_monitoredFDs[fd]->getAddressInfo().sin_port) << std::endl; //! DELETE
                 
                     // Add newClient socket to queue
                     struct epoll_event newEvent;

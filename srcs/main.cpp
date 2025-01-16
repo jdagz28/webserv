@@ -40,12 +40,12 @@ int main(int argc, char **argv)
         return (EXIT_FAILURE);
     }
 
-    Logger log;
     try
     {
         std::string configPath = getConfigPath(argc, argv);
         
         Config  config(configPath);
+        // printConfigData(config);
 
         Server server(config);
         
