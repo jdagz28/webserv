@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpResponse.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
+/*   By: jdagoy <jdagoy@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:19:13 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/11/07 11:51:23 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/01/14 22:28:04 by jdagoy          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -197,16 +197,17 @@ ServerConfig HttpResponse::checkLocConfigAndRequest()
     for (server = serverConfigs.begin(); server != serverConfigs.end(); server++)
     {
         std::string path = comparePath(*server, _request.getRequestLine());
-        if (path.empty())
-            return (config);
         _serverName = server->checkServerName(requestHost);
         if (port == server->getPort())
         {
             config = *server;
-            config.setValid();
+            if (!path.empty())
+                config.setValid();
             return (config);;
         }    
     }
+    std::cout << "ERROR: Server not found" << std::endl;
+
     return (config);
 }
 
@@ -282,16 +283,15 @@ void HttpResponse::sendResponse()
     ssize_t bytesSent = send(_client_socket, _responseMsg.data(), _responseMsg.size(), 0);
     if (bytesSent < 0)
     {
-        std::cerr << "ERROR: sending bytes" << std::endl;
+        std::cerr << "ERROR: sending bytes" << std::endl; //!Change
         return;
     }
-    // std::cout << bytesSent << " bytes sent" << std::endl;
-    // _responseMsg.erase(_responseMsg.begin(), _responseMsg.begin() + bytesSent);
-    // if (_headers["Connection"] != "keep-alive")
-    // {
-    //     if (close(_client_socket) < 0)
-    //         std::cerr << "ERROR: closing socket" << std::endl;
-    // }
+    _responseMsg.erase(_responseMsg.begin(), _responseMsg.begin() + bytesSent);
+    if (_headers["Connection"] != "keep-alive")
+    {
+        if (close(_client_socket) < 0)
+            std::cerr << "ERROR: closing socket" << std::endl; //! CHECK
+    }
 }
 
 std::string HttpResponse::getHttpResponse()

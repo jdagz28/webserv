@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parseServerBlock.cpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
+/*   By: jdagoy <jdagoy@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/02 11:19:31 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/11/05 09:35:40 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/01/07 15:45:53 by jdagoy          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,13 +93,14 @@ bool Config::checkAddr(const std::string &host, const std::string &port)
 {
     struct addrinfo hints, *res;
     memset(&hints, 0, sizeof(hints));
-    hints.ai_family = AF_UNSPEC;      
+    hints.ai_family = AF_INET;      
     hints.ai_socktype = SOCK_STREAM;
     
     int status = getaddrinfo(host.c_str(), port.c_str(),&hints, &res);
-    if (status == -1)
+    if (status != 0)
     {
-        freeaddrinfo(res);
+        if (res)
+            freeaddrinfo(res);
         return (false);
     }
     freeaddrinfo(res);
@@ -114,14 +115,39 @@ void Config::parseServerListen(const std::string &value, ServerConfig &serverCon
         _error = std::string("invalid parameter ") + GREEN + "\"" + value + "\"" + RESET;
         throw configException(_error, _configPath, _parsedLine);
     }
-    if (!validPort(value))
+
+    std::string port;
+    std::string ip;
+    
+    if (value.find(':') != std::string::npos)
+    {
+        size_t colonPos = value.find(':');
+        ip = value.substr(0, colonPos);
+        port = value.substr(colonPos + 1);
+    }
+    else
+        port = value;
+        
+    if (!validPort(port))
     {
         _error = std::string("Invalid port number in ") + GREEN + "\"listen\"" + RESET + " directive";
         throw configException(_error, _configPath, _parsedLine);
     }
-    serverConfig.setPort(strToInt(value));
-    serverConfig.setDirective("listen", value);
-    _portsToServe.push_back(strToInt(value));
+    serverConfig.setPort(strToInt(port));
+    serverConfig.setDirective("listen", port);
+    _portsToServe.push_back(strToInt(port));
+
+    if (!ip.empty())
+    {
+        if (!checkAddr(ip, port))
+        {
+            _error = std::string("Invalid IP address in ") + GREEN + "\"listen\"" + RESET + " directive";
+            throw configException(_error, _configPath, _parsedLine);
+        }
+        serverConfig.setIP(ip);
+    }
+    else
+        serverConfig.setIP(LOCALHOST);
 }
 
 void Config::parseServerDirective(const std::string &token, std::istringstream &iss, std::ifstream &infile, ServerConfig &serverConfig)

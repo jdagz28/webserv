@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerConfig.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
+/*   By: jdagoy <jdagoy@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 02:19:46 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/21 09:40:24 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/01/07 15:53:49 by jdagoy          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,11 @@ void    ServerConfig::setPort(int port)
     _port = port;
 }
 
+void    ServerConfig::setIP(const std::string &ip)
+{
+    _ip = ip;
+}
+
 void    ServerConfig::setServerName(const std::string &name)
 {
     std::vector<std::string>::iterator it;
@@ -91,6 +96,11 @@ const std::map<std::string, std::vector<std::string> > &ServerConfig::getDirecti
 int ServerConfig::getPort() const
 {
     return (_port);
+}
+
+const std::string ServerConfig::getIP() const
+{
+    return (_ip);
 }
 
 std::string ServerConfig::getServerName() const
@@ -141,12 +151,16 @@ LocationConfig ServerConfig::getLocationConfig(const std::string &path) const
     return (LocationConfig());   
 }
 
-const std::string ServerConfig::getErrorPage(StatusCode status) const
+const std::string ServerConfig::getErrorPage(int status) const
 {    
-    std::map<int, std::string>::const_iterator it = _errorPages.find(status);
-    if (it == _errorPages.end())
-        return (std::string());
-    return (it->second);
+    std::map<int, std::string>::const_iterator it;
+    for (it = _errorPages.begin(); it != _errorPages.end(); it++)
+    {
+        if (it->first == status)
+            return (it->second);
+    }
+
+    return (std::string());
 }
 
 void ServerConfig::setLocationPath(const std::string &path)

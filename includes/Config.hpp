@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
+/*   By: jdagoy <jdagoy@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 22:38:46 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/11/05 10:45:59 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/01/14 14:30:15 by jdagoy          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,9 +33,6 @@ class Config
         time_t                                  _keepAliveTimeOut;
         std::map<StatusCode, std::string>       _errorPages;
         std::vector<int>                        _portsToServe;
-        
-        Config(const Config &copy);
-        Config  &operator=(const Config &copy); 
         
         bool    validPath(const std::string &configPath);
         bool    validExtension(const std::string &configPath);
@@ -79,6 +76,8 @@ class Config
 
     public:
         Config(const std::string &configPath);
+        Config(const Config &copy);
+        Config  &operator=(const Config &copy); 
         ~Config();
 
         const std::vector<ServerConfig>& getServerConfig() const;
@@ -93,6 +92,7 @@ class Config
                 std::string configPath;
                 std::string parsedLine;
                 mutable std::string errorMsg;
+                
             public:
                 configException(const std::string &msg)
                     : exceptMsg(msg), configPath(""), parsedLine(""), errorMsg("") {};
