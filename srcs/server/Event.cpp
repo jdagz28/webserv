@@ -72,7 +72,7 @@ void    Event::handleEvent(uint32_t events, Logger *log)
 
 std::string Event::getResponseKeepAlive()
 {
-    std::string response = _response->getHeader("Keep-Alive");
+    std::string response = _response->getHeader("Connection");
 
     return (response);
 }

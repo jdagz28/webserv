@@ -100,3 +100,10 @@ void Logger::response(HttpResponse &response)
     _log["date"] = date;
     _terminalLog.push_back(message);
 }
+
+void    Logger::acceptedConnection(const sockaddr_in &address, int port)
+{
+    std::string message = "Accepted connection from " + GREEN + inet_ntoa(address.sin_addr) + RESET + " on port " + GREEN + toString(port) + RESET + "\n";
+    std::cout << message;
+    _terminalLog.push_back(message);
+}

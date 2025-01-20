@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/07 01:23:08 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/21 05:17:52 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/01/20 09:39:45 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,6 @@
 void    printConfigData(const Config &config)
 {
     std::cout << "=======================================" << std::endl;
-    if (config.getKeepAliveTimeout())
-        std::cout << "Keep-Alive timeout " << config.getKeepAliveTimeout() << std::endl;
     std::cout << "ERROR PAGES" << std::endl;
     std::cout << config.getErrorPages() << std::endl << std::endl;
     

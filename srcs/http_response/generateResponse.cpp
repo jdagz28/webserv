@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:11:06 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/11/07 11:49:24 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/01/20 09:41:27 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,7 +73,7 @@ void HttpResponse::addKeepAliveHeader()
         _headers["Connection"] = "keep-alive";
         std::ostringstream keepalive;
         keepalive << "time=" << _config.getKeepAliveTimeout();
-        keepalive << ", max=100"; //! MAX connections
+        keepalive << ", max=100";
         _headers["Keep-Alive"] = keepalive.str();
     }
     else

@@ -18,10 +18,8 @@
 #include "LocationConfig.hpp"
 #include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
+#include <arpa/inet.h> 
 
-
-
-//https://betterstack.com/community/guides/logging/how-to-view-and-configure-nginx-access-and-error-logs/
 
 class Logger 
 {
@@ -43,6 +41,7 @@ class Logger
 
         void request(const HttpRequest &request);
         void response(HttpResponse &response);
+        void acceptedConnection(const sockaddr_in &address, int port);
 
         //! void generateAccessLog();
 };

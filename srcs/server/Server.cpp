@@ -59,8 +59,17 @@ void    Server::clearSockets()
 
 void    Server::initServer()
 {
-    createSockets();
-    setSignals();
+    
+    try
+    {
+        createSockets();
+        setSignals();
+    }
+    catch (const std::exception& e)
+    {
+        _serverStatus = -1;
+        std::cerr << e.what() << std::endl;
+    }
 }
 
 void    Server::createSockets()
@@ -147,8 +156,7 @@ void    Server::handleEvent(clientFD fd, uint32_t eventFlags)
 
         checkForNewConnections(newClient);                
         addToEpoll(_eventsQueue, newClient, EPOLLIN | EPOLLET);
-        // std::cout << "Accepted connection from " << inet_ntoa(_monitoredFDs[fd]->getAddressInfo().sin_addr) //! DELETE
-        //     << " on port " << ntohs(_monitoredFDs[fd]->getAddressInfo().sin_port) << std::endl; //! DELETE
+        // _log.acceptedConnection(_monitoredFDs[fd]->getAddressInfo(), ntohs(_monitoredFDs[fd]->getAddressInfo().sin_port));
     }
     else if (_clients.find(fd) != _clients.end())
         _clients[fd]->handleEvent(eventFlags, &_log);
