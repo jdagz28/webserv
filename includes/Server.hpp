@@ -49,6 +49,10 @@ class Server
         void    clearClients();
         int setNonBlocking(int fd);
 
+        void    checkForNewConnections(clientFD newClient);
+        void    addToEpoll(int epollFD, int fd, uint32_t events);
+        void    handleEvent(clientFD fd, uint32_t eventFlags);
+
 
     public:
         Server(const Config &config);
@@ -58,7 +62,7 @@ class Server
         void    runServer();
         void    closeServer();
 
-    static void    signalHandler(int signum);
+        static void    signalHandler(int signum);
 
         class ServerException : public std::exception
         {

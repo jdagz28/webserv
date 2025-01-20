@@ -32,6 +32,7 @@ Server::~Server()
 {
     clearClients();
     clearSockets();
+    close(_eventsQueue);
 }
 
 void   Server::clearClients()
@@ -58,8 +59,17 @@ void    Server::clearSockets()
 
 void    Server::initServer()
 {
-    createSockets();
-    setSignals();
+    
+    try
+    {
+        createSockets();
+        setSignals();
+    }
+    catch (const std::exception& e)
+    {
+        _serverStatus = -1;
+        std::cerr << e.what() << std::endl;
+    }
 }
 
 void    Server::createSockets()
@@ -109,10 +119,51 @@ void    Server::setSignals()
     }
 }
 
-const char *Server::ServerException::what() const throw()
+const char* Server::ServerException::what() const throw()
 {
     return (_exceptMsg.c_str());
 }
+
+void    Server::checkForNewConnections(clientFD newClient)
+{    
+    if (newClient == -1)
+        throw ServerException("Error: Failed to accept connection");
+    if (setNonBlocking(newClient) == -1)
+        throw ServerException("Error: Failed to set client socket to non-blocking mode");
+                    
+    _clients[newClient] = new Event(newClient, _config);
+}
+
+void    Server::addToEpoll(int epollFD, int fd, uint32_t events)
+{
+    struct epoll_event event;
+    bzero(&event, sizeof(event));
+    event.data.fd = fd;
+    event.events = events;
+
+    if (epoll_ctl(epollFD, EPOLL_CTL_ADD, fd, &event) == -1)
+    {
+        close(epollFD);
+        throw ServerException("Error: Failed to add fd to epoll instance");
+    }
+}
+
+void    Server::handleEvent(clientFD fd, uint32_t eventFlags)
+{
+    if (_monitoredFDs.find(fd) != _monitoredFDs.end())
+    {
+        clientFD newClient = _monitoredFDs[fd]->acceptSocket();
+
+        checkForNewConnections(newClient);                
+        addToEpoll(_eventsQueue, newClient, EPOLLIN | EPOLLET);
+        // _log.acceptedConnection(_monitoredFDs[fd]->getAddressInfo(), ntohs(_monitoredFDs[fd]->getAddressInfo().sin_port));
+    }
+    else if (_clients.find(fd) != _clients.end())
+        _clients[fd]->handleEvent(eventFlags, &_log);
+    else
+        throw ServerException("Error: FD not found in _monitoredFDs or _clients");
+}
+
 
 void    Server::runServer()
 {
@@ -121,21 +172,9 @@ void    Server::runServer()
 
     try
     {
-        // Add master FDs (listen sockets) to epoll 
         std::vector<socketFD>::iterator it;
-        for (it = _masterFDs.begin(); it != _masterFDs.end(); it++)
-        {       
-            struct epoll_event event;
-            bzero(&event, sizeof(event));
-            event.data.fd = *it;
-            event.events = EPOLLIN | EPOLLET ;
-
-            if (epoll_ctl(_eventsQueue, EPOLL_CTL_ADD, *it, &event) == -1)
-            {
-                close(_eventsQueue);
-                throw ServerException("Error: Failed to add master socket to epoll instance");
-            }
-        }
+        for (it = _masterFDs.begin(); it != _masterFDs.end(); it++) 
+            addToEpoll(_eventsQueue, *it, EPOLLIN | EPOLLET);
         
         while (true)
         {
@@ -152,32 +191,7 @@ void    Server::runServer()
                 clientFD fd = _eventsList[i].data.fd;
                 uint32_t eventFlags = _eventsList[i].events;
 
-                // Check for new connections
-                if (_monitoredFDs.find(fd) != _monitoredFDs.end())
-                {
-                    clientFD newClient = _monitoredFDs[fd]->acceptSocket();
-                    if (newClient == -1)
-                        throw ServerException("Error: Failed to accept connection");
-                    if (setNonBlocking(newClient) == -1)
-                        throw ServerException("Error: Failed to set client socket to non-blocking mode");
-                    
-                    _clients[newClient] = new Event(newClient, _config);
-                    // std::cout << "Accepted connection from " << inet_ntoa(_monitoredFDs[fd]->getAddressInfo().sin_addr) //! DELETE
-                    //     << " on port " << ntohs(_monitoredFDs[fd]->getAddressInfo().sin_port) << std::endl; //! DELETE
-                
-                    // Add newClient socket to queue
-                    struct epoll_event newEvent;
-                    bzero(&newEvent, sizeof(newEvent));
-                    newEvent.data.fd = newClient;
-                    newEvent.events = EPOLLIN | EPOLLET ;
-
-                    if (epoll_ctl(_eventsQueue, EPOLL_CTL_ADD, newClient, &newEvent) == -1)
-                        throw ServerException("Error: Failed to add client socket to epoll instance");
-                }
-                else if (_clients.find(fd) != _clients.end())
-                    _clients[fd]->handleEvent(eventFlags, &_log);
-                else
-                    throw ServerException("Error: FD not found in _monitoredFDs or _clients");
+                handleEvent(fd, eventFlags);
             }
         }
     }
