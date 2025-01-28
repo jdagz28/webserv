@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/07 23:05:41 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/23 00:16:12 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/01/28 23:15:48 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ LocationConfig::LocationConfig(const LocationConfig &copy)
     _path = copy.getPath();
     _directives = copy.getDirectives();
     _allowedMethods = copy.getAllowedMethods();
+    _cgiExtensions = copy.getCGIExtensions();
 }
 
 LocationConfig::~LocationConfig()
@@ -36,6 +37,7 @@ LocationConfig    &LocationConfig::operator=(const LocationConfig &copy)
         _path = copy.getPath();
         _directives = copy.getDirectives();
         _allowedMethods = copy.getAllowedMethods();
+        _cgiExtensions = copy.getCGIExtensions();
     }
     return (*this);
 }

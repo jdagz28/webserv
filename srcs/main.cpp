@@ -45,12 +45,12 @@ int main(int argc, char **argv)
         std::string configPath = getConfigPath(argc, argv);
         
         Config  config(configPath);
-        // printConfigData(config);
+        printConfigData(config);
 
-        Server server(config);
+        // Server server(config);
         
-        server.initServer();
-        server.runServer();
+        // server.initServer();
+        // server.runServer();
     }
     catch (const std::exception &e)
     {

@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/04 14:50:02 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/29 16:37:34 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/01/28 23:17:38 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -205,9 +205,35 @@ void Config::parseClientBodySize(std::string &value, LocationConfig &locationCon
     locationConfig.setDirective("client_max_body_size", value);
 }
 
+void Config::parseCGIMode(const std::string &value, LocationConfig &locationConfig)
+{
+    if (value != "on" && value != "off")
+    {
+        _error = std::string("invalid value in ") + GREEN + "\"cgi_mode\"" + RESET + " directive";
+        throw configException(_error, _configPath, _parsedLine);
+    }
+    locationConfig.setDirective("cgi_mode", value);
+}
+
+void Config::parseCGIExtensions(const std::string &value, LocationConfig &locationConfig)
+{  
+    std::vector<std::string> extensions = splitBySpaces(value);
+    
+    for (size_t i = 0; i < extensions.size(); i++)
+    {
+        if (extensions[i][0] != '.')
+        {
+            _error = std::string("invalid value in ") + GREEN + "\"cgi_extension\"" + RESET + " directive";
+            throw configException(_error, _configPath, _parsedLine);
+        }
+        locationCofig.setCGIExtension(extensions[i]);
+    }
+    locationConfig.setDirective("cgi_extension", value);
+}
+
 void Config::checkValueNum(const std::string &token, const std::string &value)
 {
-    if (token == "return" || token == "limit_except" || token == "types" || token == "client_max_body_size")
+    if (token == "return" || token == "limit_except" || token == "types" || token == "client_max_body_size" || token == "cgi_extension")
         return ;
     std::vector<std::string> values = splitBySpaces(value);
     if (value.empty() || values.size() != 1)
@@ -220,7 +246,7 @@ void Config::checkValueNum(const std::string &token, const std::string &value)
 bool Config::validLocationDirective(const std::string &token)
 {
     if (token == "root" || token == "index" || token == "autoindex" || token == "return" || token == "limit_except" 
-        || token == "types" || token == "client_max_body_size")
+        || token == "types" || token == "client_max_body_size" || token == "cgi_mode" || token == "cgi_extension")
         return (true);
     return (false);   
 }
@@ -255,6 +281,10 @@ void Config::parseLocationDirective(const std::string &token, std::istringstream
                 parseRedirect(value, locationConfig);
             else if (token == "client_max_body_size")
                 parseClientBodySize(value, locationConfig);
+            else if (token == "cgi_mode")
+                parseCGIMode(value, locationConfig);
+            else if (token == "cgi_extensions")
+                parseCGIExtensions(value, locationConfig);
         }
     }
     else

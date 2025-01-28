@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 22:38:51 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/23 00:09:53 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/01/28 23:15:14 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ class LocationConfig
         std::string                             _path;
         std::map<std::string, std::string>      _directives;
         std::vector<std::string>                _allowedMethods;
+        std::vector<std::string>                _cgiExtensions;
      
     public:
         LocationConfig();
