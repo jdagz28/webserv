@@ -12,6 +12,7 @@
 
 #include "Event.hpp"
 #include "debug.hpp"
+#include "webserv.hpp"
 #include <iostream>
 #include <sys/epoll.h>
 
@@ -27,6 +28,30 @@ Event::~Event()
         delete _response;
 }
 
+bool    Event::checkServerName()
+{
+    std::string requestHost = _request->getHost();
+    std::string host = requestHost.substr(0, requestHost.find(":"));
+    int port = strToInt(requestHost.substr(requestHost.find(":") + 1));
+
+    std::vector<ServerConfig> servers = _config.getServerConfig();
+    std::vector<ServerConfig>::const_iterator server;
+    for (server = servers.begin(); server != servers.end(); server++)
+    {
+        if (server->getPort() == port)
+        {
+            std::vector<std::string> serverNames = server->getServerNames();
+            std::vector<std::string>::const_iterator serverName;
+            for (serverName = serverNames.begin(); serverName != serverNames.end(); serverName++)
+            {
+                if (*serverName == host)
+                    return (true);
+            }
+        }
+    }
+    return (false);
+}
+
 void    Event::handleEvent(uint32_t events, Logger *log)
 {
     if (_fd < 0) 
@@ -35,8 +60,9 @@ void    Event::handleEvent(uint32_t events, Logger *log)
     if (events & EPOLLIN)
     {
         _request = new HttpRequest(_fd);
+        // printHttpRequest(*_request);
                     
-        if (!_request->getRequestLine().getUri().empty())
+        if (!_request->getRequestLine().getUri().empty() && checkServerName())
         {
             log->request(*_request);
             

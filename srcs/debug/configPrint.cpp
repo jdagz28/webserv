@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/07 01:23:08 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/01/29 09:57:32 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/01/29 11:01:10 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,12 +27,13 @@ void    printConfigData(const Config &config)
         const ServerConfig &server = config.getServerConfig()[i];
 
         std::cout << "=======================================" << std::endl;
-        std::vector<std::string> serverNames = splitBySpaces(server.getServerName());
+        const std::vector<std::string> serverNames = server.getServerNames();
+        std::vector<std::string>::const_iterator serverName;
         if (serverNames.size() > 1)
         {
             std::cout << "Server Names: " << std::endl;
-            for (size_t i = 0; i < serverNames.size(); i++)
-                std::cout << "\t \t" << serverNames[i] << std::endl;
+            for (serverName = serverNames.begin(); serverName != serverNames.end(); serverName++)
+                std::cout << "\t \t" << *serverName << std::endl;
         }
         else
             std::cout << "Server Name: \t \t" << serverNames[0] << std::endl;

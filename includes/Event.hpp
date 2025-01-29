@@ -26,8 +26,9 @@ class Event
         Config          _config;
         HttpRequest*    _request;
         HttpResponse*   _response;
-       
 
+        bool    checkServerName();
+       
     public:
         Event(clientFD fd, const Config &config);
         ~Event();

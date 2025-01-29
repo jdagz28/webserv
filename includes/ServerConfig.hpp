@@ -49,7 +49,7 @@ class ServerConfig
         const std::map<std::string, std::vector<std::string> > &getDirectives() const;
         int getPort() const;
         const std::string getIP() const;
-        std::string getServerName() const;
+        std::vector<std::string> getServerNames() const;
         std::string checkServerName(const std::string &requestHost) const;
         const std::vector<LocationConfig> &getLocationConfig() const;
         LocationConfig getLocationConfig(const std::string &path) const;

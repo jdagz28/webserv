@@ -151,7 +151,7 @@ void    Server::addToEpoll(int epollFD, int fd, uint32_t events)
 void    Server::handleEvent(clientFD fd, uint32_t eventFlags)
 {
     if (_monitoredFDs.find(fd) != _monitoredFDs.end())
-    {
+    { 
         clientFD newClient = _monitoredFDs[fd]->acceptSocket();
 
         checkForNewConnections(newClient);                
