@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utilities.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
+/*   By: jdagoy <jdagoy@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 22:29:37 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/22 10:10:54 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/01/13 11:42:11 by jdagoy          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,7 +99,7 @@ int strToInt(const std::string &str)
     int num;
 
     ss >> num;
-    if (ss.fail())
+    if (ss.fail() || !ss.eof())
         return (-1);
     return (num);
 }

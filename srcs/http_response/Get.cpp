@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:05:38 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/24 22:56:29 by jdagoy           ###   ########.fr       */
+/*   Updated: 2024/11/07 11:48:43 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,8 +95,11 @@ void HttpResponse::getResource(const std::string &target_path)
         std::string defaultPage = getDirectiveLoc("index");
         if (defaultPage.empty())
             setStatusCode(NOT_FOUND);
-        indexPath = buildResourcePath(target_path, defaultPage);
-        getResourceContent(indexPath);
+        else
+        {
+            indexPath = buildResourcePath(target_path, defaultPage);
+            getResourceContent(indexPath);
+        }
     }
 }
 
@@ -121,12 +124,15 @@ void  HttpResponse::getResourceContent(const std::string &file_path)
     infile.read(&_body[0], fileSize); 
     infile.close();
     
-    std::string contentType = getExtension(file_path);
-    if (!isSupportedMedia(contentType))
+    if (!isSupportedMedia(file_path))
         setStatusCode(UNSUPPORTED_MEDIA_TYPE);
-    
-    addContentTypeHeader(contentType);
-    setStatusCode(OK);
+    else
+    {
+        std::string contentType = getExtension(file_path);
+        addContentTypeHeader(contentType);
+        if (getStatusCode() == INIT)
+            setStatusCode(OK);
+    }
 }
 
 std::string HttpResponse::extractResourceName(const std::string &uri)

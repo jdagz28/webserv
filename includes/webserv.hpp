@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
+/*   By: jdagoy <jdagoy@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 22:28:27 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/21 04:48:37 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/01/14 13:34:15 by jdagoy          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,8 @@
 #define MAX_URI_LENGTH 1000
 #define MAX_HEADER_LENGTH 1000
 #define DEFAULT_SERVERNAME "webserv"
+#define LOCALHOST "127.0.0.1"
+#define MAX_CLIENTS 100
 
 const std::string RED = "\033[0;31m";
 const std::string GREEN = "\033[0;32m";
@@ -31,6 +33,9 @@ const std::string YELLOW = "\033[1;33m";
 const std::string BLUE = "\033[0;34m";
 const std::string RESET = "\033[0m";
 
+typedef int socketFD;
+typedef int clientFD;
+typedef int FD;
 
 enum HtmlRequestParseStep
 {
@@ -92,6 +97,7 @@ bool validProtocol(const std::string &str);
 int strToInt(const std::string &str);
 bool isSpace(unsigned char ch);
 std::string toLower(const std::string &str);
+void    signalHandler(int signum);
 
 // MIMETYPES.CPP
 std::string getMimeType(const std::string &extension);

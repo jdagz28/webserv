@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/07 01:23:08 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/21 05:17:52 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/01/29 11:01:10 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,6 @@
 void    printConfigData(const Config &config)
 {
     std::cout << "=======================================" << std::endl;
-    if (config.getKeepAliveTimeout())
-        std::cout << "Keep-Alive timeout " << config.getKeepAliveTimeout() << std::endl;
     std::cout << "ERROR PAGES" << std::endl;
     std::cout << config.getErrorPages() << std::endl << std::endl;
     
@@ -29,12 +27,13 @@ void    printConfigData(const Config &config)
         const ServerConfig &server = config.getServerConfig()[i];
 
         std::cout << "=======================================" << std::endl;
-        std::vector<std::string> serverNames = splitBySpaces(server.getServerName());
+        const std::vector<std::string> serverNames = server.getServerNames();
+        std::vector<std::string>::const_iterator serverName;
         if (serverNames.size() > 1)
         {
             std::cout << "Server Names: " << std::endl;
-            for (size_t i = 0; i < serverNames.size(); i++)
-                std::cout << "\t \t" << serverNames[i] << std::endl;
+            for (serverName = serverNames.begin(); serverName != serverNames.end(); serverName++)
+                std::cout << "\t \t" << *serverName << std::endl;
         }
         else
             std::cout << "Server Name: \t \t" << serverNames[0] << std::endl;
@@ -76,6 +75,23 @@ void    printConfigData(const Config &config)
             {
                 std::cout << "\t\t" << it->first << std::endl;
                 std::cout << "\t\t\tValue: " << it->second << std::endl;  
+            }
+
+            
+            std::map<std::string, std::string>::const_iterator cgi;
+            cgi = locationDirectives.find("cgi_mode");
+            if (cgi != locationDirectives.end() && cgi->second == "on")
+            {
+                // std::cout << "\t\tCGI Mode: on" << std::endl;
+
+                const std::vector<std::string> &cgiExtensions = location.getCGIExtensions();
+                if (!cgiExtensions.empty())
+                    std::cout << "\t\tCGI Extensions: " << std::endl;
+                std::vector<std::string>::const_iterator extensions;
+                for (extensions = cgiExtensions.begin(); extensions != cgiExtensions.end(); extensions++)
+                { 
+                    std::cout << "\t\t\t" << *extensions << std::endl;
+                }
             }
         }
     }

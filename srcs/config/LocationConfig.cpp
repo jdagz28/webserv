@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/07 23:05:41 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/23 00:16:12 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/01/29 10:17:17 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ LocationConfig::LocationConfig(const LocationConfig &copy)
     _path = copy.getPath();
     _directives = copy.getDirectives();
     _allowedMethods = copy.getAllowedMethods();
+    _cgiExtensions = copy.getCGIExtensions();
 }
 
 LocationConfig::~LocationConfig()
@@ -36,6 +37,7 @@ LocationConfig    &LocationConfig::operator=(const LocationConfig &copy)
         _path = copy.getPath();
         _directives = copy.getDirectives();
         _allowedMethods = copy.getAllowedMethods();
+        _cgiExtensions = copy.getCGIExtensions();
     }
     return (*this);
 }
@@ -53,6 +55,11 @@ void    LocationConfig::setPath(const std::string &path)
 void    LocationConfig::setAllowedMethod(const std::string &method)
 {
     _allowedMethods.push_back(method);
+}
+
+void    LocationConfig::setCGIExtension(const std::string &extension)
+{
+    _cgiExtensions.push_back(extension);
 }
 
 const std::map<std::string, std::string> &LocationConfig::getDirectives() const
@@ -124,6 +131,11 @@ const std::string LocationConfig::getAutoIndex() const
             return (directive->second);
     }
     return (std::string()); 
+}
+
+const std::vector<std::string> &LocationConfig::getCGIExtensions() const
+{
+    return (_cgiExtensions);
 }
 
 

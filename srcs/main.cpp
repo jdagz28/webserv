@@ -3,26 +3,22 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: romvan-d <romvan-d@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jdagoy <jdagoy@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/05 00:23:30 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/11/04 16:37:18 by romvan-d         ###   ########.fr       */
+/*   Updated: 2025/01/10 14:58:13 by jdagoy          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <iostream>
-#include <cstdlib>
 #include <string>
 #include <cstring>
 #include "Config.hpp"
 #include "debug.hpp"
 #include "webserv.hpp"
-#include "HttpRequest.hpp"
-#include "HttpResponse.hpp"
-#include <csignal>
-#include <fcntl.h>
+#include "Server.hpp"
 
-#define PORT   4242 //1919    
+// #define PORT   4242 //1919    
 
 int server_socket = -1;
 
@@ -41,18 +37,6 @@ std::string getConfigPath(int argc, char **argv)
     else
         return (argv[1]);
     return ("");
-}
-
-void    signal_handler(int signum)
-{
-    std::cout << "Received signal " << signum << std::endl;
-    std::cout << "===== Shutting down server =====" << std::endl;
-    if (server_socket != -1)
-    {
-        close(server_socket);
-        std::cout << "Server socket closed." << std::endl;
-    }
-    exit(signum);
 }
 
 int main(int argc, char **argv)
@@ -76,112 +60,12 @@ int main(int argc, char **argv)
         std::string configPath = getConfigPath(argc, argv);
         
         Config  config(configPath);
-        
-        struct sockaddr_in server_addr, client_addr;
-        socklen_t client_len = sizeof(client_addr);
-
-        signal(SIGINT, signal_handler);
-        signal(SIGTERM, signal_handler);
-
-		FD_ZERO(&master_fd);
-		FD_ZERO(&read_fds);
-        server_socket = socket(AF_INET, SOCK_STREAM, 0);
-        if (server_socket < 0)
-        {
-            std::cerr << "Error: failed to create socket" << std::endl;
-            return (1);
-        }
-
-        int opt = 1;
-        if (setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
-        {
-            std::cerr << "Error: setsockopt failed" << std::endl;
-            close(server_socket);
-            return 1;
-        }
-
-        memset(&server_addr, 0, sizeof(server_addr));
-        server_addr.sin_family = AF_INET;
-        server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-        server_addr.sin_port = htons(PORT);
-
-        if (bind(server_socket, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1)
-        {
-            std::cerr << "Error: failed to bind socket" << std::endl;
-            close(server_socket);
-            return (1);
-        }
-        
-        if (listen(server_socket, 5) == -1)
-        {
-            std::cerr << "Error: Could not listen to socket." << std::endl;
-            close(server_socket);
-            return (1);
-        }   
-        
-		FD_SET(server_socket, &master_fd);
-		fd_max = server_socket;
-		
         // printConfigData(config);
-        std::cout << "Listening on port: " << PORT << std::endl;
-        while (true)
-        {
-            read_fds = master_fd; // copy current FD because select deletes it
-			std::cout << "Calling select with fd_max: " << fd_max << std::endl;
-			if (select(fd_max + 1, &read_fds, NULL, NULL, NULL) == -1)
-			{
-				std::cerr << "Error: Failed to go through select" << std::endl;
-				close(server_socket);
-				return (1);
-			}
-			for (int i = 0; i <= fd_max; i++)
-			{
-				if (FD_ISSET(i, &read_fds))
-				{
-					if (i == server_socket)
-					{
-						
-						new_fd = accept(server_socket, (struct sockaddr*)&client_addr, &client_len);
-						if (new_fd == - 1)
-						{
-							perror("Failed to accept connection");
-							continue;
-						}
-						else
-						{
-							fcntl(new_fd, F_SETFL, O_NONBLOCK);
-							FD_SET(new_fd, &master_fd);
-							if (new_fd > fd_max)
-							{
-								printf("if new fd > max\n");
-								fd_max = new_fd;
-							}
-						}
 
-					}
-					else
-					{
-						std::cout <<"test" << std::endl;
-				 		// std::cout << "Connection accepted" << std::endl;
-						// std::cout << "Receiving request..." << std::endl;
-						HttpRequest request(i);
-						// printHttpRequest(request);
-						// std::cout << "Request parsed." << std::endl;
-
-						// std::cout << "Generating response..." << std::endl;
-						HttpResponse response(request, config, i);
-						response.execMethod();
-						response.generateHttpResponse();
-						
-						// printHttpResponse(response.getHttpResponse());
-						// std::cout << "Sending response..." << std::endl;
-						response.sendResponse();
-						close(i);
-						FD_CLR(i, &master_fd);
-						// std::cout << "Connection closed" << std::endl;
-					}
-        		}
-			}
+        Server server(config);
+        
+        server.initServer();
+        server.runServer();
     }
 	close(server_socket);
 	}

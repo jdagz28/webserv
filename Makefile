@@ -6,7 +6,7 @@
 #    By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/05 02:06:08 by jdagoy            #+#    #+#              #
-#    Updated: 2024/10/24 22:57:28 by jdagoy           ###   ########.fr        #
+#    Updated: 2025/01/15 14:06:16 by jdagoy           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -28,7 +28,11 @@ HEADER_LIST			:= webserv.hpp \
 						ServerConfig.hpp \
 						HttpRequest.hpp \
 						HttpRequestLine.hpp \
-						HttpResponse.hpp
+						HttpResponse.hpp \
+						Logger.hpp \
+						Server.hpp\
+						Socket.hpp\
+						Event.hpp
 HEADER_FILES		:= $(addprefix $(INC_DIR), $(HEADER_LIST))
 
 
@@ -48,6 +52,13 @@ CONFIG_SRCS			:= Config.cpp \
 CONFIG_OBJS_LIST 	:= $(patsubst %.cpp, %.o, $(CONFIG_SRCS))
 CONFIG_OBJS			:= $(addprefix $(OBJ_DIR), $(CONFIG_OBJS_LIST))
 
+SERVER_DIR			:= $(SRC_DIR)server/
+SERVER_SRCS			:= Server.cpp \
+						Socket.cpp \
+						Event.cpp
+SERVER_OBJS_LIST 	:= $(patsubst %.cpp, %.o, $(SERVER_SRCS))
+SERVER_OBJS			:= $(addprefix $(OBJ_DIR), $(SERVER_OBJS_LIST))
+
 DEBUG_DIR			:= $(SRC_DIR)debug/
 DEBUG_SRCS			:= configPrint.cpp \
 						httpRequestPrint.cpp \
@@ -63,7 +74,6 @@ HTTPREQUEST_SRCS	:= HttpRequest.cpp \
 HTTPREQUEST_OBJS_LIST := $(patsubst %.cpp, %.o, $(HTTPREQUEST_SRCS))
 HTTPREQUEST_OBJS	:= $(addprefix $(OBJ_DIR), $(HTTPREQUEST_OBJS_LIST))
 
-
 HTTPRESPONSE_DIR	:= $(SRC_DIR)http_response/
 HTTPRESPONSE_SRCS	:= HttpResponse.cpp \
 						MimeTypes.cpp \
@@ -78,6 +88,11 @@ HTTPRESPONSE_SRCS	:= HttpResponse.cpp \
 HTTPRESPONSE_OBJS_LIST := $(patsubst %.cpp, %.o, $(HTTPRESPONSE_SRCS))
 HTTPRESPONSE_OBJS	:= $(addprefix $(OBJ_DIR), $(HTTPRESPONSE_OBJS_LIST))
 
+LOGGER_DIR			:= $(SRC_DIR)logger/
+LOGGER_SRCS			:= Logger.cpp
+LOGGER_OBJS_LIST 	:= $(patsubst %.cpp, %.o, $(LOGGER_SRCS))
+LOGGER_OBJS			:= $(addprefix $(OBJ_DIR), $(LOGGER_OBJS_LIST))
+
 
 all: $(NAME) 
 
@@ -90,6 +105,9 @@ $(OBJ_DIR)%.o: $(SRC_DIR)%.cpp $(HEADER_FILES)
 $(OBJ_DIR)%.o: $(CONFIG_DIR)%.cpp $(HEADER_FILES)
 	$(CXX) $(CXXFLAGS) -c $(INCLUDES) $< -o $@
 
+$(OBJ_DIR)%.o: $(SERVER_DIR)%.cpp $(HEADER_FILES)
+	$(CXX) $(CXXFLAGS) -c $(INCLUDES) $< -o $@
+
 $(OBJ_DIR)%.o: $(DEBUG_DIR)%.cpp $(HEADER_FILES)
 	$(CXX) $(CXXFLAGS) -c $(INCLUDES) $< -o $@
 
@@ -99,8 +117,11 @@ $(OBJ_DIR)%.o: $(HTTPREQUEST_DIR)%.cpp $(HEADER_FILES)
 $(OBJ_DIR)%.o: $(HTTPRESPONSE_DIR)%.cpp $(HEADER_FILES)
 	$(CXX) $(CXXFLAGS) -c $(INCLUDES) $< -o $@
 
-$(NAME): $(OBJ_DIR) $(OBJS) $(CONFIG_OBJS) $(DEBUG_OBJS) $(HTTPREQUEST_OBJS) $(HTTPRESPONSE_OBJS)
-	$(CXX) $(CXXFLAGS) $(OBJS) $(CONFIG_OBJS) $(DEBUG_OBJS) $(HTTPREQUEST_OBJS)  $(HTTPRESPONSE_OBJS) -o $(NAME)
+$(OBJ_DIR)%.o: $(LOGGER_DIR)%.cpp $(HEADER_FILES)
+	$(CXX) $(CXXFLAGS) -c $(INCLUDES) $< -o $@
+
+$(NAME): $(OBJ_DIR) $(OBJS) $(CONFIG_OBJS) $(SERVER_OBJS) $(DEBUG_OBJS) $(HTTPREQUEST_OBJS) $(HTTPRESPONSE_OBJS) $(LOGGER_OBJS)
+	$(CXX) $(CXXFLAGS) $(OBJS) $(CONFIG_OBJS) $(SERVER_OBJS) $(DEBUG_OBJS) $(HTTPREQUEST_OBJS)  $(HTTPRESPONSE_OBJS) $(LOGGER_OBJS) -o $(NAME)
 
 clean:
 	$(RM) $(OBJ_DIR)

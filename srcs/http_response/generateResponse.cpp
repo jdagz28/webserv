@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:11:06 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/21 12:41:33 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/01/20 09:41:27 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ void HttpResponse::generateHttpResponse()
         _headers["Content-Length"] = toString(_body.size());
     addKeepAliveHeader();
     addAllowHeader();
-
+    
     std::string statusLine = generateStatusLine();
     std::string headerLines = generateHeaderLines();
     std::string empty = CRLF;
@@ -73,7 +73,7 @@ void HttpResponse::addKeepAliveHeader()
         _headers["Connection"] = "keep-alive";
         std::ostringstream keepalive;
         keepalive << "time=" << _config.getKeepAliveTimeout();
-        keepalive << ", max=100"; //! MAX connections
+        keepalive << ", max=100";
         _headers["Keep-Alive"] = keepalive.str();
     }
     else
@@ -82,50 +82,20 @@ void HttpResponse::addKeepAliveHeader()
 
 void HttpResponse::addAllowHeader()
 {
-    if (getStatusCode() != METHOD_NOT_ALLOWED) 
+    if (static_cast<int>(getStatusCode()) >= 400 ) 
         return ;
     
-    const std::vector<ServerConfig> &serverConfigs = _config.getServerConfig();
-    if (serverConfigs.empty())
+    std::string allowed_method;
+    if (!_locationConfig.getPath().empty())
     {
-        setStatusCode(NOT_FOUND);
-        return ;
-    }
-    std::vector<ServerConfig>::const_iterator server;
-    
-    for (server = serverConfigs.begin(); server != serverConfigs.end(); server++)
-    {
-        std::string path = comparePath(*server, _request.getRequestLine());
-        if (path.empty())
+        std::vector<std::string> allowedMethods = _locationConfig.getAllowedMethods();
+        for (size_t i = 0; i < allowedMethods.size(); i++)
         {
-            setStatusCode(NOT_FOUND);
-            return ;
+            if (i != 0)
+                allowed_method += ", ";
+            allowed_method += allowedMethods[i];
         }
-        std::string target_path = _request.getRequestLine().getUri();
-        
-        const std::vector<LocationConfig> &locationConfigs = server->getLocationConfig();
-        if (locationConfigs.empty())
-        {
-            setStatusCode(NOT_FOUND);
-            return ;
-        }
-        std::vector<LocationConfig>::const_iterator location;
-        for (location = locationConfigs.begin(); location != locationConfigs.end(); location++)
-        {
-            std::string config_location = location->getPath();
-            if (config_location == target_path)
-            {
-                std::string allowed_method;
-                std::vector<std::string> allowedMethods = location->getAllowedMethods();
-                for (size_t i = 0; i < allowedMethods.size(); i++)
-                {
-                    if (i != 0)
-                        allowed_method += ", ";
-                    allowed_method += allowed_method[i];
-                }
-                _headers["Allow"] = allowed_method;
-            }
-        }
+        _headers["Allow"] = allowed_method;
     }
 }
 
@@ -162,4 +132,20 @@ void HttpResponse::addContentTypeHeader(const std::string &type)
         _headers["Content-Type"] = "text/html";
     else
         _headers["Content-Type"] = getMimeType(type);
+}
+
+std::string HttpResponse::getHeader(const std::string &header)
+{
+    std::map<std::string, std::string>::iterator it;
+    for (it = _headers.begin(); it != _headers.end(); it++)
+    {
+        if (it->first == header)
+            return (it->second);
+    }
+    return (std::string());
+}
+
+std::string HttpResponse::getStatusLine()
+{
+    return (generateStatusLine());
 }

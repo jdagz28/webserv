@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
+/*   By: jdagoy <jdagoy@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 22:38:46 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/22 14:04:13 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/01/14 14:30:15 by jdagoy          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,9 +32,7 @@ class Config
         int                                     _serverCount;
         time_t                                  _keepAliveTimeOut;
         std::map<StatusCode, std::string>       _errorPages;
-        
-        Config(const Config &copy);
-        Config  &operator=(const Config &copy); 
+        std::vector<int>                        _portsToServe;
         
         bool    validPath(const std::string &configPath);
         bool    validExtension(const std::string &configPath);
@@ -74,15 +72,20 @@ class Config
         void    parseClientBodySize(std::string &value, LocationConfig &locationConfig);
         void    checkValueNum(const std::string &token, const std::string &value);
         bool    validLocationDirective(const std::string &token);
+        void    parseCGIMode(const std::string &value, LocationConfig &locationConfig);
+        void    parseCGIExtensions(const std::string &value, LocationConfig &locationConfig);
         
 
     public:
         Config(const std::string &configPath);
+        Config(const Config &copy);
+        Config  &operator=(const Config &copy); 
         ~Config();
 
         const std::vector<ServerConfig>& getServerConfig() const;
         time_t  getKeepAliveTimeout() const;
         std::string getErrorPages() const;
+        const std::vector<int>& getPortsToServe() const;
 
         class configException : public std::exception
         {
@@ -91,6 +94,7 @@ class Config
                 std::string configPath;
                 std::string parsedLine;
                 mutable std::string errorMsg;
+                
             public:
                 configException(const std::string &msg)
                     : exceptMsg(msg), configPath(""), parsedLine(""), errorMsg("") {};

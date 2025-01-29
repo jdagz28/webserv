@@ -18,12 +18,11 @@ An events block is allowed for NGINX compatibility but is ignored by webserv.
 ### Example
 
 ```conf
-http  
+http 
 {
-    keepalive_timeout 20s;
-    error_page  400 website/error/error400.html;
-    error_page  404 website/error/404.html;
-    error_page  500 501 502 503  /50x.html;
+    error_page              400 website/error/400.html;
+    error_page              404 website/error/404.html;
+    error_page              500 501 502 503  website/50x.html;
     
     server 
     {
@@ -53,6 +52,37 @@ http
             }
         }
     }
+
+    server 
+    {
+        listen              1919;
+        server_name         localhost;
+        error_page          404 website/error/1919.html;
+
+        location / 
+        {
+            root            website;
+            index           index.html;
+            limit_except    GET
+            {
+                deny all;
+            }
+        }
+
+        location /resources/css
+        {
+            root            website;
+            types
+            {
+                text/css    css;
+            }
+            limit_except    GET
+            {
+                deny all;
+            }
+            
+        }
+    }
 }
 
 ```
@@ -63,7 +93,6 @@ http
 
 This is the top-level block for defining server-wide settings.
 
-- `keepalive_timeout`: Defines the time (in seconds) for keeping the connection alive with the client.
 - `error_page`: Specifies the URI to redirect to in case of an error, such as 404 or 500.
 
 ### 2. `server` Block

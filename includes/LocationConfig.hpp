@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 22:38:51 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/23 00:09:53 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/01/29 09:44:35 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ class LocationConfig
         std::string                             _path;
         std::map<std::string, std::string>      _directives;
         std::vector<std::string>                _allowedMethods;
+        std::vector<std::string>                _cgiExtensions;
      
     public:
         LocationConfig();
@@ -34,6 +35,7 @@ class LocationConfig
         void    setDirective(const std::string &directive, const std::string &value);
         void    setPath(const std::string &path);
         void    setAllowedMethod(const std::string &method);
+        void    setCGIExtension(const std::string &extension);
 
         const std::map<std::string, std::string > &getDirectives() const;
         const std::string getPath() const;
@@ -42,6 +44,7 @@ class LocationConfig
         const std::string getDefaultName() const;
         const std::string getIndex() const;
         const std::string getAutoIndex() const;
+        const std::vector<std::string> &getCGIExtensions() const;
         std::string getRedirect() const;
         size_t getClientMaxBodySize();
 

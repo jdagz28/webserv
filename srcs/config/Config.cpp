@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
+/*   By: jdagoy <jdagoy@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 22:38:59 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/23 00:06:32 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/01/08 15:33:55 by jdagoy          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -169,11 +169,23 @@ void    Config::parseConfig(const std::string &configFile)
  
         if (token == "events")
         {
+            iss >> token;
+            if (token != "events")
+            {
+                _error = "invalid directive in events block";
+                throw configException(_error, _configPath, _parsedLine);
+            }
             skipEventsBlock(infile);
             continue ;
         }
         else if (token == "http")
         {
+            iss >> token;
+            if (token != "http")
+            {
+                _error = "invalid http block";
+                throw configException(_error, _configPath, _parsedLine);
+            }
             parseHttpBlock(infile);
             break ;
         }
@@ -226,4 +238,9 @@ std::string Config::getErrorPages() const
         errorPages += "Error Code: " + toString(it->first) + " Error Page: " + it->second + "\n";
     }
     return (errorPages);
+}
+
+const std::vector<int>& Config::getPortsToServe() const
+{
+    return (_portsToServe);
 }
