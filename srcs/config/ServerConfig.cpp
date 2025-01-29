@@ -103,18 +103,9 @@ const std::string ServerConfig::getIP() const
     return (_ip);
 }
 
-std::string ServerConfig::getServerName() const
+std::vector<std::string> ServerConfig::getServerNames() const
 {
-    if (_serverName.empty())
-        return (std::string());
-    std::vector<std::string>::const_iterator it;
-    std::string names;
-    for (it = _serverName.begin(); it != _serverName.end(); it++)
-    {
-        names += *it;
-        names += " ";
-    }
-    return (names);
+    return (_serverName);
 }
 
 bool    ServerConfig::isValid() const
