@@ -72,6 +72,8 @@ class Config
         void    parseClientBodySize(std::string &value, LocationConfig &locationConfig);
         void    checkValueNum(const std::string &token, const std::string &value);
         bool    validLocationDirective(const std::string &token);
+        void    parseCGIMode(const std::string &value, LocationConfig &locationConfig);
+        void    parseCGIExtensions(const std::string &value, LocationConfig &locationConfig);
         
 
     public:

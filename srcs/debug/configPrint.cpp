@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/07 01:23:08 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/01/20 09:39:45 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/01/29 09:57:32 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,6 +74,23 @@ void    printConfigData(const Config &config)
             {
                 std::cout << "\t\t" << it->first << std::endl;
                 std::cout << "\t\t\tValue: " << it->second << std::endl;  
+            }
+
+            
+            std::map<std::string, std::string>::const_iterator cgi;
+            cgi = locationDirectives.find("cgi_mode");
+            if (cgi != locationDirectives.end() && cgi->second == "on")
+            {
+                // std::cout << "\t\tCGI Mode: on" << std::endl;
+
+                const std::vector<std::string> &cgiExtensions = location.getCGIExtensions();
+                if (!cgiExtensions.empty())
+                    std::cout << "\t\tCGI Extensions: " << std::endl;
+                std::vector<std::string>::const_iterator extensions;
+                for (extensions = cgiExtensions.begin(); extensions != cgiExtensions.end(); extensions++)
+                { 
+                    std::cout << "\t\t\t" << *extensions << std::endl;
+                }
             }
         }
     }
