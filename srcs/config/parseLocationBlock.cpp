@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/04 14:50:02 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/01/28 23:17:38 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/01/29 10:14:06 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -226,7 +226,7 @@ void Config::parseCGIExtensions(const std::string &value, LocationConfig &locati
             _error = std::string("invalid value in ") + GREEN + "\"cgi_extension\"" + RESET + " directive";
             throw configException(_error, _configPath, _parsedLine);
         }
-        locationCofig.setCGIExtension(extensions[i]);
+        locationConfig.setCGIExtension(extensions[i]);
     }
     locationConfig.setDirective("cgi_extension", value);
 }
@@ -283,7 +283,7 @@ void Config::parseLocationDirective(const std::string &token, std::istringstream
                 parseClientBodySize(value, locationConfig);
             else if (token == "cgi_mode")
                 parseCGIMode(value, locationConfig);
-            else if (token == "cgi_extensions")
+            else if (token == "cgi_extension")
                 parseCGIExtensions(value, locationConfig);
         }
     }
