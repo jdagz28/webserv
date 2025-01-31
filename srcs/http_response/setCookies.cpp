@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/02 04:53:47 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/12/06 13:14:07 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/01/31 10:57:16 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@
 * token             = <token, defined in [RFC2616], Section 2.2>
 * cookie-av         = expires-av / max-age-av / domain-av /
 *                     path-av / secure-av / httponly-av /
-*                     extension-av
+*       s              extension-av
 * expires-av        = "Expires=" sane-cookie-date
 * sane-cookie-date  = <rfc1123-date, defined in [RFC2616], Section 3.3.1>
 * max-age-av        = "Max-Age=" non-zero-digit *DIGIT
