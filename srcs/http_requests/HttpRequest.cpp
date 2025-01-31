@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:18:22 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/01/29 11:30:15 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/01/31 12:26:39 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -336,14 +336,11 @@ const std::map<std::string, MultiFormData> &HttpRequest::getMultiFormData() cons
     return (_multiFormData);
 }
 
-std::string HttpRequest::getFormData(const std::string &method)
+std::string HttpRequest::getFormData(const std::string &key)
 {
     std::map<std::string, std::string>::const_iterator it;
-    it = _formData.find(method);
+    it = _formData.find(key);
     if (it != _formData.end())
-    {
-        _formData.erase(method);
-        return (std::string("DELETE"));
-    }
+        return (_formData[key]);
     return (std::string());
 }

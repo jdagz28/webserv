@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/02 04:53:47 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/01/31 11:31:13 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/01/31 13:23:01 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,19 +38,31 @@
 * httponly-av       = "HttpOnly"
 ==============================================================================*/
 
-void HttpResponse::setCookies()
+void    HttpResponse::setCookies(std::string key, std::string value)
 {
-    std::map<std::string, std::string> cookies = _request.getCookies();
     std::string cookiesStr;
     
-    std::map<std::string, std::string>::iterator it;
-    for (it = cookies.begin(); it != cookies.end(); it++)
-    {   
-        cookiesStr += it->first + "=" + it->second;
-        if (it != --cookies.end())
-            cookiesStr += "; ";
-    }
+    if (_headers["Set-Cookie"].empty())
 
+        cookiesStr = key + "=" + value;
+    else
+    {
+        cookiesStr = _headers["Set-Cookie"];
+        cookiesStr += "; " + key + "=" + value;
+    }
     if (!cookiesStr.empty())
         _headers["Set-Cookie"] = cookiesStr;
+    //! Add expiry
+    //! max-age
+}
+
+
+void    HttpResponse::setLanguage()
+{
+    if (_request.getFormData("language") == "en")
+        _headers["Location"] = "html/language_en.html";
+    else if (_request.getFormData("language") == "fr")
+        _headers["Location"] = "html/language_fr.html";
+    setCookies("language", _request.getFormData("language"));
+    setStatusCode(SEE_OTHER);
 }

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../resources/css/styles.css">
+    <link rel="stylesheet" href="../resources/css/navbar.css">
+    <link rel="stylesheet" href="../resources/css/language.css">
+    <title>Language</title>
+</head>
+
+<body>
+    <nav class="navbar">
+        <ul class="nav-list">
+            <li class="nav-item"><a href="/">Home</a></li>
+            <li class="nav-item"><a href="/html/features.html">Features</a></li>
+            <li class="nav-item"><a href="/directory">Directory</a></li>
+            <li class="nav-item"><a href="/html/search.html">Search</a></li>
+            <li class="nav-item"><a href="/html/about.html">About Us</a></li>
+            <li class="nav-item language-container"> 
+                <div class="language-selector dropdown">
+                    <button id="dropdown-btn">
+                        <img src="https://flagsapi.com/FR/shiny/64.png" alt="French Flag" style="width: 25px; height: 20px; vertical-align: middle;">
+                        <span class="btn-text">Français</span>
+                        <span class="arrow-down"></span>
+                    </button>
+                            
+                    <ul class="dropdown-content" id="dropdown-content">
+                        <li data-lang="en">
+                            <img src="https://flagsapi.com/US/shiny/64.png" alt="English Flag" style="width: 25px; height: 20px; vertical-align: middle;"> English
+                        </li>
+                        <li data-lang="fr">
+                            <img src="https://flagsapi.com/FR/shiny/64.png" alt="French Flag" style="width: 25px; height: 20px; vertical-align: middle;"> Français
+                        </li>
+                    </ul>
+                </div>
+            </li>
+        </ul>
+    </nav>
+
+    <h1 class="landing">Bonjour!</h1>
+
+    <script src="../resources/js/script.js"></script>
+
+</body>
+
+</html>

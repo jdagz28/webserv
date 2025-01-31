@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:13:31 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/11/05 12:52:08 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/01/31 12:39:06 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,11 +110,12 @@ class HttpResponse
         void    processRequestDELETE();
         void    deleteFile(const std::string &file);
         void    curlDelete();
+
+        void    setCookies(std::string key, std::string value);
+        void    setLanguage();
         
     public:
-        HttpResponse(HttpRequest &request,
-                        Config &config,
-                        int client_socket);
+        HttpResponse(HttpRequest &request, Config &config, int client_socket);
         ~HttpResponse();
 
         void    execMethod();
