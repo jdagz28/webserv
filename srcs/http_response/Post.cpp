@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:57:50 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/01/16 13:17:13 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/01/31 10:27:13 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,10 @@ void    HttpResponse::processRequestPOST()
         {
             getRedirectContent();
             return ;
+        }
+        else if (_request.getRequestLine().getUri() == "/set-language")
+        {
+            std::cout << "Setting Language......" << std::endl; //! DELETE
         }
     }
     else if (_request.isMultiPartFormData())

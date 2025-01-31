@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/25 12:44:49 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/01/16 12:44:14 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/01/31 10:51:57 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -239,13 +239,14 @@ void HttpRequest::parseFormData(const std::string &line)
         if (equalPos != std::string::npos)
         {    
             key = token.substr(0, equalPos);
-            if (key != "q")
+            if (key != "q" && key != "language")
             {
                 setStatusCode(BAD_REQUEST);
                 return ;
             }
             token = token.substr(key.size() + 1);
         }
+
         if (key == "files")
             key = key + '_' + toString(i);
         _formData[key] = token;
