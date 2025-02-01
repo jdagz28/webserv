@@ -67,9 +67,10 @@ void    Event::handleEvent(uint32_t events, Logger *log)
             log->request(*_request);
             
             _response = new HttpResponse(*_request, _config, _fd);
+            printHttpResponse(_response->getHttpResponse());
             _response->sendResponse();
             log->response(*_response);  
-            // printHttpResponse(_response->getHttpResponse());
+            
         }
     }
 

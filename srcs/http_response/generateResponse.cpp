@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:11:06 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/01/31 12:31:01 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/01/31 13:57:09 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ bool HttpResponse::isKeepAlive() const
 }
 
 
-void HttpResponse::addKeepAliveHeader()
+void HttpResponse::addKeepAliveHeader() //! Check keep-alive
 {
     if (isKeepAlive())
     {
@@ -77,7 +77,7 @@ void HttpResponse::addKeepAliveHeader()
         _headers["Keep-Alive"] = keepalive.str();
     }
     else
-        _headers["Connection"] = "close";
+        _headers["Connection"] = "close"; 
 }
 
 void HttpResponse::addAllowHeader()
@@ -95,6 +95,8 @@ void HttpResponse::addAllowHeader()
                 allowed_method += ", ";
             allowed_method += allowedMethods[i];
         }
+        if (allowed_method.empty())
+            allowed_method = "GET"; //! SET GET AS DEFAULT; 
         _headers["Allow"] = allowed_method;
     }
 }

@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:13:31 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/01/31 12:39:06 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/01/31 13:55:35 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,6 @@ class HttpResponse
         std::vector<std::string>                _redirectDirective;
         std::string                             _redirect;
         std::string                             _serverName;
-
         std::map<std::string, std::string>      _headers;
         std::string                             _body;
         std::vector<unsigned char>              _responseMsg;

@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/02 04:53:47 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/01/31 13:23:01 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/01/31 14:02:14 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,8 @@ void    HttpResponse::setCookies(std::string key, std::string value)
         _headers["Set-Cookie"] = cookiesStr;
     //! Add expiry
     //! max-age
+    // _headers["Cache-Control"] = "no-cache";
+    // _headers["Pragma"] = "no-cache";
 }
 
 
