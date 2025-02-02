@@ -30,7 +30,7 @@ class Logger
         Logger(const Logger &copy);
         Logger &operator=(const Logger &copy);
     
-        void listening(int port, std::string *message);
+        void listening(int port, std::string *message, const Config &config);
         
     public:
         Logger();

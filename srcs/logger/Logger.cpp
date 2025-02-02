@@ -31,7 +31,7 @@ void Logger::checkConfig(const Config &config)
     for (it = servers.begin(); it != servers.end(); it++)
     {
         int port = it->getPort();
-        listening(port, &message);
+        listening(port, &message, config);
     }
     std::string closing = "==========================================\n";
     std::cout << closing;
@@ -39,11 +39,28 @@ void Logger::checkConfig(const Config &config)
     _terminalLog.push_back(message);
 }
 
-void Logger::listening(int port, std::string *message)
+void Logger::listening(int port, std::string *message, const Config &config)
 {
-    std::string log = "Listening on port: " + GREEN + toString(port) + RESET + "\n";
-    *message += log;
-    std::cout << log;
+    std::vector<ServerConfig> servers = config.getServerConfig();
+    std::vector<ServerConfig>::iterator it;
+    for (it = servers.begin(); it != servers.end(); it++)
+    {
+        if (it->getPort() == port)
+        {
+            std::string serverName;
+            std::vector<std::string> names = it->getServerNames();
+            for (size_t i = 0; i < names.size(); i++)
+            {
+                serverName += names[i];
+                if (i + 1 < names.size())
+                    serverName += "\t";
+            }
+
+            std::string log = "Listening on port: " + GREEN + toString(port) + RESET + "\t\t" + serverName + "\n";
+            *message += log;
+            std::cout << log;
+        }
+    }
 }
 
 void Logger::configError(const std::string &error)

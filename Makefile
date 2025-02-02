@@ -6,7 +6,7 @@
 #    By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/05 02:06:08 by jdagoy            #+#    #+#              #
-#    Updated: 2025/01/15 14:06:16 by jdagoy           ###   ########.fr        #
+#    Updated: 2025/02/02 20:45:20 by jdagoy           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -135,16 +135,16 @@ re: fclean all
 
 # DOCKER
 build:
-	docker build -t test-nginx .
+	docker build -t siege .
 
 start:
-	docker run -d -p 4242:4242 --name test-nginx test-nginx
+	docker run -d -p 4242:4242 --name siege siege
 
 stop: 
-	docker stop test-nginx
+	docker stop siege
 
 exec:
-	docker run --entrypoint /bin/zsh -p 4242:4242 -it test-nginx
+	docker run --rm -p 4242:4242 -p 191:1919 -p 2121:2121 -it siege
 	
 stop-containers:
 	@if [ -n "$$(docker container ls -aq)" ]; then \

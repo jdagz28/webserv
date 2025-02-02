@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:18:22 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/02 20:02:01 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/02 20:50:33 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,7 +125,6 @@ void HttpRequest::requestToBuffer()
     bool headerComplete = false;
     size_t headerEndPos = std::string::npos;
 
-    // Read repeatedly until a complete header is detected with CRLF
     while (!headerComplete)
     {
         bytesRead = recv(_client_socket, &tempBuffer[0], tempBufferSize, 0);
@@ -135,7 +134,6 @@ void HttpRequest::requestToBuffer()
             break;
         _buffer.insert(_buffer.end(), tempBuffer.begin(), tempBuffer.begin() + bytesRead);
 
-        // Search for the header terminator
         std::string buffStr(_buffer.begin(), _buffer.end());
         headerEndPos = buffStr.find(CRLF CRLF);
         if (headerEndPos != std::string::npos)
@@ -146,19 +144,16 @@ void HttpRequest::requestToBuffer()
         }
     }
 
-    // parse the given content-length if available
     size_t contentLength = 0;
     if (headerComplete)
         contentLength = getContentLengthBuffer(std::string(_buffer.begin(), _buffer.begin() + headerEndPos));
 
-    // Calculate the total number of bytes expected: header + body
     size_t totalBytesExpected = 0;
     if (headerComplete)
         totalBytesExpected = headerEndPos + contentLength;
     else
         _buffer.size();
 
-    // Continue reading until the complete body has been received
     while (_buffer.size() < totalBytesExpected)
     {
         bytesRead = recv(_client_socket, &tempBuffer[0], tempBufferSize, 0);
@@ -168,7 +163,6 @@ void HttpRequest::requestToBuffer()
             break;
         _buffer.insert(_buffer.end(), tempBuffer.begin(), tempBuffer.begin() + bytesRead);
     }
-
 }
 
 std::vector<unsigned char>::iterator HttpRequest::findBufferCRLF()

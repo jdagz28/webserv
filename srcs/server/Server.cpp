@@ -23,7 +23,7 @@ Server::Server(const Config &config)
     : _config(config), _masterFDs(), _monitoredFDs(), _clients(), _log()
 {
     _log.checkConfig(config);
-    _eventsQueue = epoll_create(1);
+    _eventsQueue = epoll_create1(0);
     if (_eventsQueue == -1)
         throw ServerException("Error: Failed to create epoll instance");
 }
