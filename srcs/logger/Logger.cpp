@@ -103,7 +103,11 @@ void Logger::response(HttpResponse &response)
 
 void    Logger::acceptedConnection(const sockaddr_in &address, int port)
 {
-    std::string message = "Accepted connection from " + GREEN + inet_ntoa(address.sin_addr) + RESET + " on port " + GREEN + toString(port) + RESET + "\n";
+    std::string ip = inet_ntoa(address.sin_addr);
+    
+    std::string message = "Accepted connection from " + GREEN + ip + RESET + " on port " + GREEN + toString(port) + RESET + "\n";
     std::cout << message;
+    _log["client address"] = ip;
+    _log["port"] = toString(port);
     _terminalLog.push_back(message);
 }

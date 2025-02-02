@@ -155,7 +155,7 @@ void    Server::handleEvent(clientFD fd, uint32_t eventFlags)
         clientFD newClient = _monitoredFDs[fd]->acceptSocket();
 
         checkForNewConnections(newClient);                
-        addToEpoll(_eventsQueue, newClient, EPOLLIN | EPOLLET);
+        addToEpoll(_eventsQueue, newClient, EPOLLIN);
         // _log.acceptedConnection(_monitoredFDs[fd]->getAddressInfo(), ntohs(_monitoredFDs[fd]->getAddressInfo().sin_port));
     }
     else if (_clients.find(fd) != _clients.end())
@@ -174,7 +174,7 @@ void    Server::runServer()
     {
         std::vector<socketFD>::iterator it;
         for (it = _masterFDs.begin(); it != _masterFDs.end(); it++) 
-            addToEpoll(_eventsQueue, *it, EPOLLIN | EPOLLET);
+            addToEpoll(_eventsQueue, *it, EPOLLIN);
         
         while (true)
         {
