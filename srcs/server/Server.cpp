@@ -20,10 +20,10 @@
 
 
 Server::Server(const Config &config) 
-    : _config(config), _masterFDs(), _monitoredFDs(), _clients(), _log()
+    : _serverStatus(0), _config(config), _masterFDs(), _monitoredFDs(), _clients(), _log()
 {
     _log.checkConfig(config);
-    _eventsQueue = epoll_create(1);
+    _eventsQueue = epoll_create1(0);
     if (_eventsQueue == -1)
         throw ServerException("Error: Failed to create epoll instance");
 }
@@ -51,7 +51,6 @@ void    Server::clearSockets()
     std::map<socketFD, Socket *>::iterator it;
     for (it = _monitoredFDs.begin(); it != _monitoredFDs.end(); it++)
     {
-        std::cout << "Closing socket: " << it->first << std::endl; //! DELETE
         delete it->second;
         close(it->first);
     }
@@ -155,7 +154,7 @@ void    Server::handleEvent(clientFD fd, uint32_t eventFlags)
         clientFD newClient = _monitoredFDs[fd]->acceptSocket();
 
         checkForNewConnections(newClient);                
-        addToEpoll(_eventsQueue, newClient, EPOLLIN | EPOLLET);
+        addToEpoll(_eventsQueue, newClient, EPOLLIN);
         // _log.acceptedConnection(_monitoredFDs[fd]->getAddressInfo(), ntohs(_monitoredFDs[fd]->getAddressInfo().sin_port));
     }
     else if (_clients.find(fd) != _clients.end())
@@ -174,7 +173,7 @@ void    Server::runServer()
     {
         std::vector<socketFD>::iterator it;
         for (it = _masterFDs.begin(); it != _masterFDs.end(); it++) 
-            addToEpoll(_eventsQueue, *it, EPOLLIN | EPOLLET);
+            addToEpoll(_eventsQueue, *it, EPOLLIN);
         
         while (true)
         {
