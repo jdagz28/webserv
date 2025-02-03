@@ -6,7 +6,7 @@
 #    By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/05 02:06:08 by jdagoy            #+#    #+#              #
-#    Updated: 2025/02/02 20:45:20 by jdagoy           ###   ########.fr        #
+#    Updated: 2025/02/03 13:28:44 by jdagoy           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -132,33 +132,3 @@ fclean: clean
 re: fclean all
 
 .PHONY: all clean fclean re
-
-# DOCKER
-build:
-	docker build -t siege .
-
-start:
-	docker run -d -p 4242:4242 --name siege siege
-
-stop: 
-	docker stop siege
-
-exec:
-	docker run --rm -p 4242:4242 -p 191:1919 -p 2121:2121 -it siege
-	
-stop-containers:
-	@if [ -n "$$(docker container ls -aq)" ]; then \
-		docker container stop $$(docker container ls -aq); \
-	fi
-
-remove-containers:
-	@if [ -n "$$(docker container ls -aq)" ]; then \
-		docker container rm $$(docker container ls -aq); \
-	fi
-
-remove-images:
-	@if [ -n "$$(docker images -aq)" ]; then \
-		docker rmi -f $$(docker images -aq); \
-	fi
-
-remove: stop-containers remove-containers remove-images

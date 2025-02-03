@@ -20,7 +20,7 @@
 
 
 Server::Server(const Config &config) 
-    : _config(config), _masterFDs(), _monitoredFDs(), _clients(), _log()
+    : _serverStatus(0), _config(config), _masterFDs(), _monitoredFDs(), _clients(), _log()
 {
     _log.checkConfig(config);
     _eventsQueue = epoll_create1(0);
@@ -51,7 +51,6 @@ void    Server::clearSockets()
     std::map<socketFD, Socket *>::iterator it;
     for (it = _monitoredFDs.begin(); it != _monitoredFDs.end(); it++)
     {
-        std::cout << "Closing socket: " << it->first << std::endl; //! DELETE
         delete it->second;
         close(it->first);
     }
