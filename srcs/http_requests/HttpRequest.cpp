@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:18:22 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/02 20:50:33 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/05 11:18:46 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,10 +24,10 @@
 HttpRequest::HttpRequest(int client_socket)
     : _request(),  _headersN(0), _status(OK), _errorMsg(""), _client_socket(client_socket), _parseStep(REQUEST_INIT), _maxBodySize(0)
 {
-    requestToBuffer();
+    // requestToBuffer();
     // printBuffer();
-    if (_errorMsg.empty())
-        parseHttpRequest();
+    // if (_errorMsg.empty())
+    //     parseHttpRequest();
 }
 
 HttpRequest::HttpRequest(const HttpRequest &copy)
@@ -105,14 +105,25 @@ void HttpRequest::parseHttpRequest()
     }
 }
 
-size_t getContentLengthBuffer(const std::string &header)
+size_t HttpRequest::getContentLengthBuffer(const std::string &header)
 {
     std::string lowerHeader = toLower(header);
-    size_t  pos = lowerHeader.find("content-length:");
+	std::string label = "content-length:";
+    size_t  pos = lowerHeader.find(label);
     if (pos == std::string::npos)
-        return (0);
-    pos += 16;
-    std::string::size_type endPos = lowerHeader.find("\r\n", pos);
+	{
+		return (0);
+	}
+	if (pos + label.size() >= lowerHeader.size())
+		return (0);
+    pos += label.size();
+	while (pos < lowerHeader.size() && isspace(lowerHeader[pos]))
+		pos++;
+	if (pos >= lowerHeader.size())
+		return (0);
+    std::string::size_type endPos = lowerHeader.find(CRLF, pos);
+	if (endPos == std::string::npos)
+		return (0);
     return (strToInt(lowerHeader.substr(pos, endPos - pos)));
 }
 
@@ -122,47 +133,14 @@ void HttpRequest::requestToBuffer()
     const size_t tempBufferSize = 1024;
     std::vector<unsigned char> tempBuffer(tempBufferSize);
     ssize_t bytesRead = 0;
-    bool headerComplete = false;
-    size_t headerEndPos = std::string::npos;
-
-    while (!headerComplete)
-    {
-        bytesRead = recv(_client_socket, &tempBuffer[0], tempBufferSize, 0);
-        if (bytesRead < 0)
-            break;
-        else if (bytesRead == 0)
-            break;
-        _buffer.insert(_buffer.end(), tempBuffer.begin(), tempBuffer.begin() + bytesRead);
-
-        std::string buffStr(_buffer.begin(), _buffer.end());
-        headerEndPos = buffStr.find(CRLF CRLF);
-        if (headerEndPos != std::string::npos)
-        {
-            headerComplete = true;
-            headerEndPos += 4;
-            break;
-        }
-    }
-
-    size_t contentLength = 0;
-    if (headerComplete)
-        contentLength = getContentLengthBuffer(std::string(_buffer.begin(), _buffer.begin() + headerEndPos));
-
-    size_t totalBytesExpected = 0;
-    if (headerComplete)
-        totalBytesExpected = headerEndPos + contentLength;
-    else
-        _buffer.size();
-
-    while (_buffer.size() < totalBytesExpected)
-    {
-        bytesRead = recv(_client_socket, &tempBuffer[0], tempBufferSize, 0);
-        if (bytesRead < 0)
-            break;
-        else if (bytesRead == 0)
-            break;
-        _buffer.insert(_buffer.end(), tempBuffer.begin(), tempBuffer.begin() + bytesRead);
-    }
+    
+	for (int i = 0; i < 100; i++)
+	{
+		bytesRead = recv(_client_socket, &tempBuffer[0], tempBufferSize, 0);
+		if (bytesRead <= 0)
+			break;
+		_buffer.insert(_buffer.end(), tempBuffer.begin(), tempBuffer.begin() + bytesRead);
+	}
 }
 
 std::vector<unsigned char>::iterator HttpRequest::findBufferCRLF()
@@ -274,8 +252,8 @@ const std::string HttpRequest::getHeader(const std::string &field) const
     header = _headers.find(field);
     if (header != _headers.end())
     {
-        if (header->second[0].substr(0, 18) == "multipart/form-data")
-            return ("multipart/form-data");
+        // if (header->second[0].substr(0, 18) == "multipart/form-data")
+            // return ("multipart/form-data");
         return (header->second[0]);
     }
     return (std::string());
@@ -335,12 +313,13 @@ bool HttpRequest::isMultiPartFormData()
 
 bool HttpRequest::isForUpload()
 {
-    if (_multiFormData.empty())
-    return (false);
+	if (_multiFormData.empty())
+		return (false);
     std::map<std::string, MultiFormData>::iterator form;
     for (form = _multiFormData.begin(); form != _multiFormData.end(); form++)
     {
-        if (form->second.fields["content-type"] == "image/jpeg" || form->second.fields["content-type"] == "image/jpg" || form->second.fields["content-type"] == "image/png" || form->second.fields["content-type"] == "image/gif" || form->second.fields["content-type"] == "image/bmp")
+        std::cout << form->second.fields["content-type"];
+		if (form->second.fields["content-type"] == "image/jpeg" || form->second.fields["content-type"] == "image/jpg" || form->second.fields["content-type"] == "image/png" || form->second.fields["content-type"] == "image/gif" || form->second.fields["content-type"] == "image/bmp")
             return (true);
     }
     return (false);
@@ -362,3 +341,26 @@ std::string HttpRequest::getFormData(const std::string &method)
     }
     return (std::string());
 }
+
+bool	HttpRequest::isHeadersComplete()
+{
+	std::string buffStr(_buffer.begin(), _buffer.end());
+	return (buffStr.find(CRLF CRLF) != std::string::npos);
+}
+
+size_t	HttpRequest::expectedTotalBytes()
+{
+	std::string buffStr(_buffer.begin(), _buffer.end());
+	size_t headerEndPos = buffStr.find(CRLF CRLF);
+	if (headerEndPos == std::string::npos)
+		return (0);
+	headerEndPos += 4;
+	size_t contentLength = getContentLengthBuffer(std::string(_buffer.begin(), _buffer.begin() + headerEndPos));
+	return (headerEndPos + contentLength);
+}
+
+size_t HttpRequest::getBufferSize() const
+{
+	return (_buffer.size());
+}
+

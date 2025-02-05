@@ -59,16 +59,28 @@ void    Event::handleEvent(uint32_t events, Logger *log)
 
     if (events & EPOLLIN)
     {
-        _request = new HttpRequest(_fd);
+        if (!_request)
+			_request = new HttpRequest(_fd);
+		_request->requestToBuffer();
+		if (!_request->isHeadersComplete())
+			return ;
+		
+		size_t expected = _request->expectedTotalBytes();
+		// std::cout << "Expected total bytes: " << expected << std::endl; //! DELETE
+		// std::cout << "Buffer size is: " << _request->getBufferSize() << std::endl; //! DELETE
+		if (_request->getBufferSize() < expected)
+			return ;
+
+		_request->parseHttpRequest();
         // printHttpRequest(*_request);
                     
         if (!_request->getRequestLine().getUri().empty() && checkServerName())
         {
-            log->request(*_request);
+            // log->request(*_request);
             
             _response = new HttpResponse(*_request, _config, _fd);
             _response->sendResponse();
-            log->response(*_response);  
+            // log->response(*_response);  
             // printHttpResponse(_response->getHttpResponse());
         }
     }

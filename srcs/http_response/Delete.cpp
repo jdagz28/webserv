@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/24 21:37:25 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/25 01:07:07 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/03 16:02:43 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,6 @@ void HttpResponse::curlDelete()
         size_t equalPos = queryStr.find('=');
         if (equalPos != std::string::npos)
         {
-
             std::string key = queryStr.substr(0, equalPos);
             std::string file = queryStr.substr(equalPos + 1);
             deleteFile(file);
