@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/25 12:44:49 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/05 12:09:42 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/05 13:37:32 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -150,13 +150,10 @@ void HttpRequest::parseBinary(const std::string &boundary, MultiFormData *form)
             break;
         }
     }
+	if (_buffer.size() == 2 && std::string(_buffer.begin(), _buffer.begin() + 2) == CRLF)
+		_buffer.clear();
 }
-std::string byteToHex(unsigned char byte) 
-{
-    std::stringstream ss;
-    ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(byte);
-    return ss.str();
-}
+
 
 void HttpRequest::parseMultipartForm(const std::string &boundary)
 {
@@ -166,42 +163,17 @@ void HttpRequest::parseMultipartForm(const std::string &boundary)
         return ;
     }
     MultiFormData form;
-    
+
     while (!_buffer.empty())
     {
         parseUntilBinary(boundary, &form);
         if (_status != OK)
             return ;
-		std::cout << "Buffer size before parsing binary: " << _buffer.size() << std::endl;
         parseBinary(boundary, &form);
-		std::cout << "Buffer size after parsing binary: " << _buffer.size() << std::endl;
         if (_status != OK)
             return ;
         _multiFormData[form.fields["name"]] = form;
     }
-	
-	// std::cout << "================================" << std::endl;
-    // std::cout << "Multipart Form Data" << std::endl;
-    // std::cout << "================================" << std::endl;
-    // std::cout << "_multiFormData size: " << _multiFormData.size() << std::endl;
-    // std::map<std::string, MultiFormData>::iterator it;
-    // for (it = _multiFormData.begin(); it != _multiFormData.end(); it++)
-    // {
-    //     std::cout << "MultiFormData key: " << it->first << std::endl;
-    //     std::cout << "fields size: " << it->second.fields.size() << std::endl;
-    //     std::map<std::string, std::string>::iterator field;
-    //     for (field = it->second.fields.begin(); field != it->second.fields.end(); field++)
-    //     {
-    //         std::cout << field->first << ": " << field->second << std::endl;
-    //     }
-    //     std::cout << "binary size: " << it->second.binary.size() << std::endl;
-    //     std::vector<unsigned char>::iterator binary;
-    //     for (binary = it->second.binary.begin(); binary != it->second.binary.end(); binary++)
-    //     {
-    //         std::cout << byteToHex(*binary) << " ";
-    //     }
-    //     std::cout << std::endl;
-    // }
 }
 
 void HttpRequest::parseRequestBody()
