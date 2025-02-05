@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/25 12:44:49 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/03 14:13:30 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/05 12:09:42 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,10 +119,7 @@ void HttpRequest::parseUntilBinary(const std::string &boundary, MultiFormData *f
 void HttpRequest::parseBinary(const std::string &boundary, MultiFormData *form)
 {
     if (_buffer.empty())
-    {
-        setStatusCode(INTERNAL_SERVER_ERROR);
         return ;
-    }
     std::string boundaryStr = "--" + boundary;
     std::vector<unsigned char>::iterator boundaryIt;
 
@@ -141,16 +138,20 @@ void HttpRequest::parseBinary(const std::string &boundary, MultiFormData *form)
             break;
         }
         form->binary.insert(form->binary.end(), _buffer.begin(), boundaryIt);
+		if (form->binary.size() > _maxBodySize)
+		{
+			setStatusCode(PAYLOAD_TOO_LARGE);
+			return ;
+		}
         _buffer.erase(_buffer.begin(), boundaryIt + boundaryStr.size());
         if (std::string(_buffer.begin(), _buffer.begin() + 2) == "--")
         {
-            _buffer.erase(_buffer.begin(), _buffer.begin() + 2);
+			_buffer.erase(_buffer.begin(), _buffer.begin() + 2);
             break;
         }
     }
 }
-
-std::string byteToHex(unsigned char byte)
+std::string byteToHex(unsigned char byte) 
 {
     std::stringstream ss;
     ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(byte);
@@ -171,11 +172,36 @@ void HttpRequest::parseMultipartForm(const std::string &boundary)
         parseUntilBinary(boundary, &form);
         if (_status != OK)
             return ;
+		std::cout << "Buffer size before parsing binary: " << _buffer.size() << std::endl;
         parseBinary(boundary, &form);
+		std::cout << "Buffer size after parsing binary: " << _buffer.size() << std::endl;
         if (_status != OK)
             return ;
         _multiFormData[form.fields["name"]] = form;
     }
+	
+	// std::cout << "================================" << std::endl;
+    // std::cout << "Multipart Form Data" << std::endl;
+    // std::cout << "================================" << std::endl;
+    // std::cout << "_multiFormData size: " << _multiFormData.size() << std::endl;
+    // std::map<std::string, MultiFormData>::iterator it;
+    // for (it = _multiFormData.begin(); it != _multiFormData.end(); it++)
+    // {
+    //     std::cout << "MultiFormData key: " << it->first << std::endl;
+    //     std::cout << "fields size: " << it->second.fields.size() << std::endl;
+    //     std::map<std::string, std::string>::iterator field;
+    //     for (field = it->second.fields.begin(); field != it->second.fields.end(); field++)
+    //     {
+    //         std::cout << field->first << ": " << field->second << std::endl;
+    //     }
+    //     std::cout << "binary size: " << it->second.binary.size() << std::endl;
+    //     std::vector<unsigned char>::iterator binary;
+    //     for (binary = it->second.binary.begin(); binary != it->second.binary.end(); binary++)
+    //     {
+    //         std::cout << byteToHex(*binary) << " ";
+    //     }
+    //     std::cout << std::endl;
+    // }
 }
 
 void HttpRequest::parseRequestBody()
@@ -198,8 +224,8 @@ void HttpRequest::parseRequestBody()
     while (true)
     {
         if (_buffer.empty())
-            break;
-        std::string line = getLineAndPopFromBuffer();
+			break;
+		std::string line = getLineAndPopFromBuffer();
         if (line.empty())
             continue ;
         switch(_parseStep)
@@ -212,13 +238,17 @@ void HttpRequest::parseRequestBody()
                     if (_status != OK)
                         return ;
                 }
-                std::string boundary;
-                if (isMultiPartFormData(&boundary)) 
-                {
-                    parseMultipartForm(boundary);
-                }
+				else if (type.find("multipart/form-data") != std::string::npos)
+				{
+					std::string boundary;
+					if (isMultiPartFormData(&boundary)) 
+					{
+						parseMultipartForm(boundary);
+					}
+					if (_status != OK)
+						return ;
+				}
                 _parseStep = REQUEST_DONE;
-
             }
             default:
                 break ;
