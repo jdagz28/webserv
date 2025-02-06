@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/01 03:36:00 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/10 21:33:28 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/06 03:40:04 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,17 +14,15 @@
 
 HttpRequestLine::HttpRequestLine()
     : _method(""), _uri(""), _version(""), _error(0), _errormsg("")
-{
-}
+{}
 
 HttpRequestLine::HttpRequestLine(const HttpRequestLine &copy)
-{
-    _method = copy._method;
-    _uri = copy._uri;
-    _version = copy._version;
-    _error = copy._error;
-    _errormsg = copy._errormsg;
-}
+    : _method(copy._method), 
+		_uri(copy._uri), 
+		_version(copy._version), 
+		_error(copy._error), 
+		_errormsg(copy._errormsg)
+{}
 
 HttpRequestLine &HttpRequestLine::operator=(const HttpRequestLine &copy)
 {
@@ -40,8 +38,7 @@ HttpRequestLine &HttpRequestLine::operator=(const HttpRequestLine &copy)
 }
 
 HttpRequestLine::~HttpRequestLine()
-{
-}
+{}
 
 void HttpRequestLine::setMethod(const std::string &method)
 {

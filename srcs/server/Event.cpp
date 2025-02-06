@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   Event.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jdagoy <jdagoy@student.42.fr>            +#+  +:+       +#+        */
+/*   By: jdagoy <jdagoy@student.s19.be>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/14 13:36:17 by jdagoy           #+#    #+#             */
 /*   Updated: 2025/01/15 14:04:34 by jdagoy          ###   ########.fr       */
@@ -55,7 +55,7 @@ bool    Event::checkServerName()
 void    Event::handleEvent(uint32_t events, Logger *log)
 {
     if (_fd < 0) 
-        throw std::runtime_error("Invalid file descriptor in Event::handleEvent"); //!CHANGE
+        throw std::runtime_error("Invalid file descriptor in Event::handleEvent"); 
 
     if (events & EPOLLIN)
     {
@@ -71,7 +71,8 @@ void    Event::handleEvent(uint32_t events, Logger *log)
 		if (_request->getBufferSize() < expected)
 			return ;
 
-		_request->parseHttpRequest();
+		if (_request->getStatusCode() == OK)
+			_request->parseHttpRequest();
         // printHttpRequest(*_request);
                     
         if (!_request->getRequestLine().getUri().empty() && checkServerName())

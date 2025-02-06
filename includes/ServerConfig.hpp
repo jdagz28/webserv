@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   ServerConfig.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jdagoy <jdagoy@student.42.fr>            +#+  +:+       +#+        */
+/*   By: jdagoy <jdagoy@student.s19.be>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 02:19:38 by jdagoy            #+#    #+#             */
 /*   Updated: 2025/01/07 15:53:33 by jdagoy          ###   ########.fr       */
@@ -47,7 +47,7 @@ class ServerConfig
         void    setValid();
 
         const std::map<std::string, std::vector<std::string> > &getDirectives() const;
-        int getPort() const;
+        int	getPort() const;
         const std::string getIP() const;
         std::vector<std::string> getServerNames() const;
         std::string checkServerName(const std::string &requestHost) const;

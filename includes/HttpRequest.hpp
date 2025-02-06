@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:11:42 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/05 11:05:10 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/06 04:08:14 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,12 +55,12 @@ class HttpRequest
         std::vector<unsigned char>::iterator findBufferCRLF();
 		size_t  getContentLengthBuffer(const std::string &header);
 
-        std::string parseFieldname(const std::string &line, size_t *pos);
-        std::string parseFieldValue(const std::string &line, size_t *pos);
-        void splitFormLine(const std::string &line, MultiFormData *form);
-        void parseUntilBinary(const std::string &boundary, MultiFormData *form);
-        void parseBinary(const std::string &boundary, MultiFormData *form);
-        void parseMultipartForm(const std::string &boundary);
+        std::string	parseFieldname(const std::string &line, size_t *pos);
+        std::string	parseFieldValue(const std::string &line, size_t *pos);
+        void	splitFormLine(const std::string &line, MultiFormData *form);
+        void	parseUntilBinary(const std::string &boundary, MultiFormData *form);
+        void	parseBinary(const std::string &boundary, MultiFormData *form);
+        void	parseMultipartForm(const std::string &boundary);
         
     
     public:
@@ -73,16 +73,16 @@ class HttpRequest
         void    setStatusCode(StatusCode status);
         void    setMaxBodySize(size_t bodySize);
 
-        const HttpRequestLine& getRequestLine() const;
-        const std::map<std::string, std::vector<std::string> >& getHeaders() const;    
-        std::string getHost() const;
+        const HttpRequestLine &getRequestLine() const;
+        const std::map<std::string, std::vector<std::string> > &getHeaders() const;    
+        std::string	getHost() const;
         StatusCode  getStatusCode() const;
         const std::string &getErrorMsg() const;
         const std::string getHeader(const std::string &field) const;
         const std::map<std::string, MultiFormData> &getMultiFormData() const;
         const std::map<std::string, std::string> &getFormData() const;
         std::string getFormData(const std::string &method);
-		size_t  expectedTotalBytes();
+		size_t 	expectedTotalBytes();
 		size_t  getBufferSize() const;
 
         bool    isConnectionClosed() const;
@@ -97,7 +97,6 @@ class HttpRequest
         void    requestToBuffer(); 
         void    parseRequestBody();
         void    printBuffer() const;
-
 };
 
 

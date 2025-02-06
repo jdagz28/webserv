@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parseServerBlock.cpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jdagoy <jdagoy@student.42.fr>            +#+  +:+       +#+        */
+/*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/02 11:19:31 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/01/07 15:45:53 by jdagoy          ###   ########.fr       */
+/*   Updated: 2025/02/06 03:06:37 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -194,7 +194,7 @@ void Config::parseServerDirective(const std::string &token, std::istringstream &
     }
     else
     {
-        _error = "invalid directictive in server block";
+        _error = "invalid directive in server block";
         throw configException(_error, _configPath, _parsedLine);
     }
 }

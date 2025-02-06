@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   Config.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jdagoy <jdagoy@student.42.fr>            +#+  +:+       +#+        */
+/*   By: jdagoy <jdagoy@student.s19.be>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 22:38:46 by jdagoy            #+#    #+#             */
 /*   Updated: 2025/01/14 14:30:15 by jdagoy          ###   ########.fr       */
@@ -82,10 +82,10 @@ class Config
         Config  &operator=(const Config &copy); 
         ~Config();
 
-        const std::vector<ServerConfig>& getServerConfig() const;
+        const std::vector<ServerConfig> &getServerConfig() const;
         time_t  getKeepAliveTimeout() const;
         std::string getErrorPages() const;
-        const std::vector<int>& getPortsToServe() const;
+        const std::vector<int> &getPortsToServe() const;
 
         class configException : public std::exception
         {
@@ -106,7 +106,6 @@ class Config
                 ~configException() throw() {};
                 const char *what() const throw();
         };
-
 };
 
 #endif 

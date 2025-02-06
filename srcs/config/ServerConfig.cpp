@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   ServerConfig.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jdagoy <jdagoy@student.42.fr>            +#+  +:+       +#+        */
+/*   By: jdagoy <jdagoy@student.s19.be>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 02:19:46 by jdagoy            #+#    #+#             */
 /*   Updated: 2025/01/07 15:53:49 by jdagoy          ###   ########.fr       */
@@ -14,20 +14,18 @@
 #include <cstdlib>
 
 ServerConfig::ServerConfig()
-    : _valid(false)
-{
-}
+    : _port(-1), _valid(false)
+{}
 
 ServerConfig::ServerConfig(const ServerConfig &copy)
-{
-    _directives = copy._directives;
-    _port = copy._port;
-    _serverName = copy._serverName;
-    _locationConfig = copy._locationConfig;
-    _errorPages = copy._errorPages;
-    _locationPaths = copy._locationPaths;
-    _valid = copy._valid;
-}
+    : _directives(copy._directives), 
+		_ip(copy._ip), _port(copy._port), 
+		_serverName(copy._serverName), 
+		_locationConfig(copy._locationConfig), 
+		_errorPages(copy._errorPages), 
+		_locationPaths(copy._locationPaths), 
+		_valid(copy._valid)
+{}
 
 ServerConfig::~ServerConfig()
 {}
@@ -37,6 +35,7 @@ ServerConfig    &ServerConfig::operator=(const ServerConfig &copy)
     if (this != &copy)
     {
         _directives = copy._directives;
+		_ip = copy._ip;
         _port = copy._port;
         _serverName = copy._serverName;
         _locationConfig = copy._locationConfig;

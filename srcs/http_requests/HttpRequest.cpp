@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:18:22 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/05 11:18:46 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/06 03:26:09 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,15 +23,10 @@
 
 HttpRequest::HttpRequest(int client_socket)
     : _request(),  _headersN(0), _status(OK), _errorMsg(""), _client_socket(client_socket), _parseStep(REQUEST_INIT), _maxBodySize(0)
-{
-    // requestToBuffer();
-    // printBuffer();
-    // if (_errorMsg.empty())
-    //     parseHttpRequest();
-}
+{}
 
 HttpRequest::HttpRequest(const HttpRequest &copy)
-    :   _request(copy._request),
+    : _request(copy._request),
         _headers(copy._headers),
         _headersN(copy._headersN),
         _buffer(copy._buffer),
@@ -42,8 +37,7 @@ HttpRequest::HttpRequest(const HttpRequest &copy)
         _parseStep(copy._parseStep),
         _multiFormData(copy._multiFormData),
         _maxBodySize(copy._maxBodySize)
-{
-}
+{}
 
 HttpRequest &HttpRequest::operator=(const HttpRequest &copy)
 {
@@ -65,8 +59,7 @@ HttpRequest &HttpRequest::operator=(const HttpRequest &copy)
 }
 
 HttpRequest::~HttpRequest()
-{
-}
+{}
 
 void HttpRequest::parseHttpRequest()
 {
@@ -251,11 +244,7 @@ const std::string HttpRequest::getHeader(const std::string &field) const
     
     header = _headers.find(field);
     if (header != _headers.end())
-    {
-        // if (header->second[0].substr(0, 18) == "multipart/form-data")
-            // return ("multipart/form-data");
         return (header->second[0]);
-    }
     return (std::string());
 }
 

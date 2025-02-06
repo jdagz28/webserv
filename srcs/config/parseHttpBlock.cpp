@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/01 11:20:02 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/30 12:53:12 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/06 02:56:07 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ void Config::parseKeepAlive(std::istringstream &iss)
     std::string value;
     std::getline(iss, value);
     trimWhitespaces(value);
-    std::stringstream ss(value);
+	
     if (!value.empty())
     {
         if (value[value.length() - 1] != ';')
@@ -36,6 +36,7 @@ void Config::parseKeepAlive(std::istringstream &iss)
             value = value.substr(0, value.length() - 1);
     }
     int timeout;
+	std::stringstream ss(value);
     ss >> timeout;
     if (ss.fail())
     {
@@ -150,7 +151,7 @@ void Config::parseHttpBlock(std::ifstream &infile)
     }
     if (openingBrace != closingBrace)
     {
-        _error = "mismatch braces in http bloc.";
+        _error = "mismatch braces in http block";
         throw configException(_error, _configPath, _parsedLine);
     }
 }
