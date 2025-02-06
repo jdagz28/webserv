@@ -16,8 +16,8 @@
 #include <iostream>
 #include <sys/epoll.h>
 
-Event::Event(clientFD fd, const Config &config)
-    : _fd(fd), _config(config), _request(NULL), _response(NULL)
+Event::Event(clientFD fd, int epollFD, const Config &config)
+    : _fd(fd), _epollFD(epollFD), _config(config), _request(NULL), _response(NULL)
 {}
 
 Event::~Event()
@@ -66,8 +66,6 @@ void    Event::handleEvent(uint32_t events, Logger *log)
 			return ;
 		
 		size_t expected = _request->expectedTotalBytes();
-		// std::cout << "Expected total bytes: " << expected << std::endl; //! DELETE
-		// std::cout << "Buffer size is: " << _request->getBufferSize() << std::endl; //! DELETE
 		if (_request->getBufferSize() < expected)
 			return ;
 
@@ -77,11 +75,20 @@ void    Event::handleEvent(uint32_t events, Logger *log)
                     
         if (!_request->getRequestLine().getUri().empty() && checkServerName())
         {
-            // log->request(*_request);
-            
+            log->request(*_request);
             _response = new HttpResponse(*_request, _config, _fd);
-            _response->sendResponse();
-            // log->response(*_response);  
+
+ 			struct epoll_event ev;
+			ev.data.fd = _fd;
+			ev.events = EPOLLOUT;
+			if (epoll_ctl(_epollFD, EPOLL_CTL_MOD, _fd, &ev) == -1)
+			{
+				perror("epoll_ctl: modify to EPOLLOUT");
+				close(_fd);
+				delete this;
+				return;
+			}
+
             // printHttpResponse(_response->getHttpResponse());
         }
     }

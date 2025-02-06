@@ -130,7 +130,7 @@ void    Server::checkForNewConnections(clientFD newClient)
     if (setNonBlocking(newClient) == -1)
         throw ServerException("Error: Failed to set client socket to non-blocking mode");
                     
-    _clients[newClient] = new Event(newClient, _config);
+    _clients[newClient] = new Event(newClient, _eventsQueue, _config);
 }
 
 void    Server::addToEpoll(int epollFD, int fd, uint32_t events)

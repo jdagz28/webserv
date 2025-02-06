@@ -23,6 +23,7 @@ class Event
 {
     private:
         clientFD        _fd;
+		int				_epollFD;
         Config          _config;
         HttpRequest*    _request;
         HttpResponse*   _response;
@@ -30,7 +31,7 @@ class Event
         bool    checkServerName();
        
     public:
-        Event(clientFD fd, const Config &config);
+        Event(clientFD fd, int epollFD, const Config &config);
         ~Event();
 
         void    handleEvent(uint32_t events, Logger *log);
