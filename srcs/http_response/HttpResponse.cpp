@@ -20,9 +20,7 @@
 #include <ctime>
 #include <sstream>
 
-HttpResponse::HttpResponse(HttpRequest &request,
-                            Config &config,
-                            int client_socket)
+HttpResponse::HttpResponse(HttpRequest &request, const Config &config, int client_socket)
     : _request(request), _config(config), _status(INIT), _client_socket(client_socket), _allowedMethods(), _headers(), _body("")
 {
     if (_request.getStatusCode() !=  OK && _request.getStatusCode() != INIT)

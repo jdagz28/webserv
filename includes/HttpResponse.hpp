@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:13:31 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/11/05 12:52:08 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/09 18:11:40 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ class HttpResponse
 {
     private:
         HttpRequest                             &_request;
-        Config                                  &_config;
+        const Config                            &_config;
         ServerConfig                            _serverConfig;
         LocationConfig                          _locationConfig;
         StatusCode                              _status;
@@ -112,9 +112,7 @@ class HttpResponse
         void    curlDelete();
         
     public:
-        HttpResponse(HttpRequest &request,
-                        Config &config,
-                        int client_socket);
+        HttpResponse(HttpRequest &request, const Config &config, int client_socket);
         ~HttpResponse();
 
         void    execMethod();

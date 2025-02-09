@@ -19,6 +19,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <netinet/in.h>
+#include <csignal>
 
 #define CRLF "\r\n"
 #define MAX_URI_LENGTH 1000
@@ -36,6 +37,8 @@ const std::string RESET = "\033[0m";
 typedef int socketFD;
 typedef int clientFD;
 typedef int FD;
+
+extern volatile sig_atomic_t g_running;
 
 enum HtmlRequestParseStep
 {

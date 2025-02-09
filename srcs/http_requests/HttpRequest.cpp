@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:18:22 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/06 03:26:09 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/09 19:01:01 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,14 @@ HttpRequest &HttpRequest::operator=(const HttpRequest &copy)
 }
 
 HttpRequest::~HttpRequest()
-{}
+{
+	std::cout << "HttpRequest destructor" << std::endl; //! DELETE
+	if (_client_socket >= 0)
+	{
+        close(_client_socket);
+        _client_socket = -1; 
+    }
+}
 
 void HttpRequest::parseHttpRequest()
 {

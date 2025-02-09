@@ -17,12 +17,13 @@
 #include <sys/epoll.h>
 
 Event::Event(clientFD fd, int epollFD, const Config &config)
-    : _fd(fd), _epollFD(epollFD), _config(config), _request(NULL), _response(NULL)
+    : _fd(fd), _epollFD(epollFD), _config(config), _request(NULL), _response(NULL), _finished(false)
 {}
 
 Event::~Event()
 {
-    if (_request)
+    std::cout << "Event destructor" << std::endl; //! DELETE
+	if (_request)
         delete _request;
     if (_response)
         delete _response;
@@ -85,7 +86,7 @@ void    Event::handleEvent(uint32_t events, Logger *log)
 			{
 				perror("epoll_ctl: modify to EPOLLOUT");
 				close(_fd);
-				delete this;
+				_finished = true;
 				return;
 			}
 
@@ -106,19 +107,24 @@ void    Event::handleEvent(uint32_t events, Logger *log)
                 return ;
         }
         close(_fd);
-        delete this;
+		_finished = true;
     }
 
     if (events & (EPOLLERR | EPOLLHUP))
-    {
+	{
         close(_fd);
-        delete this;
-    }
+		_finished = true;
+	}	
 }
 
-std::string Event::getResponseKeepAlive()
+std::string Event::getResponseKeepAlive() const
 {
     std::string response = _response->getHeader("Connection");
 
     return (response);
+}
+
+bool Event::isFinished() const
+{
+	return (_finished);
 }

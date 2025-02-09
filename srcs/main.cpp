@@ -18,10 +18,7 @@
 #include "webserv.hpp"
 #include "Server.hpp"
 
-// #define PORT   4242 //1919    
-
-int server_socket = -1;
-
+volatile sig_atomic_t g_running = 0;
 
 std::string getConfigPath(int argc, char **argv)
 {

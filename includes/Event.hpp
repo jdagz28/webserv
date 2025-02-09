@@ -24,10 +24,13 @@ class Event
     private:
         clientFD        _fd;
 		int				_epollFD;
-        Config          _config;
+        const Config    &_config;
         HttpRequest*    _request;
         HttpResponse*   _response;
+		bool			_finished;
 
+		Event(const Event &copy);
+		Event &operator=(const Event &copy);
         bool    checkServerName();
        
     public:
@@ -35,8 +38,8 @@ class Event
         ~Event();
 
         void    handleEvent(uint32_t events, Logger *log);
-        std::string getResponseKeepAlive();
+        std::string getResponseKeepAlive() const;
+		bool isFinished() const;
 };
-
 
 #endif
