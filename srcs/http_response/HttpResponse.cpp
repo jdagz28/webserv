@@ -34,7 +34,11 @@ HttpResponse::HttpResponse(HttpRequest &request, const Config &config, int clien
 }
 
 HttpResponse::~HttpResponse()
-{}
+{
+    _responseMsg.clear();
+    _headers.clear();
+    _allowedMethods.clear();
+}
 
 void HttpResponse::setStatusCode(StatusCode status)
 {

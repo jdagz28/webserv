@@ -29,7 +29,11 @@ Event::~Event()
 {
     // std::cout << "Event destructor, count = " << --s_eventCount << std::endl; //!DELETE
     delete _request;
-    delete _response;
+    if (_response)
+    {
+        delete _response;
+        _response = NULL;
+    }
 }
 
 bool    Event::checkServerName()
@@ -81,7 +85,7 @@ void    Event::handleEvent(uint32_t events, Logger *log)
         {
             log->request(*_request);
 			(void)log;
-            // _response = new HttpResponse(*_request, _config, _fd);
+            _response = new HttpResponse(*_request, _config, _fd);
 
  			struct epoll_event ev;
 			ev.data.fd = _fd;
@@ -116,6 +120,11 @@ void    Event::handleEvent(uint32_t events, Logger *log)
 
     if (events & (EPOLLERR | EPOLLHUP))
 	{
+        if (_response)
+        {
+            delete _response;
+            _response = NULL;
+        }
         close(_fd);
 		_finished = true;
 	}	

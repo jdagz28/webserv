@@ -32,7 +32,7 @@ Server::Server(const Config &config)
 
 Server::~Server()
 {
-	std::cout << "Clearing " << _clients.size() << " client events." << std::endl; //! DELETE
+	// std::cout << "Clearing " << _clients.size() << " client events." << std::endl; //! DELETE
     clearSockets();
 	clearClients();
 	close(_eventsQueue);
