@@ -35,7 +35,8 @@ HttpResponse::HttpResponse(HttpRequest &request, const Config &config, int clien
 
 HttpResponse::~HttpResponse()
 {
-    _responseMsg.clear();
+    _body.clear();
+	_responseMsg.clear();
     _headers.clear();
     _allowedMethods.clear();
 }

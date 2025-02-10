@@ -112,7 +112,12 @@ void    Event::handleEvent(uint32_t events, Logger *log)
             _response = NULL;
 
             if (!_request->isConnectionClosed())
-                return ;
+			{
+				_finished = false;
+				_request->reset();
+				_response = NULL;
+				return ;
+			}
         }
         close(_fd);
 		_finished = true;

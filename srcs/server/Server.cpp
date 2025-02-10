@@ -35,7 +35,8 @@ Server::~Server()
 	// std::cout << "Clearing " << _clients.size() << " client events." << std::endl; //! DELETE
     clearSockets();
 	clearClients();
-	close(_eventsQueue);
+	if (_eventsQueue >= 0)
+		close(_eventsQueue);
 }
 
 void   Server::clearClients()
@@ -130,10 +131,14 @@ const char* Server::ServerException::what() const throw()
 void    Server::checkForNewConnections(clientFD newClient)
 {    
     if (newClient == -1)
+	{
         throw ServerException("Error: Failed to accept connection");
-    if (setNonBlocking(newClient) == -1)
+	}
+	if (setNonBlocking(newClient) == -1)
         throw ServerException("Error: Failed to set client socket to non-blocking mode");
-                    
+	std::map<clientFD, Event *>::iterator it = _clients.find(newClient);
+	if (it != _clients.end())
+		return ;
     _clients[newClient] = new Event(newClient, _eventsQueue, _config);
 }
 

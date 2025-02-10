@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:18:22 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/10 14:35:51 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/10 23:31:24 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -359,3 +359,16 @@ size_t HttpRequest::getBufferSize() const
 	return (_buffer.size());
 }
 
+void	HttpRequest::reset()
+{
+	_request = HttpRequestLine();
+	_headers.clear();
+	_headersN = 0;
+	_buffer.clear();
+	_status = OK;
+	_errorMsg = "";
+	_formData.clear();
+	_parseStep = REQUEST_INIT;
+	_multiFormData.clear();
+	_maxBodySize = 0;
+}

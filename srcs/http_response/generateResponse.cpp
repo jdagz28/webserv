@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:11:06 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/01/20 09:41:27 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/10 23:37:33 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,11 @@
 
 void HttpResponse::generateHttpResponse()
 {
-    if (_body.empty() && _status != OK)
+    if (!_responseMsg.empty())
+	{
+    	_responseMsg.clear();
+	}
+	if (_body.empty() && _status != OK)
         getErrorPage();
     
     _headers["Server"] = _serverName;

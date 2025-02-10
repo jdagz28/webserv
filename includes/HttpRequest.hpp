@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:11:42 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/06 04:08:14 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/10 23:33:08 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,6 +97,7 @@ class HttpRequest
         void    requestToBuffer(); 
         void    parseRequestBody();
         void    printBuffer() const;
+		void	reset();
 };
 
 
