@@ -34,9 +34,7 @@ HttpResponse::HttpResponse(HttpRequest &request, const Config &config, int clien
 }
 
 HttpResponse::~HttpResponse()
-{
-	std::cout << "HttpResponse destructor" << std::endl; //! DELETE
-}
+{}
 
 void HttpResponse::setStatusCode(StatusCode status)
 {

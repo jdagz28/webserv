@@ -22,16 +22,14 @@ Event::Event(clientFD fd, int epollFD, const Config &config)
     : _fd(fd), _epollFD(epollFD), _config(config), _request(NULL), _response(NULL), _finished(false)
 {
 	++s_eventCount;
-    std::cout << "Event allocated, count = " << s_eventCount << std::endl;
+    // std::cout << "Event allocated, count = " << s_eventCount << std::endl; //! DELETE
 }
 
 Event::~Event()
 {
-    std::cout << "Event destructor, count = " << --s_eventCount << std::endl;
-	if (_request)
-        delete _request;
-    if (_response)
-        delete _response;
+    // std::cout << "Event destructor, count = " << --s_eventCount << std::endl; //!DELETE
+    delete _request;
+    delete _response;
 }
 
 bool    Event::checkServerName()
@@ -81,9 +79,9 @@ void    Event::handleEvent(uint32_t events, Logger *log)
                     
         if (!_request->getRequestLine().getUri().empty() && checkServerName())
         {
-            // log->request(*_request);
+            log->request(*_request);
 			(void)log;
-            _response = new HttpResponse(*_request, _config, _fd);
+            // _response = new HttpResponse(*_request, _config, _fd);
 
  			struct epoll_event ev;
 			ev.data.fd = _fd;
@@ -105,7 +103,7 @@ void    Event::handleEvent(uint32_t events, Logger *log)
         if (_response)
         {
             _response->sendResponse();
-            // log->response(*_response);
+            log->response(*_response);
             delete _response;
             _response = NULL;
 

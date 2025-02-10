@@ -33,18 +33,18 @@ Server::Server(const Config &config)
 Server::~Server()
 {
 	std::cout << "Clearing " << _clients.size() << " client events." << std::endl; //! DELETE
-    clearClients();
     clearSockets();
-    close(_eventsQueue);
+	clearClients();
+	close(_eventsQueue);
 }
 
 void   Server::clearClients()
 {
     std::map<clientFD, Event *>::iterator it;
     for (it = _clients.begin(); it != _clients.end(); it++)
-    {
-        delete it->second;
-        close(it->first);
+	{
+		delete it->second;
+		close(it->first);
     }
     _clients.clear();
 }
@@ -174,14 +174,12 @@ void	Server::cleanupFinishedEvents()
 	{
 		if (it->second->isFinished())
 		{
-            Event* ev = it->second;
-            ++it;  
-            _clients.erase(it->first); 
-            delete ev;  
+            delete it->second;
+			_clients.erase(it++);
 		}
 		else
 		{
-			it++;
+			++it;
 		}
 	}
 }
