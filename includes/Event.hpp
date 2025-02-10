@@ -28,6 +28,7 @@ class Event
         HttpRequest*    _request;
         HttpResponse*   _response;
 		bool			_finished;
+		static int 		s_eventCount;
 
 		Event(const Event &copy);
 		Event &operator=(const Event &copy);

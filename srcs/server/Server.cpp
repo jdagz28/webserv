@@ -32,6 +32,7 @@ Server::Server(const Config &config)
 
 Server::~Server()
 {
+	std::cout << "Clearing " << _clients.size() << " client events." << std::endl; //! DELETE
     clearClients();
     clearSockets();
     close(_eventsQueue);
@@ -104,7 +105,7 @@ void    Server::signalHandler(int signum)
     std::cout << std::endl << "Exiting... Received signal " << signum << std::endl;
     std::cout << "===== Shutting down server =====" << std::endl;
     // exit(signum);
-	g_running = 1;
+	g_running = 0;
 }
 
 void    Server::setSignals()
@@ -173,10 +174,10 @@ void	Server::cleanupFinishedEvents()
 	{
 		if (it->second->isFinished())
 		{
-			delete it->second;
-			std::map<int, Event*>::iterator temp = it;
-			it++;
-			_clients.erase(temp);
+            Event* ev = it->second;
+            ++it;  
+            _clients.erase(it->first); 
+            delete ev;  
 		}
 		else
 		{
@@ -184,7 +185,6 @@ void	Server::cleanupFinishedEvents()
 		}
 	}
 }
-
 
 void    Server::runServer()
 {
@@ -197,7 +197,7 @@ void    Server::runServer()
         for (it = _masterFDs.begin(); it != _masterFDs.end(); it++) 
             addToEpoll(_eventsQueue, *it, EPOLLIN);
         
-        while (!g_running)
+        while (g_running)
         {
             int nEvents = epoll_wait(_eventsQueue, _eventsList, MAX_CLIENTS, -1);
             if (nEvents == -1)
