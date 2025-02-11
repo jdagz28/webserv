@@ -91,19 +91,19 @@ enum StatusCode
 // UTILITIES
 void    trimWhitespaces(std::string &str);
 std::vector<std::string>    splitBySpaces(const std::string &str);
-bool isDirectory(const std::string &path);
-bool fileExists(const std::string &path);
-bool endsWith(const std::string &str, const std::string &suffix);
-std::string getExtension(const std::string &path);
-std::string toString(int num);
-bool validProtocol(const std::string &str);
-int strToInt(const std::string &str);
-bool isSpace(unsigned char ch);
-std::string toLower(const std::string &str);
-void    signalHandler(int signum);
+bool	isDirectory(const std::string &path);
+bool	fileExists(const std::string &path);
+bool	endsWith(const std::string &str, const std::string &suffix);
+std::string	getExtension(const std::string &path);
+std::string	toString(int num);
+bool	validProtocol(const std::string &str);
+int	strToInt(const std::string &str);
+bool	isSpace(unsigned char ch);
+std::string	toLower(const std::string &str);
+void	signalHandler(int signum);
 
 // MIMETYPES.CPP
-std::string getMimeType(const std::string &extension);
+std::string	getMimeType(const std::string &extension);
 
 //STATUSCODES.CPP
 std::string getStatusReason(StatusCode code);

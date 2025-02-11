@@ -39,8 +39,8 @@ class Event
         ~Event();
 
         void    handleEvent(uint32_t events, Logger *log);
-        std::string getResponseKeepAlive() const;
-		bool isFinished() const;
+        std::string	getResponseKeepAlive() const;
+		bool	isFinished() const;
 };
 
 #endif

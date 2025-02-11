@@ -277,11 +277,7 @@ bool HttpResponse::isSupportedMedia(const std::string &uri)
 void HttpResponse::sendResponse()
 {
     if (_responseMsg.empty())
-    {
-        std::cerr << "ERROR: response empty" << std::endl;
-        return;
-    }
-
+        throw(std::runtime_error("Error: empty response"));
     ssize_t bytesSent = send(_client_socket, _responseMsg.data(), _responseMsg.size(), 0);
     if (bytesSent < 0)
 	{
@@ -297,7 +293,7 @@ void HttpResponse::sendResponse()
     }
 }
 
-std::string HttpResponse::getHttpResponse()
+std::string	HttpResponse::getHttpResponse() const
 {
     std::string response(_responseMsg.begin(), _responseMsg.end());
     return (response);

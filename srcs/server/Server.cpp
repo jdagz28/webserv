@@ -102,8 +102,11 @@ void    Server::createSockets()
 
 void    Server::signalHandler(int signum)
 {
-    std::cout << std::endl << "Exiting... Received signal " << signum << std::endl;
-    std::cout << "===== Shutting down server =====" << std::endl;
+	if (signum == SIGINT)
+		std::cout << " - CTRL + C detected" << std::endl;	 
+	std::cout << "==========================================" << std::endl;
+    std::cout << "               SHUTTING DOWN              " << std::endl; 
+	std::cout << "==========================================" << std::endl;
 	g_running = 0;
 }
 

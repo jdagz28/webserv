@@ -46,14 +46,14 @@ class ServerConfig
         void    setLocationPath(const std::string &path);
         void    setValid();
 
-        const std::map<std::string, std::vector<std::string> > &getDirectives() const;
+        const std::map<std::string, std::vector<std::string> >	&getDirectives() const;
         int	getPort() const;
-        const std::string getIP() const;
-        std::vector<std::string> getServerNames() const;
-        std::string checkServerName(const std::string &requestHost) const;
-        const std::vector<LocationConfig> &getLocationConfig() const;
-        LocationConfig getLocationConfig(const std::string &path) const;
-        const std::string getErrorPage(int status) const;
+        const std::string	getIP() const;
+        std::vector<std::string>	getServerNames() const;
+        std::string	checkServerName(const std::string &requestHost) const;
+        const std::vector<LocationConfig>	&getLocationConfig() const;
+        LocationConfig	getLocationConfig(const std::string &path) const;
+        const std::string	getErrorPage(int status) const;
         bool    isPathAlreadySet(const std::string &path) const;
         bool    isValid() const;
 };
