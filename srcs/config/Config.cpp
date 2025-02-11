@@ -95,7 +95,7 @@ void    Config::checkFile(const std::string &configPath)
 
 }
 
-void Config::skipEventsBlock(std::ifstream &infile)
+void	Config::skipEventsBlock(std::ifstream &infile)
 {
     std::string line;
     int openingBrace = 0;
@@ -205,12 +205,12 @@ void    Config::parseConfig(const std::string &configFile)
     }
 }
 
-const std::vector<ServerConfig> &Config::getServerConfig() const
+const std::vector<ServerConfig>	&Config::getServerConfig() const
 {
     return (_serverConfig);
 }
 
-const char *Config::configException::what() const throw()
+const char	*Config::configException::what() const throw()
 {
     if (!configPath.empty() && !parsedLine.empty())
     {
@@ -227,7 +227,7 @@ time_t  Config::getKeepAliveTimeout() const
     return (_keepAliveTimeOut);
 }
 
-std::string Config::getErrorPages() const
+std::string	Config::getErrorPages() const
 {
     std::string errorPages;
     std::map<StatusCode, std::string>::const_iterator it;
@@ -238,7 +238,7 @@ std::string Config::getErrorPages() const
     return (errorPages);
 }
 
-const std::vector<int> &Config::getPortsToServe() const
+const std::vector<int>	&Config::getPortsToServe() const
 {
     return (_portsToServe);
 }

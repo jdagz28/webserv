@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/02 11:19:31 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/06 03:06:37 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/11 10:45:26 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 #include <cstring>
 #include <netdb.h>
 
-void Config::parseErrorPages(std::istringstream &iss, ServerConfig &serverConfig)
+void	Config::parseErrorPages(std::istringstream &iss, ServerConfig &serverConfig)
 {
     std::string value;
     std::getline(iss, value);
@@ -56,7 +56,7 @@ void Config::parseErrorPages(std::istringstream &iss, ServerConfig &serverConfig
     }
 }
 
-bool Config::checkServerName(const std::string &name)
+bool	Config::checkServerName(const std::string &name)
 {
     for (size_t i = 0; i < name.length(); i++)
     {
@@ -66,7 +66,7 @@ bool Config::checkServerName(const std::string &name)
     return (true);
 }
 
-void Config::parseServerName(const std::string &value, ServerConfig &serverConfig)
+void	Config::parseServerName(const std::string &value, ServerConfig &serverConfig)
 {
     std::vector<std::string> serverNames = splitBySpaces(value);
     for (size_t i = 0; i < serverNames.size(); i++)
@@ -81,7 +81,7 @@ void Config::parseServerName(const std::string &value, ServerConfig &serverConfi
     serverConfig.setDirective("server_name", value);
 }
 
-bool Config::validPort(const std::string &value)
+bool	Config::validPort(const std::string &value)
 {
     int port = strToInt(value);
     if (port < 0 || port > 65535)
@@ -89,7 +89,7 @@ bool Config::validPort(const std::string &value)
     return (true);
 }
 
-bool Config::checkAddr(const std::string &host, const std::string &port)
+bool	Config::checkAddr(const std::string &host, const std::string &port)
 {
     struct addrinfo hints, *res;
     memset(&hints, 0, sizeof(hints));
@@ -107,7 +107,7 @@ bool Config::checkAddr(const std::string &host, const std::string &port)
     return (true);
 }
 
-void Config::parseServerListen(const std::string &value, ServerConfig &serverConfig)
+void	Config::parseServerListen(const std::string &value, ServerConfig &serverConfig)
 {
     std::vector<std::string> check = splitBySpaces(value);
     if (check.size() != 1)
@@ -150,7 +150,7 @@ void Config::parseServerListen(const std::string &value, ServerConfig &serverCon
         serverConfig.setIP(LOCALHOST);
 }
 
-void Config::parseServerDirective(const std::string &token, std::istringstream &iss, std::ifstream &infile, ServerConfig &serverConfig)
+void	Config::parseServerDirective(const std::string &token, std::istringstream &iss, std::ifstream &infile, ServerConfig &serverConfig)
 {
     if (token == "location")
     {
@@ -199,7 +199,7 @@ void Config::parseServerDirective(const std::string &token, std::istringstream &
     }
 }
 
-void Config::parseServerBlock(std::ifstream &infile, ServerConfig &serverConfig)
+void	Config::parseServerBlock(std::ifstream &infile, ServerConfig &serverConfig)
 {
     std::string line;
     int openingBrace = 0;

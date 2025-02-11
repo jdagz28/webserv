@@ -30,7 +30,7 @@ ServerConfig::ServerConfig(const ServerConfig &copy)
 ServerConfig::~ServerConfig()
 {}
 
-ServerConfig    &ServerConfig::operator=(const ServerConfig &copy)
+ServerConfig	&ServerConfig::operator=(const ServerConfig &copy)
 {
     if (this != &copy)
     {
@@ -87,22 +87,22 @@ void    ServerConfig::setValid()
     _valid = true;
 }
 
-const std::map<std::string, std::vector<std::string> > &ServerConfig::getDirectives() const
+const std::map<std::string, std::vector<std::string> >	&ServerConfig::getDirectives() const
 {
     return (_directives);
 }
 
-int ServerConfig::getPort() const
+int	ServerConfig::getPort() const
 {
     return (_port);
 }
 
-const std::string ServerConfig::getIP() const
+const std::string	ServerConfig::getIP() const
 {
     return (_ip);
 }
 
-std::vector<std::string> ServerConfig::getServerNames() const
+std::vector<std::string>	ServerConfig::getServerNames() const
 {
     return (_serverName);
 }
@@ -112,7 +112,7 @@ bool    ServerConfig::isValid() const
     return (_valid);
 }
 
-std::string ServerConfig::checkServerName(const std::string &requestHost) const
+std::string	ServerConfig::checkServerName(const std::string &requestHost) const
 {
     if (_serverName.empty())
         return (DEFAULT_SERVERNAME);
@@ -125,7 +125,7 @@ std::string ServerConfig::checkServerName(const std::string &requestHost) const
     return (DEFAULT_SERVERNAME);
 }
 
-const std::vector<LocationConfig> &ServerConfig::getLocationConfig() const
+const std::vector<LocationConfig>	&ServerConfig::getLocationConfig() const
 {
     return (_locationConfig);
 }
@@ -141,7 +141,7 @@ LocationConfig ServerConfig::getLocationConfig(const std::string &path) const
     return (LocationConfig());   
 }
 
-const std::string ServerConfig::getErrorPage(int status) const
+const std::string	ServerConfig::getErrorPage(int status) const
 {    
     std::map<int, std::string>::const_iterator it;
     for (it = _errorPages.begin(); it != _errorPages.end(); it++)
@@ -153,12 +153,12 @@ const std::string ServerConfig::getErrorPage(int status) const
     return (std::string());
 }
 
-void ServerConfig::setLocationPath(const std::string &path)
+void	ServerConfig::setLocationPath(const std::string &path)
 {
     _locationPaths.push_back(path);
 }
 
-bool ServerConfig::isPathAlreadySet(const std::string &path) const
+bool	ServerConfig::isPathAlreadySet(const std::string &path) const
 {
     std::vector<std::string>::const_iterator it;
     for (it = _locationPaths.begin(); it != _locationPaths.end(); it++)

@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:57:50 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/01/16 13:17:13 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/11 12:33:20 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ void    HttpResponse::processRequestPOST()
     }
 }
 
-void HttpResponse::processImageUpload()
+void	HttpResponse::processImageUpload()
 {
     std::srand(static_cast<unsigned>(std::time(0)));
     

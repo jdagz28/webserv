@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/25 12:44:49 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/06 03:40:54 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/11 12:28:07 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 #include <fstream>
 #include <iomanip> 
 
-std::string HttpRequest::parseFieldname(const std::string &line, size_t *pos)
+std::string	HttpRequest::parseFieldname(const std::string &line, size_t *pos)
 {
     if (!pos)
         return (std::string());
@@ -33,7 +33,7 @@ std::string HttpRequest::parseFieldname(const std::string &line, size_t *pos)
     return (fieldname); 
 }
 
-std::string HttpRequest::parseFieldValue(const std::string &line, size_t *pos)
+std::string	HttpRequest::parseFieldValue(const std::string &line, size_t *pos)
 {
     if (!pos)
         return std::string();
@@ -50,7 +50,7 @@ std::string HttpRequest::parseFieldValue(const std::string &line, size_t *pos)
     return (fieldvalue);
 }
 
-void HttpRequest::splitFormLine(const std::string &line, MultiFormData *form)
+void	HttpRequest::splitFormLine(const std::string &line, MultiFormData *form)
 {
     size_t pos = 0;
     std::string fieldname = parseFieldname(line, &pos);
@@ -93,7 +93,7 @@ void HttpRequest::splitFormLine(const std::string &line, MultiFormData *form)
 }
 
 
-void HttpRequest::parseUntilBinary(const std::string &boundary, MultiFormData *form)
+void	HttpRequest::parseUntilBinary(const std::string &boundary, MultiFormData *form)
 {
     const std::string separator = "--" + boundary;
 
@@ -116,7 +116,7 @@ void HttpRequest::parseUntilBinary(const std::string &boundary, MultiFormData *f
     }
 }
 
-void HttpRequest::parseBinary(const std::string &boundary, MultiFormData *form)
+void	HttpRequest::parseBinary(const std::string &boundary, MultiFormData *form)
 {
     if (_buffer.empty())
         return ;
@@ -155,7 +155,7 @@ void HttpRequest::parseBinary(const std::string &boundary, MultiFormData *form)
 }
 
 
-void HttpRequest::parseMultipartForm(const std::string &boundary)
+void	HttpRequest::parseMultipartForm(const std::string &boundary)
 {
     if (_buffer.empty() || boundary.empty())
     {
@@ -176,7 +176,7 @@ void HttpRequest::parseMultipartForm(const std::string &boundary)
     }
 }
 
-void HttpRequest::parseRequestBody()
+void	HttpRequest::parseRequestBody()
 {
     std::string contentLen = getHeader("content-length");
     if (contentLen.empty())
@@ -227,7 +227,7 @@ void HttpRequest::parseRequestBody()
     }
 }
 
-void HttpRequest::parseFormData(const std::string &line)
+void	HttpRequest::parseFormData(const std::string &line)
 {
     std::string key;
     std::string token;

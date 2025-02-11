@@ -41,7 +41,7 @@ HttpResponse::~HttpResponse()
     _allowedMethods.clear();
 }
 
-void HttpResponse::setStatusCode(StatusCode status)
+void	HttpResponse::setStatusCode(StatusCode status)
 {
     _status = status;
 }
@@ -52,7 +52,7 @@ StatusCode HttpResponse::getStatusCode() const
 }
 
 
-int HttpResponse::checkMethod(const std::string &method)
+int	HttpResponse::checkMethod(const std::string &method)
 {
     if (method == "GET")
         return (GET);
@@ -63,7 +63,7 @@ int HttpResponse::checkMethod(const std::string &method)
     return (ErrorMethod);
 }
 
-void HttpResponse::execMethod()
+void	HttpResponse::execMethod()
 {
     std::string method = _request.getRequestLine().getMethod();
     _serverConfig = checkLocConfigAndRequest();
@@ -107,7 +107,7 @@ void HttpResponse::execMethod()
     }
 }
 
-static bool isMatchingPrefix(const std::string &pattern, const std::string &target)
+static bool	isMatchingPrefix(const std::string &pattern, const std::string &target)
 {
     if (pattern.empty() || target.empty())
         return (false);
@@ -121,7 +121,7 @@ static bool isMatchingPrefix(const std::string &pattern, const std::string &targ
     return (false);
 }
 
-std::string HttpResponse::comparePath(const ServerConfig &server, const HttpRequestLine &request)
+std::string	HttpResponse::comparePath(const ServerConfig &server, const HttpRequestLine &request)
 {
     std::string target_path = request.getUri();
     std::string path;
@@ -153,7 +153,7 @@ std::string HttpResponse::comparePath(const ServerConfig &server, const HttpRequ
 }
 
 
-LocationConfig HttpResponse::getLocationConfig()
+LocationConfig	HttpResponse::getLocationConfig()
 {
     LocationConfig location;
     
@@ -176,7 +176,7 @@ LocationConfig HttpResponse::getLocationConfig()
     return (location);    
 }
 
-ServerConfig HttpResponse::checkLocConfigAndRequest()
+ServerConfig	HttpResponse::checkLocConfigAndRequest()
 {
     ServerConfig config;
     
@@ -213,7 +213,7 @@ ServerConfig HttpResponse::checkLocConfigAndRequest()
     return (config);
 }
 
-bool HttpResponse::isMethodAllowed(const LocationConfig &location, const std::string &requestMethod)
+bool	HttpResponse::isMethodAllowed(const LocationConfig &location, const std::string &requestMethod)
 {
     if (!location.isMethodAllowed(requestMethod))
     {
@@ -224,7 +224,7 @@ bool HttpResponse::isMethodAllowed(const LocationConfig &location, const std::st
     return (true);
 }
 
-std::string HttpResponse::checkRoot(const ServerConfig &server, const std::string &path)
+std::string	HttpResponse::checkRoot(const ServerConfig &server, const std::string &path)
 {
     std::string rootpath;
     const std::vector<LocationConfig> &locationConfigs = server.getLocationConfig();
@@ -244,7 +244,7 @@ std::string HttpResponse::checkRoot(const ServerConfig &server, const std::strin
     return (std::string());
 }
 
-std::string HttpResponse::resolvePath(const ServerConfig &server)
+std::string	HttpResponse::resolvePath(const ServerConfig &server)
 {
     std::string path = comparePath(server, _request.getRequestLine());
     if (path.empty())
@@ -256,7 +256,7 @@ std::string HttpResponse::resolvePath(const ServerConfig &server)
         return (path);
 }
 
-std::string HttpResponse::getDirectiveLoc(const std::string &directive)
+std::string	HttpResponse::getDirectiveLoc(const std::string &directive)
 {
 
     if (directive == "index")
@@ -267,14 +267,14 @@ std::string HttpResponse::getDirectiveLoc(const std::string &directive)
 }
 
 
-bool HttpResponse::isSupportedMedia(const std::string &uri)
+bool	HttpResponse::isSupportedMedia(const std::string &uri)
 {
     std::string extension = getExtension(uri);
     std::string type = getMimeType(extension);
     return (!type.empty());    
 }
 
-void HttpResponse::sendResponse()
+void	HttpResponse::sendResponse()
 {
     if (_responseMsg.empty())
         throw(std::runtime_error("Error: empty response"));
@@ -299,7 +299,7 @@ std::string	HttpResponse::getHttpResponse() const
     return (response);
 }
 
-std::string HttpResponse::cleanURI(std::string uri)
+std::string	HttpResponse::cleanURI(std::string uri)
 {
     while (uri.find("//") != std::string::npos)
         uri.erase(uri.find("//"), 1);

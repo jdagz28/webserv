@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/25 12:42:30 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/06 03:28:41 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/11 12:28:52 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 #include <sstream>
 #include <iostream>
 
-std::string HttpRequest::extract_token(const std::string &line, size_t &pos, char del)
+std::string	HttpRequest::extract_token(const std::string &line, size_t &pos, char del)
 {
     size_t  end = line.find(del, pos);
     if (end == std::string::npos)
@@ -26,7 +26,7 @@ std::string HttpRequest::extract_token(const std::string &line, size_t &pos, cha
     return (token);
 }
 
-void HttpRequest::parseRequestLine(const std::string &line)
+void	HttpRequest::parseRequestLine(const std::string &line)
 {
     size_t  pos = 0;
     
@@ -72,7 +72,7 @@ void HttpRequest::parseRequestLine(const std::string &line)
     }
 }
 
-bool HttpRequest::isValidFieldName(const std::string &line)
+bool	HttpRequest::isValidFieldName(const std::string &line)
 {
     if (line.empty())
         return (false);
@@ -82,7 +82,7 @@ bool HttpRequest::isValidFieldName(const std::string &line)
     return (true);
 }
 
-bool HttpRequest::isValidFieldValue(const std::string &line)
+bool	HttpRequest::isValidFieldValue(const std::string &line)
 {
     if (line.empty())
         return (false);
@@ -94,7 +94,7 @@ bool HttpRequest::isValidFieldValue(const std::string &line)
     return (true);
 }
 
-void HttpRequest::parseRequestHeaders(const std::string &line)
+void	HttpRequest::parseRequestHeaders(const std::string &line)
 {
     size_t  colonPos = line.find (':');
     if (colonPos == std::string::npos)

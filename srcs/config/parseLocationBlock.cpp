@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/04 14:50:02 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/06 03:11:18 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/11 10:44:38 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 #include <algorithm>
 
 
-void Config::checkAllowedMethod(const std::string &value, LocationConfig &locationConfig)
+void	Config::checkAllowedMethod(const std::string &value, LocationConfig &locationConfig)
 {
     std::vector<std::string> allowed = splitBySpaces(value);
     for (size_t i = 0; i < allowed.size(); i++)
@@ -32,7 +32,7 @@ void Config::checkAllowedMethod(const std::string &value, LocationConfig &locati
     }
 }
 
-void Config::parseTypes(const std::string &value, std::ifstream &infile, LocationConfig &locationConfig)
+void	Config::parseTypes(const std::string &value, std::ifstream &infile, LocationConfig &locationConfig)
 {
     if (!value.empty())
     {
@@ -79,7 +79,7 @@ void Config::parseTypes(const std::string &value, std::ifstream &infile, Locatio
     }
 }
 
-void Config::parseLimitExcept(const std::string &value, std::ifstream &infile, LocationConfig &locationConfig)
+void	Config::parseLimitExcept(const std::string &value, std::ifstream &infile, LocationConfig &locationConfig)
 {
     checkAllowedMethod(value, locationConfig);
     locationConfig.setDirective("limit_except", "true");
@@ -122,7 +122,7 @@ void Config::parseLimitExcept(const std::string &value, std::ifstream &infile, L
     }
 }
 
-void Config::parseRedirect(const std::string &value, LocationConfig &locationConfig)
+void	Config::parseRedirect(const std::string &value, LocationConfig &locationConfig)
 {
     std::vector<std::string> values = splitBySpaces(value);
     if (values.size() != 2)
@@ -146,7 +146,7 @@ void Config::parseRedirect(const std::string &value, LocationConfig &locationCon
     locationConfig.setDirective("return", value);
 }
 
-void Config::parseAutoindex(const std::string &value, LocationConfig &locationConfig)
+void	Config::parseAutoindex(const std::string &value, LocationConfig &locationConfig)
 {
     if (value != "on" && value != "off")
     {
@@ -156,7 +156,7 @@ void Config::parseAutoindex(const std::string &value, LocationConfig &locationCo
     locationConfig.setDirective("autoindex", value);
 }
 
-void Config::parseIndex(const std::string &value, LocationConfig &locationConfig)
+void	Config::parseIndex(const std::string &value, LocationConfig &locationConfig)
 {
     for (size_t i = 0; i < value.size(); i++)
     {
@@ -175,7 +175,7 @@ void Config::parseIndex(const std::string &value, LocationConfig &locationConfig
 }
 
 
-void Config::parseRoot(const std::string &value, LocationConfig &locationConfig)
+void	Config::parseRoot(const std::string &value, LocationConfig &locationConfig)
 {
     for (size_t i = 0; i < value.size(); i++)
     {
@@ -188,7 +188,7 @@ void Config::parseRoot(const std::string &value, LocationConfig &locationConfig)
     locationConfig.setDirective("root", value);
 }
 
-void Config::parseClientBodySize(std::string &value, LocationConfig &locationConfig)
+void	Config::parseClientBodySize(std::string &value, LocationConfig &locationConfig)
 {
     if (value[value.length() - 1] != 'M' && value[value.length() - 1] != 'm')
     {
@@ -205,7 +205,7 @@ void Config::parseClientBodySize(std::string &value, LocationConfig &locationCon
     locationConfig.setDirective("client_max_body_size", value);
 }
 
-void Config::parseCGIMode(const std::string &value, LocationConfig &locationConfig)
+void	Config::parseCGIMode(const std::string &value, LocationConfig &locationConfig)
 {
     if (value != "on" && value != "off")
     {
@@ -215,7 +215,7 @@ void Config::parseCGIMode(const std::string &value, LocationConfig &locationConf
     locationConfig.setDirective("cgi_mode", value);
 }
 
-void Config::parseCGIExtensions(const std::string &value, LocationConfig &locationConfig)
+void	Config::parseCGIExtensions(const std::string &value, LocationConfig &locationConfig)
 {  
     std::vector<std::string> extensions = splitBySpaces(value);
     
@@ -231,7 +231,7 @@ void Config::parseCGIExtensions(const std::string &value, LocationConfig &locati
     locationConfig.setDirective("cgi_extension", value);
 }
 
-void Config::checkValueNum(const std::string &token, const std::string &value)
+void	Config::checkValueNum(const std::string &token, const std::string &value)
 {
     if (token == "return" || token == "limit_except" || token == "types" || token == "client_max_body_size" || token == "cgi_extension")
         return ;
@@ -243,7 +243,7 @@ void Config::checkValueNum(const std::string &token, const std::string &value)
     }
 }
 
-bool Config::validLocationDirective(const std::string &token)
+bool	Config::validLocationDirective(const std::string &token)
 {
     if (token == "root" || token == "index" || token == "autoindex" || token == "return" || token == "limit_except" 
         || token == "types" || token == "client_max_body_size" || token == "cgi_mode" || token == "cgi_extension")
@@ -251,7 +251,7 @@ bool Config::validLocationDirective(const std::string &token)
     return (false);   
 }
 
-void Config::parseLocationDirective(const std::string &token, std::istringstream &iss, std::ifstream &infile, LocationConfig &locationConfig)
+void	Config::parseLocationDirective(const std::string &token, std::istringstream &iss, std::ifstream &infile, LocationConfig &locationConfig)
 {
     if (validLocationDirective(token))
     {
@@ -295,7 +295,7 @@ void Config::parseLocationDirective(const std::string &token, std::istringstream
 }
 
 
-void Config::parseLocationBlock(std::ifstream &infile, LocationConfig &locationConfig)
+void	Config::parseLocationBlock(std::ifstream &infile, LocationConfig &locationConfig)
 {
     std::string line;
     int openingBrace = 0;

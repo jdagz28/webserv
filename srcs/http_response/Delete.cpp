@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/24 21:37:25 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/03 16:02:43 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/11 12:29:12 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 #include <string>
 #include <map>
 
-void HttpResponse::deleteFile(const std::string &file)
+void	HttpResponse::deleteFile(const std::string &file)
 {
     std::string path = resolvePath(_serverConfig);
     if (path.empty())
@@ -34,7 +34,7 @@ void HttpResponse::deleteFile(const std::string &file)
         setStatusCode(NOT_FOUND);
 }
 
-void HttpResponse::curlDelete()
+void	HttpResponse::curlDelete()
 {
     std::string uri = cleanURI(_request.getRequestLine().getUri());
     size_t questionPos = uri.find('?');
@@ -57,7 +57,7 @@ void HttpResponse::curlDelete()
 }
 
 
-void HttpResponse::processRequestDELETE()
+void	HttpResponse::processRequestDELETE()
 {
     std::map<std::string, std::string> toDelete = _request.getFormData();
     if (toDelete.empty())
