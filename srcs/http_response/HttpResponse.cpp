@@ -284,15 +284,16 @@ void HttpResponse::sendResponse()
 
     ssize_t bytesSent = send(_client_socket, _responseMsg.data(), _responseMsg.size(), 0);
     if (bytesSent < 0)
-    {
-        std::cerr << "ERROR: sending bytes" << std::endl; //!Change
-        return;
-    }
+	{
+		if (errno == EAGAIN || errno == EWOULDBLOCK) 
+			return; 
+		throw(std::runtime_error("Error: sending response"));
+	}
     _responseMsg.erase(_responseMsg.begin(), _responseMsg.begin() + bytesSent);
     if (_headers["Connection"] != "keep-alive")
     {
         if (close(_client_socket) < 0)
-            std::cerr << "ERROR: closing socket" << std::endl; //! CHECK
+			throw(std::runtime_error("Error: closing socket"));
     }
 }
 

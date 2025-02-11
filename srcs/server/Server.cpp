@@ -32,7 +32,6 @@ Server::Server(const Config &config)
 
 Server::~Server()
 {
-	// std::cout << "Clearing " << _clients.size() << " client events." << std::endl; //! DELETE
     clearSockets();
 	clearClients();
 	if (_eventsQueue >= 0)
@@ -105,7 +104,6 @@ void    Server::signalHandler(int signum)
 {
     std::cout << std::endl << "Exiting... Received signal " << signum << std::endl;
     std::cout << "===== Shutting down server =====" << std::endl;
-    // exit(signum);
 	g_running = 0;
 }
 

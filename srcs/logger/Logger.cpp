@@ -85,7 +85,6 @@ void Logger::request(const HttpRequest &request)
     _log["request line"] = requestLine;
     _log["host"] = host;
     _log["referer"] = request.getHeader("referer");
-    //! client address 
     _terminalLog.push_back(message);
 }
 

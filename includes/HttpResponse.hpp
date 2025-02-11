@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:13:31 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/09 18:11:40 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/11 06:41:22 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,12 +47,11 @@ class HttpResponse
         ServerConfig                            _serverConfig;
         LocationConfig                          _locationConfig;
         StatusCode                              _status;
-        int                                     _client_socket; //!
+        int                                     _client_socket; 
         std::vector<std::string>                _allowedMethods; 
         std::vector<std::string>                _redirectDirective;
         std::string                             _redirect;
         std::string                             _serverName;
-
         std::map<std::string, std::string>      _headers;
         std::string                             _body;
         std::vector<unsigned char>              _responseMsg;

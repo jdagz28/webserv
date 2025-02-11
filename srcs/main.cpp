@@ -20,6 +20,8 @@
 
 volatile sig_atomic_t g_running = 1;
 
+
+
 std::string getConfigPath(int argc, char **argv)
 {
     if (argc == 1)
