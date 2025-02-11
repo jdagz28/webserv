@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:57:50 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/11 12:33:20 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/11 13:21:34 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,25 @@ void    HttpResponse::processRequestPOST()
     }
 }
 
+static std::string appendTimestamp(const std::string &directory, std::string filename)
+{
+	std::time_t now = std::time(NULL);
+    std::tm *ltm = std::localtime(&now);
+    char timeStr[16]; 
+    std::strftime(timeStr, sizeof(timeStr), "%Y%m%d%H%M%S", ltm);
+
+	size_t pos = filename.find_last_of('.');
+	if (pos != std::string::npos)
+	{
+		std::string baseName = filename.substr(0, pos);
+		std::string fileExt = filename.substr(pos);
+		return (directory + baseName + "_" + timeStr + fileExt);
+	}
+	else
+		filename += std::string("_") + timeStr;
+	return (directory + filename);
+}
+
 void	HttpResponse::processImageUpload()
 {
     std::srand(static_cast<unsigned>(std::time(0)));
@@ -82,6 +101,9 @@ void	HttpResponse::processImageUpload()
             }
             
             std::string filepath = directory + filename;
+			struct stat stFile;
+			if (stat(filepath.c_str(), &stFile) == 0)
+				filepath = appendTimestamp(directory, filename);
             std::ofstream filestream(filepath.c_str(), std::ios::binary);
             if (!filestream.is_open())
             {
