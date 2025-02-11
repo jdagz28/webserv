@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 01:04:16 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/09/04 23:50:43 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/11 12:33:55 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 #include "webserv.hpp"
 
 
-std::string getStatusReason(StatusCode code) 
+std::string	getStatusReason(StatusCode code) 
 {
     switch (code) 
     {

@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jdagoy <jdagoy@student.42.fr>            +#+  +:+       +#+        */
+/*   By: jdagoy <jdagoy@student.s19.be>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 02:24:21 by jdagoy           #+#    #+#             */
 /*   Updated: 2025/01/15 13:37:36 by jdagoy          ###   ########.fr       */
@@ -31,7 +31,7 @@ class Server
 {
     private:
         int                             _serverStatus;
-        Config                          _config;
+        const Config                    &_config;
         std::vector<socketFD>           _masterFDs;
         std::map<socketFD, Socket *>    _monitoredFDs;
         std::map<clientFD, Event *>     _clients;
@@ -52,7 +52,7 @@ class Server
         void    checkForNewConnections(clientFD newClient);
         void    addToEpoll(int epollFD, int fd, uint32_t events);
         void    handleEvent(clientFD fd, uint32_t eventFlags);
-
+		void    cleanupFinishedEvents();
 
     public:
         Server(const Config &config);
@@ -74,7 +74,6 @@ class Server
                 ~ServerException() throw() {};
                 const char *what() const throw();
         };
-
 };
 
 

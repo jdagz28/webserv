@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   Config.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jdagoy <jdagoy@student.42.fr>            +#+  +:+       +#+        */
+/*   By: jdagoy <jdagoy@student.s19.be>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 22:38:46 by jdagoy            #+#    #+#             */
 /*   Updated: 2025/01/14 14:30:15 by jdagoy          ###   ########.fr       */
@@ -43,13 +43,11 @@ class Config
         void    checkBraces(const std::string &token, int &openingBrace, int &closingBrace);
         bool    checkErrorPage(const std::string &errorPagePath);
 
-        // http-block parsing
         void    parseHttpBlock(std::ifstream &infile);
         void    parseHttpDirective(const std::string &token, std::istringstream &iss, std::ifstream &infile);
         void    parseErrorPages(std::istringstream &iss);
         void    parseKeepAlive(std::istringstream &iss);
 
-        // server-block parsing
         void    parseServerBlock(std::ifstream &infile, ServerConfig &serverConfig);
         void    parseServerDirective(const std::string &token, std::istringstream &iss, std::ifstream &infile, ServerConfig &serverConfig);
         void    parseErrorPages(std::istringstream &iss, ServerConfig &serverConfig);
@@ -59,7 +57,6 @@ class Config
         void    parseServerName(const std::string &value, ServerConfig &serverConfig);
         bool    checkServerName(const std::string &name);
         
-        //  location-block parsing
         void    parseLocationBlock(std::ifstream &infile, LocationConfig &locationConfig);
         void    parseLocationDirective(const std::string &token, std::istringstream &iss, std::ifstream &infile, LocationConfig &locationConfig);
         void    checkAllowedMethod(const std::string &value, LocationConfig &locationConfig);
@@ -82,10 +79,10 @@ class Config
         Config  &operator=(const Config &copy); 
         ~Config();
 
-        const std::vector<ServerConfig>& getServerConfig() const;
+        const std::vector<ServerConfig> &getServerConfig() const;
         time_t  getKeepAliveTimeout() const;
         std::string getErrorPages() const;
-        const std::vector<int>& getPortsToServe() const;
+        const std::vector<int> &getPortsToServe() const;
 
         class configException : public std::exception
         {
@@ -106,7 +103,6 @@ class Config
                 ~configException() throw() {};
                 const char *what() const throw();
         };
-
 };
 
 #endif 

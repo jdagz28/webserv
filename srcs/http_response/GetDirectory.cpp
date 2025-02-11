@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 15:15:53 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/01/06 02:51:27 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/11 12:31:31 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 #include <sstream>
 #include <set>
 
-bool HttpResponse::checkDirIndex()
+bool	HttpResponse::checkDirIndex()
 {
     std::string index = getDirectiveLoc("index");
     if (index.empty())
@@ -28,7 +28,7 @@ bool HttpResponse::checkDirIndex()
     return (true);
 }
 
-bool HttpResponse::isAutoIndex()
+bool	HttpResponse::isAutoIndex()
 {
     std::string autoIndex = getDirectiveLoc("autoindex");
     if (autoIndex.empty() || autoIndex != "on")
@@ -36,7 +36,7 @@ bool HttpResponse::isAutoIndex()
     return (true);
 }
 
-std::string getTimeStamp(time_t time)
+std::string	getTimeStamp(time_t time)
 {
     char formatedTime[30];
     struct tm *time_info;
@@ -57,7 +57,7 @@ std::string getTimeStamp(time_t time)
     return (std::string(formatedTime));
 }
 
-void HttpResponse::generateDirPage(const std::string &path, std::set<FileData> &directories, std::set<FileData> &files)
+void	HttpResponse::generateDirPage(const std::string &path, std::set<FileData> &directories, std::set<FileData> &files)
 {
     _headers["Location"] = _request.getHost() + "/" + path;
     std::ostringstream html;
@@ -176,7 +176,7 @@ void HttpResponse::generateDirPage(const std::string &path, std::set<FileData> &
     setStatusCode(OK);
 }
 
-void HttpResponse::generateDirList(std::string path)
+void	HttpResponse::generateDirList(std::string path)
 {
     std::set<FileData> directories;
     std::set<FileData> files;

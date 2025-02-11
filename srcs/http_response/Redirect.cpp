@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:02:29 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/24 22:56:08 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/11 12:33:43 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 #include <ctime>
 #include <sstream>
 
-bool HttpResponse::isRedirect(const LocationConfig &location)
+bool	HttpResponse::isRedirect(const LocationConfig &location)
 {
     if (location.isRedirect())
     {
@@ -27,7 +27,7 @@ bool HttpResponse::isRedirect(const LocationConfig &location)
     return (false);
 }
 
-bool HttpResponse::validateRedirect()
+bool	HttpResponse::validateRedirect()
 {
     if (_redirectDirective.size() != 2)
         return (false);
@@ -38,7 +38,7 @@ bool HttpResponse::validateRedirect()
     return (true);
 }
 
-bool HttpResponse::isRedirectExternal()
+bool	HttpResponse::isRedirectExternal()
 {
     if (_redirect.empty())
         return (false);
@@ -64,7 +64,7 @@ bool HttpResponse::isRedirectExternal()
     return (true);
 }
 
-void HttpResponse::getRedirectContent()
+void	HttpResponse::getRedirectContent()
 {
     std::string redirectPath;
     if (!validateRedirect())
@@ -91,7 +91,7 @@ void HttpResponse::getRedirectContent()
     setStatusCode(status);
 }
 
-void HttpResponse::setRedirect(std::string status, const std::string &path)
+void	HttpResponse::setRedirect(std::string status, const std::string &path)
 {
     _redirectDirective.push_back(status);
     _redirectDirective.push_back(path);

@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:05:38 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/11/07 11:48:43 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/11 12:30:53 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 #include <sstream>
 #include <set>
 
-void HttpResponse::processRequestGET()
+void	HttpResponse::processRequestGET()
 {   
     if (isRedirect(_locationConfig))
     {
@@ -55,7 +55,7 @@ void HttpResponse::processRequestGET()
     getResource(path);
 }
 
-std::string HttpResponse::verifyPath(std::string path)
+std::string	HttpResponse::verifyPath(std::string path)
 {
     std::string uri = cleanURI(_request.getRequestLine().getUri());
     std::string subset = path.substr(path.find('/') + 1);
@@ -65,7 +65,7 @@ std::string HttpResponse::verifyPath(std::string path)
     return (path);
 }
 
-std::string HttpResponse::buildResourcePath(const std::string &basePath, const std::string &resourceName)
+std::string	HttpResponse::buildResourcePath(const std::string &basePath, const std::string &resourceName)
 {
     if (!checkSlash(basePath, resourceName))
         return(basePath + '/' + resourceName);
@@ -76,7 +76,7 @@ std::string HttpResponse::buildResourcePath(const std::string &basePath, const s
 }
 
 
-void HttpResponse::getResource(const std::string &target_path)
+void	HttpResponse::getResource(const std::string &target_path)
 {
     std::string indexPath;
         
@@ -103,7 +103,7 @@ void HttpResponse::getResource(const std::string &target_path)
     }
 }
 
-void  HttpResponse::getResourceContent(const std::string &file_path)
+void 	HttpResponse::getResourceContent(const std::string &file_path)
 {
     if (!fileExists(file_path))
     {
@@ -135,7 +135,7 @@ void  HttpResponse::getResourceContent(const std::string &file_path)
     }
 }
 
-std::string HttpResponse::extractResourceName(const std::string &uri)
+std::string	HttpResponse::extractResourceName(const std::string &uri)
 {
     size_t  lastSlashPos = uri.find_last_of('/');
     if (lastSlashPos != std::string::npos && lastSlashPos + 1 < uri.length())
@@ -143,7 +143,7 @@ std::string HttpResponse::extractResourceName(const std::string &uri)
     return (uri);
 }
 
-bool HttpResponse::checkSlash(const std::string &defaultLoc, const std::string &page)
+bool	HttpResponse::checkSlash(const std::string &defaultLoc, const std::string &page)
 {
     bool defaultSlash = !defaultLoc.empty() && defaultLoc[defaultLoc.length() - 1] == '/';
     bool pageSlash = !page.empty() && page[0] == '/';

@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 22:50:55 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/01/16 04:13:24 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/11 12:29:26 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 #include <string>
 
 
-void HttpResponse::getErrorPage()
+void	HttpResponse::getErrorPage()
 {
     std::string ErrorPagePath = _serverConfig.getErrorPage(_status);
 
@@ -33,7 +33,7 @@ void HttpResponse::getErrorPage()
     }
 }
 
-std::string HttpResponse::generateErrorPage(const std::string &status, const std::string &statusMessage)
+std::string	HttpResponse::generateErrorPage(const std::string &status, const std::string &statusMessage)
 {
     std::string html = std::string("<!DOCTYPE html>\r\n")
         + "<html lang=\"en\">\r\n\r\n"

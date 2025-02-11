@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/07 23:05:41 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/01/29 10:17:17 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/11 10:38:48 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,16 +16,14 @@
 
 LocationConfig::LocationConfig()
     : _path("")
-{
-}
+{}
 
 LocationConfig::LocationConfig(const LocationConfig &copy)
-{
-    _path = copy.getPath();
-    _directives = copy.getDirectives();
-    _allowedMethods = copy.getAllowedMethods();
-    _cgiExtensions = copy.getCGIExtensions();
-}
+    : _path(copy.getPath()), 
+		_directives(copy.getDirectives()), 
+		_allowedMethods(copy.getAllowedMethods()), 
+		_cgiExtensions(copy.getCGIExtensions())
+{}
 
 LocationConfig::~LocationConfig()
 {}
@@ -62,17 +60,17 @@ void    LocationConfig::setCGIExtension(const std::string &extension)
     _cgiExtensions.push_back(extension);
 }
 
-const std::map<std::string, std::string> &LocationConfig::getDirectives() const
+const std::map<std::string, std::string>	&LocationConfig::getDirectives() const
 {
     return (_directives);
 }
 
-const std::string LocationConfig::getPath() const
+const std::string	LocationConfig::getPath() const
 {
     return (_path);
 }
 
-const std::string LocationConfig::getRoot() const
+const std::string	LocationConfig::getRoot() const
 {
     std::map<std::string, std::string>::const_iterator it;
     for (it = _directives.begin(); it != _directives.end(); it++)
@@ -83,12 +81,12 @@ const std::string LocationConfig::getRoot() const
     return (std::string());
 }
 
-const std::vector<std::string> &LocationConfig::getAllowedMethods() const
+const std::vector<std::string>	&LocationConfig::getAllowedMethods() const
 {
     return(_allowedMethods);
 }
 
-bool LocationConfig::isLimitExcept() const
+bool	LocationConfig::isLimitExcept() const
 {
     std::map<std::string, std::string>::const_iterator directive;
     for (directive = _directives.begin(); directive != _directives.end(); directive++)
@@ -100,7 +98,7 @@ bool LocationConfig::isLimitExcept() const
 }
 
 
-const std::string LocationConfig::getDefaultName() const
+const std::string	LocationConfig::getDefaultName() const
 {
     std::map<std::string, std::string>::const_iterator directive;
     for (directive = _directives.begin(); directive != _directives.end(); directive++)
@@ -111,7 +109,7 @@ const std::string LocationConfig::getDefaultName() const
     return (std::string()); 
 }
 
-const std::string LocationConfig::getIndex() const
+const std::string	LocationConfig::getIndex() const
 {
     std::map<std::string, std::string>::const_iterator directive;
     for (directive = _directives.begin(); directive != _directives.end(); directive++)
@@ -122,7 +120,7 @@ const std::string LocationConfig::getIndex() const
     return (std::string()); 
 }
 
-const std::string LocationConfig::getAutoIndex() const
+const std::string	LocationConfig::getAutoIndex() const
 {
     std::map<std::string, std::string>::const_iterator directive;
     for (directive = _directives.begin(); directive != _directives.end(); directive++)
@@ -133,13 +131,13 @@ const std::string LocationConfig::getAutoIndex() const
     return (std::string()); 
 }
 
-const std::vector<std::string> &LocationConfig::getCGIExtensions() const
+const std::vector<std::string>	&LocationConfig::getCGIExtensions() const
 {
     return (_cgiExtensions);
 }
 
 
-bool LocationConfig::isMethodAllowed(const std::string &method) const
+bool	LocationConfig::isMethodAllowed(const std::string &method) const
 {
     if (isLimitExcept() && _allowedMethods.empty())
         return (false);
@@ -152,7 +150,7 @@ bool LocationConfig::isMethodAllowed(const std::string &method) const
     return (false);
 }
 
-bool LocationConfig::isRedirect() const
+bool	LocationConfig::isRedirect() const
 {
     if (_directives.empty())
         return (false);
@@ -165,7 +163,7 @@ bool LocationConfig::isRedirect() const
     return (false);
 }
 
-std::string LocationConfig::getRedirect() const
+std::string	LocationConfig::getRedirect() const
 {
     std::map<std::string, std::string>::const_iterator directive;
     for (directive = _directives.begin(); directive != _directives.end(); directive++)
@@ -176,7 +174,7 @@ std::string LocationConfig::getRedirect() const
     return (std::string());
 }
 
-size_t LocationConfig::getClientMaxBodySize()
+size_t	LocationConfig::getClientMaxBodySize()
 {
     std::map<std::string, std::string>::const_iterator directive;
     for (directive = _directives.begin(); directive != _directives.end(); directive++)

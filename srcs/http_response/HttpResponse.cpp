@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   HttpResponse.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jdagoy <jdagoy@student.42.fr>            +#+  +:+       +#+        */
+/*   By: jdagoy <jdagoy@student.s19.be>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:19:13 by jdagoy            #+#    #+#             */
 /*   Updated: 2025/01/14 22:28:04 by jdagoy          ###   ########.fr       */
@@ -20,9 +20,7 @@
 #include <ctime>
 #include <sstream>
 
-HttpResponse::HttpResponse(HttpRequest &request,
-                            Config &config,
-                            int client_socket)
+HttpResponse::HttpResponse(HttpRequest &request, const Config &config, int client_socket)
     : _request(request), _config(config), _status(INIT), _client_socket(client_socket), _allowedMethods(), _headers(), _body("")
 {
     if (_request.getStatusCode() !=  OK && _request.getStatusCode() != INIT)
@@ -37,9 +35,13 @@ HttpResponse::HttpResponse(HttpRequest &request,
 
 HttpResponse::~HttpResponse()
 {
+    _body.clear();
+	_responseMsg.clear();
+    _headers.clear();
+    _allowedMethods.clear();
 }
 
-void HttpResponse::setStatusCode(StatusCode status)
+void	HttpResponse::setStatusCode(StatusCode status)
 {
     _status = status;
 }
@@ -50,7 +52,7 @@ StatusCode HttpResponse::getStatusCode() const
 }
 
 
-int HttpResponse::checkMethod(const std::string &method)
+int	HttpResponse::checkMethod(const std::string &method)
 {
     if (method == "GET")
         return (GET);
@@ -61,7 +63,7 @@ int HttpResponse::checkMethod(const std::string &method)
     return (ErrorMethod);
 }
 
-void HttpResponse::execMethod()
+void	HttpResponse::execMethod()
 {
     std::string method = _request.getRequestLine().getMethod();
     _serverConfig = checkLocConfigAndRequest();
@@ -105,7 +107,7 @@ void HttpResponse::execMethod()
     }
 }
 
-static bool isMatchingPrefix(const std::string &pattern, const std::string &target)
+static bool	isMatchingPrefix(const std::string &pattern, const std::string &target)
 {
     if (pattern.empty() || target.empty())
         return (false);
@@ -119,7 +121,7 @@ static bool isMatchingPrefix(const std::string &pattern, const std::string &targ
     return (false);
 }
 
-std::string HttpResponse::comparePath(const ServerConfig &server, const HttpRequestLine &request)
+std::string	HttpResponse::comparePath(const ServerConfig &server, const HttpRequestLine &request)
 {
     std::string target_path = request.getUri();
     std::string path;
@@ -151,7 +153,7 @@ std::string HttpResponse::comparePath(const ServerConfig &server, const HttpRequ
 }
 
 
-LocationConfig HttpResponse::getLocationConfig()
+LocationConfig	HttpResponse::getLocationConfig()
 {
     LocationConfig location;
     
@@ -174,7 +176,7 @@ LocationConfig HttpResponse::getLocationConfig()
     return (location);    
 }
 
-ServerConfig HttpResponse::checkLocConfigAndRequest()
+ServerConfig	HttpResponse::checkLocConfigAndRequest()
 {
     ServerConfig config;
     
@@ -211,7 +213,7 @@ ServerConfig HttpResponse::checkLocConfigAndRequest()
     return (config);
 }
 
-bool HttpResponse::isMethodAllowed(const LocationConfig &location, const std::string &requestMethod)
+bool	HttpResponse::isMethodAllowed(const LocationConfig &location, const std::string &requestMethod)
 {
     if (!location.isMethodAllowed(requestMethod))
     {
@@ -222,7 +224,7 @@ bool HttpResponse::isMethodAllowed(const LocationConfig &location, const std::st
     return (true);
 }
 
-std::string HttpResponse::checkRoot(const ServerConfig &server, const std::string &path)
+std::string	HttpResponse::checkRoot(const ServerConfig &server, const std::string &path)
 {
     std::string rootpath;
     const std::vector<LocationConfig> &locationConfigs = server.getLocationConfig();
@@ -242,7 +244,7 @@ std::string HttpResponse::checkRoot(const ServerConfig &server, const std::strin
     return (std::string());
 }
 
-std::string HttpResponse::resolvePath(const ServerConfig &server)
+std::string	HttpResponse::resolvePath(const ServerConfig &server)
 {
     std::string path = comparePath(server, _request.getRequestLine());
     if (path.empty())
@@ -254,7 +256,7 @@ std::string HttpResponse::resolvePath(const ServerConfig &server)
         return (path);
 }
 
-std::string HttpResponse::getDirectiveLoc(const std::string &directive)
+std::string	HttpResponse::getDirectiveLoc(const std::string &directive)
 {
 
     if (directive == "index")
@@ -265,42 +267,39 @@ std::string HttpResponse::getDirectiveLoc(const std::string &directive)
 }
 
 
-bool HttpResponse::isSupportedMedia(const std::string &uri)
+bool	HttpResponse::isSupportedMedia(const std::string &uri)
 {
     std::string extension = getExtension(uri);
     std::string type = getMimeType(extension);
     return (!type.empty());    
 }
 
-void HttpResponse::sendResponse()
+void	HttpResponse::sendResponse()
 {
     if (_responseMsg.empty())
-    {
-        std::cerr << "ERROR: response empty" << std::endl;
-        return;
-    }
-
+        throw(std::runtime_error("Error: empty response"));
     ssize_t bytesSent = send(_client_socket, _responseMsg.data(), _responseMsg.size(), 0);
     if (bytesSent < 0)
-    {
-        std::cerr << "ERROR: sending bytes" << std::endl; //!Change
-        return;
-    }
+	{
+		if (errno == EAGAIN || errno == EWOULDBLOCK) 
+			return; 
+		throw(std::runtime_error("Error: sending response"));
+	}
     _responseMsg.erase(_responseMsg.begin(), _responseMsg.begin() + bytesSent);
     if (_headers["Connection"] != "keep-alive")
     {
         if (close(_client_socket) < 0)
-            std::cerr << "ERROR: closing socket" << std::endl; //! CHECK
+			throw(std::runtime_error("Error: closing socket"));
     }
 }
 
-std::string HttpResponse::getHttpResponse()
+std::string	HttpResponse::getHttpResponse() const
 {
     std::string response(_responseMsg.begin(), _responseMsg.end());
     return (response);
 }
 
-std::string HttpResponse::cleanURI(std::string uri)
+std::string	HttpResponse::cleanURI(std::string uri)
 {
     while (uri.find("//") != std::string::npos)
         uri.erase(uri.find("//"), 1);

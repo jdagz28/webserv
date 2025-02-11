@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:11:06 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/01/20 09:41:27 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/11 12:30:18 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,9 +20,13 @@
 #include <ctime>
 #include <sstream>
 
-void HttpResponse::generateHttpResponse()
+void	HttpResponse::generateHttpResponse()
 {
-    if (_body.empty() && _status != OK)
+    if (!_responseMsg.empty())
+	{
+    	_responseMsg.clear();
+	}
+	if (_body.empty() && _status != OK)
         getErrorPage();
     
     _headers["Server"] = _serverName;
@@ -44,7 +48,7 @@ void HttpResponse::generateHttpResponse()
     _responseMsg.insert(_responseMsg.end(), _body.begin(), _body.end());
 }
 
-std::string HttpResponse::getHttpDateGMT()
+std::string	HttpResponse::getHttpDateGMT()
 {
     std::time_t now = std::time(NULL);
     std::tm *gmt_tm = std::gmtime(&now);
@@ -56,7 +60,7 @@ std::string HttpResponse::getHttpDateGMT()
     return (std::string(date));
 }
 
-bool HttpResponse::isKeepAlive() const
+bool	HttpResponse::isKeepAlive() const
 {
     if (_request.isConnectionClosed())
         return (false);
@@ -66,7 +70,7 @@ bool HttpResponse::isKeepAlive() const
 }
 
 
-void HttpResponse::addKeepAliveHeader()
+void	HttpResponse::addKeepAliveHeader()
 {
     if (isKeepAlive())
     {
@@ -80,7 +84,7 @@ void HttpResponse::addKeepAliveHeader()
         _headers["Connection"] = "close";
 }
 
-void HttpResponse::addAllowHeader()
+void	HttpResponse::addAllowHeader()
 {
     if (static_cast<int>(getStatusCode()) >= 400 ) 
         return ;
@@ -99,7 +103,7 @@ void HttpResponse::addAllowHeader()
     }
 }
 
-std::string HttpResponse::generateStatusLine()
+std::string	HttpResponse::generateStatusLine()
 {
     std::ostringstream status_line;
     
@@ -111,7 +115,7 @@ std::string HttpResponse::generateStatusLine()
     return (status_line.str());   
 }
 
-std::string HttpResponse::generateHeaderLines()
+std::string	HttpResponse::generateHeaderLines()
 {
     std::map<std::string, std::string>::const_iterator header;
     std::ostringstream response_headers;
@@ -126,7 +130,7 @@ std::string HttpResponse::generateHeaderLines()
     return (response_headers.str());
 }
 
-void HttpResponse::addContentTypeHeader(const std::string &type)
+void	HttpResponse::addContentTypeHeader(const std::string &type)
 {
     if (type.empty())
         _headers["Content-Type"] = "text/html";
@@ -134,7 +138,7 @@ void HttpResponse::addContentTypeHeader(const std::string &type)
         _headers["Content-Type"] = getMimeType(type);
 }
 
-std::string HttpResponse::getHeader(const std::string &header)
+std::string	HttpResponse::getHeader(const std::string &header)
 {
     std::map<std::string, std::string>::iterator it;
     for (it = _headers.begin(); it != _headers.end(); it++)
@@ -145,7 +149,7 @@ std::string HttpResponse::getHeader(const std::string &header)
     return (std::string());
 }
 
-std::string HttpResponse::getStatusLine()
+std::string	HttpResponse::getStatusLine()
 {
     return (generateStatusLine());
 }
