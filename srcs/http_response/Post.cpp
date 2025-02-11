@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:57:50 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/06 02:33:08 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/11 13:21:34 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,7 +68,7 @@ static std::string appendTimestamp(const std::string &directory, std::string fil
 	return (directory + filename);
 }
 
-void HttpResponse::processImageUpload()
+void	HttpResponse::processImageUpload()
 {
     std::srand(static_cast<unsigned>(std::time(0)));
     

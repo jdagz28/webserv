@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   utilities.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jdagoy <jdagoy@student.42.fr>            +#+  +:+       +#+        */
+/*   By: jdagoy <jdagoy@student.s19.be>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 22:29:37 by jdagoy            #+#    #+#             */
 /*   Updated: 2025/01/13 11:42:11 by jdagoy          ###   ########.fr       */

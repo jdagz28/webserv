@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:13:31 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/11/05 12:52:08 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/11 10:13:06 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,16 +43,15 @@ class HttpResponse
 {
     private:
         HttpRequest                             &_request;
-        Config                                  &_config;
+        const Config                            &_config;
         ServerConfig                            _serverConfig;
         LocationConfig                          _locationConfig;
         StatusCode                              _status;
-        int                                     _client_socket; //!
+        int                                     _client_socket; 
         std::vector<std::string>                _allowedMethods; 
         std::vector<std::string>                _redirectDirective;
         std::string                             _redirect;
         std::string                             _serverName;
-
         std::map<std::string, std::string>      _headers;
         std::string                             _body;
         std::vector<unsigned char>              _responseMsg;
@@ -112,9 +111,7 @@ class HttpResponse
         void    curlDelete();
         
     public:
-        HttpResponse(HttpRequest &request,
-                        Config &config,
-                        int client_socket);
+        HttpResponse(HttpRequest &request, const Config &config, int client_socket);
         ~HttpResponse();
 
         void    execMethod();
@@ -124,9 +121,9 @@ class HttpResponse
 
         
         StatusCode getStatusCode() const;
-        std::string getHttpResponse();
-        std::string getHeader(const std::string &header);
-        std::string getStatusLine();
+        std::string	getHttpResponse() const;
+        std::string	getHeader(const std::string &header);
+        std::string	getStatusLine();
 };
 
 

@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jdagoy <jdagoy@student.42.fr>            +#+  +:+       +#+        */
+/*   By: jdagoy <jdagoy@student.s19.be>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 02:24:09 by jdagoy           #+#    #+#             */
 /*   Updated: 2025/01/15 13:55:28 by jdagoy          ###   ########.fr       */
@@ -11,6 +11,8 @@
 /* ************************************************************************** */
 
 #include "Server.hpp"
+#include "webserv.hpp"
+
 #include <iostream>
 #include <algorithm>
 #include <arpa/inet.h> 
@@ -30,18 +32,19 @@ Server::Server(const Config &config)
 
 Server::~Server()
 {
-    clearClients();
     clearSockets();
-    close(_eventsQueue);
+	clearClients();
+	if (_eventsQueue >= 0)
+		close(_eventsQueue);
 }
 
 void   Server::clearClients()
 {
     std::map<clientFD, Event *>::iterator it;
     for (it = _clients.begin(); it != _clients.end(); it++)
-    {
-        delete it->second;
-        close(it->first);
+	{
+		delete it->second;
+		close(it->first);
     }
     _clients.clear();
 }
@@ -50,10 +53,10 @@ void    Server::clearSockets()
 {
     std::map<socketFD, Socket *>::iterator it;
     for (it = _monitoredFDs.begin(); it != _monitoredFDs.end(); it++)
-    {
+	{
         delete it->second;
-        close(it->first);
-    }
+	}
+	_monitoredFDs.clear();
 }
 
 void    Server::initServer()
@@ -99,9 +102,12 @@ void    Server::createSockets()
 
 void    Server::signalHandler(int signum)
 {
-    std::cout << std::endl << "Exiting... Received signal " << signum << std::endl;
-    std::cout << "===== Shutting down server =====" << std::endl;
-    exit(signum);
+	if (signum == SIGINT)
+		std::cout << " - CTRL + C detected" << std::endl;	 
+	std::cout << "==========================================" << std::endl;
+    std::cout << "               SHUTTING DOWN              " << std::endl; 
+	std::cout << "==========================================" << std::endl;
+	g_running = 0;
 }
 
 void    Server::setSignals()
@@ -126,11 +132,15 @@ const char* Server::ServerException::what() const throw()
 void    Server::checkForNewConnections(clientFD newClient)
 {    
     if (newClient == -1)
+	{
         throw ServerException("Error: Failed to accept connection");
-    if (setNonBlocking(newClient) == -1)
+	}
+	if (setNonBlocking(newClient) == -1)
         throw ServerException("Error: Failed to set client socket to non-blocking mode");
-                    
-    _clients[newClient] = new Event(newClient, _config);
+	std::map<clientFD, Event *>::iterator it = _clients.find(newClient);
+	if (it != _clients.end())
+		return ;
+    _clients[newClient] = new Event(newClient, _eventsQueue, _config);
 }
 
 void    Server::addToEpoll(int epollFD, int fd, uint32_t events)
@@ -163,6 +173,22 @@ void    Server::handleEvent(clientFD fd, uint32_t eventFlags)
         throw ServerException("Error: FD not found in _monitoredFDs or _clients");
 }
 
+void	Server::cleanupFinishedEvents() 
+{
+	std::map<clientFD, Event *>::iterator it;
+	for (it = _clients.begin(); it != _clients.end(); )
+	{
+		if (it->second->isFinished())
+		{
+            delete it->second;
+			_clients.erase(it++);
+		}
+		else
+		{
+			++it;
+		}
+	}
+}
 
 void    Server::runServer()
 {
@@ -175,7 +201,7 @@ void    Server::runServer()
         for (it = _masterFDs.begin(); it != _masterFDs.end(); it++) 
             addToEpoll(_eventsQueue, *it, EPOLLIN);
         
-        while (true)
+        while (g_running)
         {
             int nEvents = epoll_wait(_eventsQueue, _eventsList, MAX_CLIENTS, -1);
             if (nEvents == -1)
@@ -192,7 +218,11 @@ void    Server::runServer()
 
                 handleEvent(fd, eventFlags);
             }
+			cleanupFinishedEvents();
         }
+		clearClients();
+		clearSockets();
+		close(_eventsQueue);
     }
     catch (const std::exception& e)
     {

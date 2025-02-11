@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jdagoy <jdagoy@student.42.fr>            +#+  +:+       +#+        */
+/*   By: jdagoy <jdagoy@student.s19.be>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 22:28:27 by jdagoy            #+#    #+#             */
 /*   Updated: 2025/01/14 13:34:15 by jdagoy          ###   ########.fr       */
@@ -19,6 +19,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <netinet/in.h>
+#include <csignal>
 
 #define CRLF "\r\n"
 #define MAX_URI_LENGTH 1000
@@ -36,6 +37,8 @@ const std::string RESET = "\033[0m";
 typedef int socketFD;
 typedef int clientFD;
 typedef int FD;
+
+extern volatile sig_atomic_t g_running;
 
 enum HtmlRequestParseStep
 {
@@ -88,19 +91,19 @@ enum StatusCode
 // UTILITIES
 void    trimWhitespaces(std::string &str);
 std::vector<std::string>    splitBySpaces(const std::string &str);
-bool isDirectory(const std::string &path);
-bool fileExists(const std::string &path);
-bool endsWith(const std::string &str, const std::string &suffix);
-std::string getExtension(const std::string &path);
-std::string toString(int num);
-bool validProtocol(const std::string &str);
-int strToInt(const std::string &str);
-bool isSpace(unsigned char ch);
-std::string toLower(const std::string &str);
-void    signalHandler(int signum);
+bool	isDirectory(const std::string &path);
+bool	fileExists(const std::string &path);
+bool	endsWith(const std::string &str, const std::string &suffix);
+std::string	getExtension(const std::string &path);
+std::string	toString(int num);
+bool	validProtocol(const std::string &str);
+int	strToInt(const std::string &str);
+bool	isSpace(unsigned char ch);
+std::string	toLower(const std::string &str);
+void	signalHandler(int signum);
 
 // MIMETYPES.CPP
-std::string getMimeType(const std::string &extension);
+std::string	getMimeType(const std::string &extension);
 
 //STATUSCODES.CPP
 std::string getStatusReason(StatusCode code);

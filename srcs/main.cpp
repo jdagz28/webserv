@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jdagoy <jdagoy@student.42.fr>            +#+  +:+       +#+        */
+/*   By: jdagoy <jdagoy@student.s19.be>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/05 00:23:30 by jdagoy            #+#    #+#             */
 /*   Updated: 2025/01/10 14:58:13 by jdagoy          ###   ########.fr       */
@@ -18,9 +18,8 @@
 #include "webserv.hpp"
 #include "Server.hpp"
 
-// #define PORT   4242 //1919    
+volatile sig_atomic_t g_running = 1;
 
-int server_socket = -1;
 
 
 std::string getConfigPath(int argc, char **argv)

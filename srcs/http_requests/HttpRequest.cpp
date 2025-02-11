@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:18:22 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/05 11:18:46 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/11 10:36:49 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,15 +23,10 @@
 
 HttpRequest::HttpRequest(int client_socket)
     : _request(),  _headersN(0), _status(OK), _errorMsg(""), _client_socket(client_socket), _parseStep(REQUEST_INIT), _maxBodySize(0)
-{
-    // requestToBuffer();
-    // printBuffer();
-    // if (_errorMsg.empty())
-    //     parseHttpRequest();
-}
+{}
 
 HttpRequest::HttpRequest(const HttpRequest &copy)
-    :   _request(copy._request),
+    : _request(copy._request),
         _headers(copy._headers),
         _headersN(copy._headersN),
         _buffer(copy._buffer),
@@ -42,8 +37,7 @@ HttpRequest::HttpRequest(const HttpRequest &copy)
         _parseStep(copy._parseStep),
         _multiFormData(copy._multiFormData),
         _maxBodySize(copy._maxBodySize)
-{
-}
+{}
 
 HttpRequest &HttpRequest::operator=(const HttpRequest &copy)
 {
@@ -66,9 +60,14 @@ HttpRequest &HttpRequest::operator=(const HttpRequest &copy)
 
 HttpRequest::~HttpRequest()
 {
+	if (_client_socket >= 0)
+	{
+        close(_client_socket);
+        _client_socket = -1; 
+    }
 }
 
-void HttpRequest::parseHttpRequest()
+void	HttpRequest::parseHttpRequest()
 {
     if (_parseStep == REQUEST_INIT)
         _parseStep = REQUEST_LINE;
@@ -89,7 +88,7 @@ void HttpRequest::parseHttpRequest()
                 if (line.empty())
                 {
                     _parseStep = REQUEST_BODY;
-                    return;
+                    return ;
                 }
                 else
                 {
@@ -98,14 +97,14 @@ void HttpRequest::parseHttpRequest()
                     if (_status != OK)
                         return ;
                 }
-                break;
+                break ;
             default:
-                break;
+                break ;
         }
     }
 }
 
-size_t HttpRequest::getContentLengthBuffer(const std::string &header)
+size_t	HttpRequest::getContentLengthBuffer(const std::string &header)
 {
     std::string lowerHeader = toLower(header);
 	std::string label = "content-length:";
@@ -128,7 +127,7 @@ size_t HttpRequest::getContentLengthBuffer(const std::string &header)
 }
 
 
-void HttpRequest::requestToBuffer()
+void	HttpRequest::requestToBuffer()
 {
     const size_t tempBufferSize = 1024;
     std::vector<unsigned char> tempBuffer(tempBufferSize);
@@ -143,7 +142,7 @@ void HttpRequest::requestToBuffer()
 	}
 }
 
-std::vector<unsigned char>::iterator HttpRequest::findBufferCRLF()
+std::vector<unsigned char>::iterator	HttpRequest::findBufferCRLF()
 {
     std::vector<unsigned char>::iterator it;
     for (it = _buffer.begin(); it != _buffer.end() - 1; ++it)
@@ -154,7 +153,7 @@ std::vector<unsigned char>::iterator HttpRequest::findBufferCRLF()
     return (_buffer.end());
 }
 
-std::string HttpRequest::getLineAndPopFromBuffer()
+std::string	HttpRequest::getLineAndPopFromBuffer()
 {
     std::string line;
     
@@ -176,7 +175,7 @@ std::string HttpRequest::getLineAndPopFromBuffer()
     return (line);
 }
 
-void HttpRequest::printBuffer() const
+void	HttpRequest::printBuffer() const
 {
     std::vector<unsigned char>::const_iterator it;
     for (it = _buffer.begin(); it != _buffer.end(); it++)
@@ -184,28 +183,28 @@ void HttpRequest::printBuffer() const
     std::cout << std::endl;
 }
 
-void HttpRequest::setClientSocket(int client_socket)
+void	HttpRequest::setClientSocket(int client_socket)
 {
     _client_socket = client_socket;
 }
 
-void HttpRequest::setMaxBodySize(size_t bodySize)
+void	HttpRequest::setMaxBodySize(size_t bodySize)
 {
     _maxBodySize = bodySize * 1024 * 1024;
 }
 
-const HttpRequestLine& HttpRequest::getRequestLine() const
+const	HttpRequestLine& HttpRequest::getRequestLine() const
 {
     return (_request);
 }
 
-const std::map<std::string, std::vector<std::string> >& HttpRequest::getHeaders() const
+const	std::map<std::string, std::vector<std::string> >& HttpRequest::getHeaders() const
 {
     
     return (_headers);
 }
 
-bool HttpRequest::isConnectionClosed() const
+bool	HttpRequest::isConnectionClosed() const
 {
     std::map<std::string, std::vector<std::string> >::const_iterator header;
     header = _headers.find("connection");
@@ -221,7 +220,7 @@ bool HttpRequest::isConnectionClosed() const
     return (false);
 }
 
-std::string HttpRequest::getHost() const
+std::string	HttpRequest::getHost() const
 {
     std::map<std::string, std::vector<std::string> >::const_iterator header;
     header =_headers.find("host");
@@ -230,41 +229,37 @@ std::string HttpRequest::getHost() const
     return (std::string());
 }
 
-void HttpRequest::setStatusCode(StatusCode status)
+void	HttpRequest::setStatusCode(StatusCode status)
 {
     _status = status;
 }
 
-StatusCode HttpRequest::getStatusCode() const
+StatusCode	HttpRequest::getStatusCode() const
 {
     return (_status);
 }
 
-const std::string &HttpRequest::getErrorMsg() const
+const std::string	&HttpRequest::getErrorMsg() const
 {
     return (_errorMsg);
 }
 
-const std::string HttpRequest::getHeader(const std::string &field) const
+const std::string	HttpRequest::getHeader(const std::string &field) const
 {
     std::map<std::string, std::vector<std::string> > ::const_iterator header;
     
     header = _headers.find(field);
     if (header != _headers.end())
-    {
-        // if (header->second[0].substr(0, 18) == "multipart/form-data")
-            // return ("multipart/form-data");
         return (header->second[0]);
-    }
     return (std::string());
 }
 
-const std::map<std::string, std::string> &HttpRequest::getFormData() const
+const std::map<std::string, std::string>	&HttpRequest::getFormData() const
 {
     return (_formData);
 }
 
-bool HttpRequest::isSupportedMediaPOST()
+bool	HttpRequest::isSupportedMediaPOST()
 {
     std::string type = getHeader("content-type");
     if (type.empty())
@@ -280,7 +275,7 @@ bool HttpRequest::isSupportedMediaPOST()
     return (false);
 }
 
-bool HttpRequest::isSupportedMediaPOST(const std::string &type)
+bool	HttpRequest::isSupportedMediaPOST(const std::string &type)
 {
     if (type.empty())
         return (false);
@@ -364,3 +359,16 @@ size_t HttpRequest::getBufferSize() const
 	return (_buffer.size());
 }
 
+void	HttpRequest::reset()
+{
+	_request = HttpRequestLine();
+	_headers.clear();
+	_headersN = 0;
+	_buffer.clear();
+	_status = OK;
+	_errorMsg = "";
+	_formData.clear();
+	_parseStep = REQUEST_INIT;
+	_multiFormData.clear();
+	_maxBodySize = 0;
+}

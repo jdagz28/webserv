@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/01 11:20:02 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/10/30 12:53:12 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/11 10:39:17 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,12 +16,12 @@
 #include <fstream>
 #include <sstream>
 
-void Config::parseKeepAlive(std::istringstream &iss)
+void	Config::parseKeepAlive(std::istringstream &iss)
 {
     std::string value;
     std::getline(iss, value);
     trimWhitespaces(value);
-    std::stringstream ss(value);
+	
     if (!value.empty())
     {
         if (value[value.length() - 1] != ';')
@@ -36,6 +36,7 @@ void Config::parseKeepAlive(std::istringstream &iss)
             value = value.substr(0, value.length() - 1);
     }
     int timeout;
+	std::stringstream ss(value);
     ss >> timeout;
     if (ss.fail())
     {
@@ -45,7 +46,7 @@ void Config::parseKeepAlive(std::istringstream &iss)
     _keepAliveTimeOut = timeout;
 }
 
-bool Config::checkErrorPage(const std::string &errorPagePath)
+bool	Config::checkErrorPage(const std::string &errorPagePath)
 {
     for (size_t i = 0; i < errorPagePath.length(); i++)
     {
@@ -55,7 +56,7 @@ bool Config::checkErrorPage(const std::string &errorPagePath)
     return (true);
 }
 
-void Config::parseErrorPages(std::istringstream &iss)
+void	Config::parseErrorPages(std::istringstream &iss)
 {
     std::string value;
     std::getline(iss, value);
@@ -93,7 +94,7 @@ void Config::parseErrorPages(std::istringstream &iss)
     }
 }
 
-void Config::parseHttpDirective(const std::string &token, std::istringstream &iss, std::ifstream &infile)
+void	Config::parseHttpDirective(const std::string &token, std::istringstream &iss, std::ifstream &infile)
 {
     if (token == "keepalive_timeout")
         parseKeepAlive(iss);
@@ -126,7 +127,7 @@ void Config::parseHttpDirective(const std::string &token, std::istringstream &is
     }
 }
 
-void Config::parseHttpBlock(std::ifstream &infile)
+void	Config::parseHttpBlock(std::ifstream &infile)
 {
     std::string line;
     int openingBrace = 0;
@@ -150,7 +151,7 @@ void Config::parseHttpBlock(std::ifstream &infile)
     }
     if (openingBrace != closingBrace)
     {
-        _error = "mismatch braces in http bloc.";
+        _error = "mismatch braces in http block";
         throw configException(_error, _configPath, _parsedLine);
     }
 }

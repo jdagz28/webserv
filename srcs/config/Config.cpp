@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   Config.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jdagoy <jdagoy@student.42.fr>            +#+  +:+       +#+        */
+/*   By: jdagoy <jdagoy@student.s19.be>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/04 22:38:59 by jdagoy            #+#    #+#             */
 /*   Updated: 2025/01/08 15:33:55 by jdagoy          ###   ########.fr       */
@@ -25,15 +25,14 @@ Config::Config(const std::string &configPath)
 }
 
 Config::Config(const Config &copy)
-{
-    _configPath = copy._configPath;
-    _parsedLine = copy._parsedLine;
-    _error = copy._error;
-    _serverConfig = copy._serverConfig;
-    _serverCount = copy._serverCount;
-    _keepAliveTimeOut = copy._keepAliveTimeOut;
-    _errorPages = copy._errorPages;
-}
+    : _configPath(copy._configPath),
+		_parsedLine(copy._parsedLine),
+    	_error(copy._error),
+    	_serverConfig(copy._serverConfig),
+    	_serverCount(copy._serverCount),
+    	_keepAliveTimeOut(copy._keepAliveTimeOut),
+    	_errorPages(copy._errorPages)
+{}
 
 Config::~Config()
 {}
@@ -96,7 +95,7 @@ void    Config::checkFile(const std::string &configPath)
 
 }
 
-void Config::skipEventsBlock(std::ifstream &infile)
+void	Config::skipEventsBlock(std::ifstream &infile)
 {
     std::string line;
     int openingBrace = 0;
@@ -156,7 +155,6 @@ void    Config::parseConfig(const std::string &configFile)
     }
 
     std::string line;
-    
     while (std::getline(infile, line))
     {
         _parsedLine++;
@@ -207,12 +205,12 @@ void    Config::parseConfig(const std::string &configFile)
     }
 }
 
-const std::vector<ServerConfig>& Config::getServerConfig() const
+const std::vector<ServerConfig>	&Config::getServerConfig() const
 {
     return (_serverConfig);
 }
 
-const char *Config::configException::what() const throw()
+const char	*Config::configException::what() const throw()
 {
     if (!configPath.empty() && !parsedLine.empty())
     {
@@ -229,7 +227,7 @@ time_t  Config::getKeepAliveTimeout() const
     return (_keepAliveTimeOut);
 }
 
-std::string Config::getErrorPages() const
+std::string	Config::getErrorPages() const
 {
     std::string errorPages;
     std::map<StatusCode, std::string>::const_iterator it;
@@ -240,7 +238,7 @@ std::string Config::getErrorPages() const
     return (errorPages);
 }
 
-const std::vector<int>& Config::getPortsToServe() const
+const std::vector<int>	&Config::getPortsToServe() const
 {
     return (_portsToServe);
 }

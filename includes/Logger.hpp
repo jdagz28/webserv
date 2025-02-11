@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   Logger.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jdagoy <jdagoy@student.42.fr>            +#+  +:+       +#+        */
+/*   By: jdagoy <jdagoy@student.s19.be>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/05 10:16:19 by jdagoy            #+#    #+#             */
 /*   Updated: 2025/01/14 22:45:12 by jdagoy          ###   ########.fr       */
@@ -30,20 +30,18 @@ class Logger
         Logger(const Logger &copy);
         Logger &operator=(const Logger &copy);
     
-        void listening(int port, std::string *message, const Config &config);
+        void	listening(int port, std::string *message, const Config &config);
         
     public:
         Logger();
         ~Logger();
 
-        void checkConfig(const Config &config);
-        void configError(const std::string &error);
+        void	checkConfig(const Config &config);
+        void	configError(const std::string &error);
 
-        void request(const HttpRequest &request);
-        void response(HttpResponse &response);
-        void acceptedConnection(const sockaddr_in &address, int port);
-
-        //! void generateAccessLog();
+        void	request(const HttpRequest &request);
+        void	response(HttpResponse &response);
+        void	acceptedConnection(const sockaddr_in &address, int port);
 };
 
 #endif

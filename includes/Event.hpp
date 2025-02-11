@@ -23,19 +23,24 @@ class Event
 {
     private:
         clientFD        _fd;
-        Config          _config;
+		int				_epollFD;
+        const Config    &_config;
         HttpRequest*    _request;
         HttpResponse*   _response;
+		bool			_finished;
+		static int 		s_eventCount;
 
+		Event(const Event &copy);
+		Event &operator=(const Event &copy);
         bool    checkServerName();
        
     public:
-        Event(clientFD fd, const Config &config);
+        Event(clientFD fd, int epollFD, const Config &config);
         ~Event();
 
         void    handleEvent(uint32_t events, Logger *log);
-        std::string getResponseKeepAlive();
+        std::string	getResponseKeepAlive() const;
+		bool	isFinished() const;
 };
-
 
 #endif

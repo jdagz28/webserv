@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:11:42 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/05 11:05:10 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/11 10:12:20 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,13 +40,17 @@ class HttpRequest
         std::map<std::string, MultiFormData>                                _multiFormData;
         size_t                                                              _maxBodySize;
         
-
         HttpRequest();
-
-
+		
         void    parseRequestLine(const std::string &line);
         void    parseRequestHeaders(const std::string &line);
         void    parseFormData(const std::string &line);
+		std::string	parseFieldname(const std::string &line, size_t *pos);
+        std::string	parseFieldValue(const std::string &line, size_t *pos);
+        void	splitFormLine(const std::string &line, MultiFormData *form);
+        void	parseUntilBinary(const std::string &boundary, MultiFormData *form);
+        void	parseBinary(const std::string &boundary, MultiFormData *form);
+        void	parseMultipartForm(const std::string &boundary);
 
         std::string     getLineAndPopFromBuffer();
         std::string     extract_token(const std::string &line, size_t &pos, char del);
@@ -55,14 +59,6 @@ class HttpRequest
         std::vector<unsigned char>::iterator findBufferCRLF();
 		size_t  getContentLengthBuffer(const std::string &header);
 
-        std::string parseFieldname(const std::string &line, size_t *pos);
-        std::string parseFieldValue(const std::string &line, size_t *pos);
-        void splitFormLine(const std::string &line, MultiFormData *form);
-        void parseUntilBinary(const std::string &boundary, MultiFormData *form);
-        void parseBinary(const std::string &boundary, MultiFormData *form);
-        void parseMultipartForm(const std::string &boundary);
-        
-    
     public:
         HttpRequest(int client_socket);
         HttpRequest(const HttpRequest &copy);
@@ -73,17 +69,17 @@ class HttpRequest
         void    setStatusCode(StatusCode status);
         void    setMaxBodySize(size_t bodySize);
 
-        const HttpRequestLine& getRequestLine() const;
-        const std::map<std::string, std::vector<std::string> >& getHeaders() const;    
-        std::string getHost() const;
-        StatusCode  getStatusCode() const;
-        const std::string &getErrorMsg() const;
-        const std::string getHeader(const std::string &field) const;
-        const std::map<std::string, MultiFormData> &getMultiFormData() const;
-        const std::map<std::string, std::string> &getFormData() const;
-        std::string getFormData(const std::string &method);
-		size_t  expectedTotalBytes();
-		size_t  getBufferSize() const;
+        const HttpRequestLine	&getRequestLine() const;
+        const std::map<std::string, std::vector<std::string> >	&getHeaders() const;    
+        std::string	getHost() const;
+        StatusCode	getStatusCode() const;
+        const std::string	&getErrorMsg() const;
+        const std::string	getHeader(const std::string &field) const;
+        const std::map<std::string, MultiFormData>	&getMultiFormData() const;
+        const std::map<std::string, std::string>	&getFormData() const;
+        std::string	getFormData(const std::string &method);
+		size_t 	expectedTotalBytes();
+		size_t	getBufferSize() const;
 
         bool    isConnectionClosed() const;
         bool    isMultiPartFormData(std::string *boundary);
@@ -97,7 +93,7 @@ class HttpRequest
         void    requestToBuffer(); 
         void    parseRequestBody();
         void    printBuffer() const;
-
+		void	reset();
 };
 
 

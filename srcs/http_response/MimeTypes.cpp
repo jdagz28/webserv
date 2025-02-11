@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/02 22:18:43 by jdagoy            #+#    #+#             */
-/*   Updated: 2024/11/07 11:43:26 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/11 12:33:11 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 #include <map>
 
 
-std::map<std::string, std::string>& MimeTypes()
+std::map<std::string, std::string>	&MimeTypes()
 {
     static std::map<std::string, std::string> mimeTypes;
     
@@ -148,7 +148,7 @@ std::map<std::string, std::string>& MimeTypes()
     return (mimeTypes);
 }
 
-std::string getMimeType(const std::string &extension)
+std::string	getMimeType(const std::string &extension)
 {
     const std::map<std::string, std::string>& mime_types = MimeTypes();
 

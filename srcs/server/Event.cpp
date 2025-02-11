@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   Event.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jdagoy <jdagoy@student.42.fr>            +#+  +:+       +#+        */
+/*   By: jdagoy <jdagoy@student.s19.be>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/14 13:36:17 by jdagoy           #+#    #+#             */
 /*   Updated: 2025/01/15 14:04:34 by jdagoy          ###   ########.fr       */
@@ -16,16 +16,22 @@
 #include <iostream>
 #include <sys/epoll.h>
 
-Event::Event(clientFD fd, const Config &config)
-    : _fd(fd), _config(config), _request(NULL), _response(NULL)
-{}
+int Event::s_eventCount = 0;
+
+Event::Event(clientFD fd, int epollFD, const Config &config)
+    : _fd(fd), _epollFD(epollFD), _config(config), _request(NULL), _response(NULL), _finished(false)
+{
+	++s_eventCount;
+}
 
 Event::~Event()
 {
-    if (_request)
-        delete _request;
+    delete _request;
     if (_response)
+    {
         delete _response;
+        _response = NULL;
+    }
 }
 
 bool    Event::checkServerName()
@@ -54,63 +60,103 @@ bool    Event::checkServerName()
 
 void    Event::handleEvent(uint32_t events, Logger *log)
 {
-    if (_fd < 0) 
-        throw std::runtime_error("Invalid file descriptor in Event::handleEvent"); //!CHANGE
+    try
+	{
+		if (_fd < 0) 
+			throw std::runtime_error("Invalid file descriptor in Event::handleEvent"); 
 
-    if (events & EPOLLIN)
-    {
-        if (!_request)
-			_request = new HttpRequest(_fd);
-		_request->requestToBuffer();
-		if (!_request->isHeadersComplete())
-			return ;
-		
-		size_t expected = _request->expectedTotalBytes();
-		// std::cout << "Expected total bytes: " << expected << std::endl; //! DELETE
-		// std::cout << "Buffer size is: " << _request->getBufferSize() << std::endl; //! DELETE
-		if (_request->getBufferSize() < expected)
-			return ;
+		if (events & EPOLLIN)
+		{
+			if (!_request)
+				_request = new HttpRequest(_fd);
+			_request->requestToBuffer();
+			if (!_request->isHeadersComplete())
+				return ;
+			
+			size_t expected = _request->expectedTotalBytes();
+			if (_request->getBufferSize() < expected)
+				return ;
 
-		_request->parseHttpRequest();
-        // printHttpRequest(*_request);
-                    
-        if (!_request->getRequestLine().getUri().empty() && checkServerName())
-        {
-            // log->request(*_request);
-            
-            _response = new HttpResponse(*_request, _config, _fd);
-            _response->sendResponse();
-            // log->response(*_response);  
-            // printHttpResponse(_response->getHttpResponse());
-        }
-    }
+			if (_request->getStatusCode() == OK)
+				_request->parseHttpRequest();
+						
+			if (!_request->getRequestLine().getUri().empty() && checkServerName())
+			{
+				log->request(*_request);
+				(void)log;
+				_response = new HttpResponse(*_request, _config, _fd);
 
-    if (events & EPOLLOUT)
-    {
-        if (_response)
-        {
-            _response->sendResponse();
-            log->response(*_response);
-            delete _response;
-            _response = NULL;
+				struct epoll_event ev;
+				ev.data.fd = _fd;
+				ev.events = EPOLLOUT;
+				if (epoll_ctl(_epollFD, EPOLL_CTL_MOD, _fd, &ev) == -1)
+				{
+					perror("epoll_ctl: modify to EPOLLOUT");
+					close(_fd);
+					_finished = true;
+					return;
+				}
+			}
+		}
 
-            if (!_request->isConnectionClosed())
-                return ;
-        }
-        close(_fd);
-        delete this;
-    }
+		if (events & EPOLLOUT)
+		{
+			if (_response)
+			{
+				_response->sendResponse();
+				log->response(*_response);
+				delete _response;
+				_response = NULL;
 
-    if (events & (EPOLLERR | EPOLLHUP))
-    {
-        close(_fd);
-        delete this;
-    }
+				if (!_request->isConnectionClosed())
+				{
+					_finished = false;
+					_request->reset();
+					_response = NULL;
+					return ;
+				}
+			}
+			close(_fd);
+			_finished = true;
+		}
+
+		if (events & (EPOLLERR | EPOLLHUP))
+		{
+			if (_response)
+			{
+				delete _response;
+				_response = NULL;
+			}
+			close(_fd);
+			_finished = true;
+		}	
+	}
+	catch(const std::exception& e)
+	{
+		std::cerr << e.what() << std::endl;
+		if (_response) 
+		{
+			delete _response;
+			_response = NULL;
+		}
+		if (_fd >= 0) 
+		{
+			close(_fd);
+			_fd = -1;
+		}
+		_finished = true;
+	}
+	
 }
 
-std::string Event::getResponseKeepAlive()
+std::string Event::getResponseKeepAlive() const
 {
     std::string response = _response->getHeader("Connection");
 
     return (response);
+}
+
+bool Event::isFinished() const
+{
+	return (_finished);
 }
