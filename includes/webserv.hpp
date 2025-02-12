@@ -26,7 +26,7 @@
 #define MAX_HEADER_LENGTH 1000
 #define DEFAULT_SERVERNAME "webserv"
 #define LOCALHOST "127.0.0.1"
-#define MAX_CLIENTS 100
+#define MAX_CLIENTS 1000
 
 const std::string RED = "\033[0;31m";
 const std::string GREEN = "\033[0;32m";
