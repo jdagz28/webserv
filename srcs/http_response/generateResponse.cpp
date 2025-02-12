@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:11:06 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/11 12:30:18 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/12 11:32:00 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,7 +81,7 @@ void	HttpResponse::addKeepAliveHeader()
         _headers["Keep-Alive"] = keepalive.str();
     }
     else
-        _headers["Connection"] = "close";
+		_headers["Connection"] = "keep-alive";
 }
 
 void	HttpResponse::addAllowHeader()
