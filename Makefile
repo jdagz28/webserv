@@ -6,7 +6,7 @@
 #    By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/05 02:06:08 by jdagoy            #+#    #+#              #
-#    Updated: 2025/02/03 13:28:44 by jdagoy           ###   ########.fr        #
+#    Updated: 2025/02/22 21:04:58 by jdagoy           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -32,7 +32,8 @@ HEADER_LIST			:= webserv.hpp \
 						Logger.hpp \
 						Server.hpp\
 						Socket.hpp\
-						Event.hpp
+						Event.hpp \
+						Cgi.hpp
 HEADER_FILES		:= $(addprefix $(INC_DIR), $(HEADER_LIST))
 
 
@@ -84,7 +85,8 @@ HTTPRESPONSE_SRCS	:= HttpResponse.cpp \
 						generateResponse.cpp \
 						Error.cpp \
 						Post.cpp \
-						Delete.cpp
+						Delete.cpp \
+						Cgi.cpp
 HTTPRESPONSE_OBJS_LIST := $(patsubst %.cpp, %.o, $(HTTPRESPONSE_SRCS))
 HTTPRESPONSE_OBJS	:= $(addprefix $(OBJ_DIR), $(HTTPRESPONSE_OBJS_LIST))
 
