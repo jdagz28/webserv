@@ -77,11 +77,16 @@ void    Server::initServer()
 void    Server::createSockets()
 {
     std::vector<ServerConfig> servers = _config.getServerConfig();
+	std::set<int> createdPorts;
     std::vector<ServerConfig>::iterator it;
 
     for (it = servers.begin(); it != servers.end(); it++)
     {
-        try
+        int itPort = it->getPort();
+		if (createdPorts.find(itPort) != createdPorts.end())
+			continue ; 
+		
+		try
         {
             Socket *socket = new Socket(it->getIP(), it->getPort());
             if (setNonBlocking(socket->getSocketFD()) == -1)
@@ -91,6 +96,7 @@ void    Server::createSockets()
 
             _monitoredFDs[socket->getSocketFD()] = socket;
             _masterFDs.push_back(socket->getSocketFD());
+			createdPorts.insert(itPort);
         }
         catch(const std::exception& e)
         {
