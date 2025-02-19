@@ -28,10 +28,16 @@ void Logger::checkConfig(const Config &config)
     
     std::vector<ServerConfig> servers = config.getServerConfig();
     std::vector<ServerConfig>::iterator it;
-    for (it = servers.begin(); it != servers.end(); it++)
+	std::set<int> printedPorts;
+
+    for (it = servers.begin(); it != servers.end(); ++it)
     {
         int port = it->getPort();
-        listening(port, &message, config);
+        if (printedPorts.find(port) == printedPorts.end())
+        {
+            printedPorts.insert(port);
+            listening(port, &message, config);
+        }
     }
     std::string closing = "==========================================\n";
     std::cout << closing;
