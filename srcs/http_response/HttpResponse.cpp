@@ -200,7 +200,7 @@ ServerConfig	HttpResponse::checkLocConfigAndRequest()
     {
         std::string path = comparePath(*server, _request.getRequestLine());
         _serverName = server->checkServerName(requestHost);
-        if (port == server->getPort())
+        if (port == server->getPort() && _serverName == requestHost)
         {
             config = *server;
             if (!path.empty())
