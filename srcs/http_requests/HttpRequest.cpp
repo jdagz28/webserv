@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:18:22 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/20 09:53:56 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/20 10:26:45 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,19 +126,29 @@ size_t	HttpRequest::getContentLengthBuffer(const std::string &header)
     return (strToInt(lowerHeader.substr(pos, endPos - pos)));
 }
 
-
 void	HttpRequest::requestToBuffer()
 {
     const size_t tempBufferSize = 1024;
     std::vector<unsigned char> tempBuffer(tempBufferSize);
     ssize_t bytesRead = 0;
+	bool dataRead = false;
     
-	for (int i = 0; i < 100; i++)
+	while (true)
 	{
 		bytesRead = recv(_client_socket, &tempBuffer[0], tempBufferSize, 0);
-		if (bytesRead <= 0)
+		if (bytesRead > 0)
+		{
+			_buffer.insert(_buffer.end(), tempBuffer.begin(), tempBuffer.begin() + bytesRead);
+			dataRead = true;
+		}
+		else if (bytesRead == 0)
 			break;
-		_buffer.insert(_buffer.end(), tempBuffer.begin(), tempBuffer.begin() + bytesRead);
+		else
+		{
+			if (!dataRead)
+				throw::std::runtime_error("Error: reading from socket");
+			break ; 
+		}
 	}
 }
 
