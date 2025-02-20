@@ -276,16 +276,23 @@ bool	HttpResponse::isSupportedMedia(const std::string &uri)
 
 void	HttpResponse::sendResponse()
 {
+	size_t totalSent = 0;
+	size_t responseSize = _responseMsg.size();
+
     if (_responseMsg.empty())
-        throw(std::runtime_error("Error: empty response"));
-    ssize_t bytesSent = send(_client_socket, _responseMsg.data(), _responseMsg.size(), 0);
-    if (bytesSent < 0)
 	{
-		if (errno == EAGAIN || errno == EWOULDBLOCK) 
-			return; 
-		throw(std::runtime_error("Error: sending response"));
+        throw(std::runtime_error("Error: empty response"));
 	}
-    _responseMsg.erase(_responseMsg.begin(), _responseMsg.begin() + bytesSent);
+	while (totalSent < responseSize)
+	{
+		ssize_t bytesSent = send(_client_socket, _responseMsg.data(), _responseMsg.size(), 0);
+		if (bytesSent < 0)
+			throw(std::runtime_error("Error: sending response"));
+		if (bytesSent == 0)
+			throw(std::runtime_error("Error: connection closed while sending"));
+		totalSent += bytesSent;
+	}
+    _responseMsg.clear();
     if (_headers["Connection"] != "keep-alive")
     {
         if (close(_client_socket) < 0)

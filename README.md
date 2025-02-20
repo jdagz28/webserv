@@ -121,7 +121,7 @@ The `location` block is used to define how to respond to requests for a specific
         - Deny all except `GET`.
             ```conf
             limit_except GET 
-            {
+            {s
                 deny all;
             }
             ```
@@ -140,5 +140,7 @@ The `location` block is used to define how to respond to requests for a specific
         text/css css;
     }
     ```
+- `cgi_mode`: Specifies if this location block is for cgi. Can be enabled (`on`) or disabled (`off`).
+- `cgi_extension`: Specify the supported cgi scripts.
 
 ---
