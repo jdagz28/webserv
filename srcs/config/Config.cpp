@@ -214,7 +214,7 @@ const char	*Config::configException::what() const throw()
 {
     if (!configPath.empty() && !parsedLine.empty())
     {
-        errorMsg = RED + std::string("webserv: ") + RESET + "[emerg] " + exceptMsg
+        errorMsg = RED + std::string("webserv: ") + RESET + "[error] " + exceptMsg
                     + " in " + RESET + configPath + ":" + RED + parsedLine + std::string(RESET);
         return (errorMsg.c_str());
     }

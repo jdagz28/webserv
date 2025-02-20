@@ -92,13 +92,15 @@ void	HttpResponse::execMethod()
         case POST:
             _request.setMaxBodySize(_locationConfig.getClientMaxBodySize());
             _request.parseRequestBody();
-            if (_request.getFormData("_method") == "DELETE")
-            {
-                processRequestDELETE();
-                break ; 
-            }
-            processRequestPOST();
-            break ;
+			if (!checkPostLocation())
+				break ; 
+			if (_request.getFormData("_method") == "DELETE")
+			{
+				processRequestDELETE();
+				break ; 
+			}
+			processRequestPOST();
+				break ;
         case DELETE:
             processRequestDELETE();
             break ;
@@ -144,8 +146,13 @@ std::string	HttpResponse::comparePath(const ServerConfig &server, const HttpRequ
         }
 
         if (isMatchingPrefix(config_location, target_path))
+		{
             if (path.empty() || path.length() < config_location.length())
+			{
                 path = config_location;
+				return (path);
+			}
+		}
     }
     if (path.empty())
         setStatusCode(NOT_FOUND);

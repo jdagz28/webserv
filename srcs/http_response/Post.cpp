@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:57:50 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/11 13:21:34 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/20 13:00:42 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 #include <fstream>
 #include <sys/stat.h>
 #include <iterator>
+#include <algorithm>
 
 
 void    HttpResponse::processRequestPOST()
@@ -125,4 +126,19 @@ void	HttpResponse::processImageUpload()
             setStatusCode(CREATED);
         }
     }
+}
+
+bool	HttpResponse::checkPostLocation()
+{
+	std::string uri = _request.getRequestLine().getUri();
+	if (_locationConfig.isMethodAllowed("POST"))
+	{
+		std::string path = _locationConfig.getPath();
+		if (uri[uri.size() - 1] == '/')
+			uri = uri.substr(0, uri.size() - 1);
+		if (uri == path)
+			return (true);
+	}
+	setStatusCode(BAD_REQUEST);
+	return (false);
 }
