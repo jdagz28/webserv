@@ -35,7 +35,7 @@
             <ul>
                 <li class="features-list"><a href="/old">Local redirect</a></li>
                 <li class="features-list"><a href="/campus19">External Redirect</a></li>
-                <!-- <li class="features-list"><a href="/old">Redirect to other port</a></li> -->
+                <li class="features-list"><a href="http://cgi.localhost:2121">Redirect to other server config (cgi.localhost:2121)</a></li>
 
             </ul>
             <li>Errors</li>
@@ -69,16 +69,16 @@
                     <span class="command-text">curl -X POST -H "Content-Type: application/x-www-form-urlencoded" -d "q=test" localhost:4242/search</span>
             </div>
             <div class="command-box">
-                <button class="copy-btn" onclick="copyToClipboard('curl -X POST -F "file=@./test.jpg" localhost:4242/html/upload/')">Copy</button>
-                    <span class="command-text">curl -X POST -F "file=@./test.jpg" localhost:4242/html/upload/</span>
+                <button class="copy-btn" onclick="copyToClipboard('curl -X POST -F "file=@./test.jpg" localhost:4242/directory/uploads')">Copy</button>
+                    <span class="command-text">curl -X POST -F "file=@./test.jpg" localhost:4242/directory/uploads</span>
             </div>
         </div>
         <hr class="dotted">
         <h2>DELETE</h2>
         <div class="commands-container">
             <div class="command-box">
-                <button class="copy-btn" onclick="copyToClipboard('curl -i -X DELETE localhost:4242/directory/uploads/?files=test.jpg')">Copy</button>
-                    <span class="command-text">curl -i -X DELETE localhost:4242/directory/uploads/?files=test.jpg</span>
+                <button class="copy-btn" onclick="copyToClipboard('curl -i -X DELETE 'http://localhost:4242/directory/uploads/?files=test.jpg'')">Copy</button>
+                    <span class="command-text">curl -i -X DELETE 'http://localhost:4242/directory/uploads/?files=test.jpg'</span>
             </div>
         </div>
 

@@ -140,5 +140,7 @@ The `location` block is used to define how to respond to requests for a specific
         text/css css;
     }
     ```
+- `cgi_mode`: Determines whether CGI processing is enabled for this location block. Set it `on` to enable CGI support or `off` to disable it.
+- `cgi_extension`: Specifies the file extensions that should be treated as CGI scripts. List the supported extensions (for example, `.py`, `.pl`, `.sh`) that the server will process via the CGI mechanism.
 
 ---
