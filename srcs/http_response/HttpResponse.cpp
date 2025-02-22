@@ -80,9 +80,15 @@ void	HttpResponse::execMethod()
         setStatusCode(NOT_FOUND);
         return ;
     }
-    
     if (!isMethodAllowed(_locationConfig, method))
+	{
         return ;
+	}
+	if (isCGIRequest(_request.getRequestLine().getUri()))
+	{
+		std::cout << "CGI REQUEST" << std::endl;
+		return ;
+	}
     
     switch (checkMethod(method))
     {
@@ -308,4 +314,15 @@ std::string	HttpResponse::cleanURI(std::string uri)
     if (uri[0] == '/')
         uri = uri.substr(1);
     return (uri);
+}
+
+bool	HttpResponse::isCGIRequest(const std::string &uri)
+{
+	std::cout << "URI: " << uri << std::endl;
+	std::string extension = getExtension(uri);
+	std::cout << extension << std::endl;
+
+	if (_locationConfig.isCGIExtensionAllowed(extension))
+		return (true);
+	return (false);
 }

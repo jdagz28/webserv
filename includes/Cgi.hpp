@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/13 23:25:12 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/22 21:05:53 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/22 21:53:24 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,8 @@ class Cgi
 		Cgi(const Cgi &copy);
 		Cgi &operator=(const Cgi &copy);
 
+		bool	isValidScript();
+
 	public:
 		Cgi();
 		Cgi(const std::string &path, const std::map<std::string, std::string> &env);
@@ -35,6 +37,8 @@ class Cgi
 
 		void 	setScriptPath(const std::string &path);
 		void 	setEnv(const std::map<std::string, std::string> &env);
+
+		void	executeCGI();
 };
 
 #endif

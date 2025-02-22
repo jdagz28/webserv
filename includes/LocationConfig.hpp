@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 22:38:51 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/11 10:11:32 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/22 21:25:27 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,7 @@ class LocationConfig
         bool    isRedirect() const;
         bool    isPathAlreadySet(const std::string &path) const;
         bool    isLimitExcept() const;
+		bool	isCGIExtensionAllowed(const std::string &extension) const;
 };
 
 #endif
