@@ -30,8 +30,6 @@ Socket::Socket(const std::string &ip, int port)
         _socketStatus = -1;
         std::cerr << e.what() << std::endl;
     }
-    
-    
 }
 
 Socket::~Socket()

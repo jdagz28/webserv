@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/07 23:05:41 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/22 21:56:50 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/24 00:20:22 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -192,7 +192,6 @@ bool	LocationConfig::isCGIExtensionAllowed(const std::string &extension) const
 	std::vector<std::string>::const_iterator it;
 	for (it = _cgiExtensions.begin(); it != _cgiExtensions.end(); it++)
 	{
-		std::cout << "Extension: " << *it << std::endl;
 		if (*it == extension)
 			return (true);
 	}

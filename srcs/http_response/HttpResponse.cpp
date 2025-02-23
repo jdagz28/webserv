@@ -87,6 +87,11 @@ void	HttpResponse::execMethod()
 	if (isCGIRequest(_request.getRequestLine().getUri()))
 	{
 		std::cout << "CGI REQUEST" << std::endl;
+        std::string cgiConf = _locationConfig.getPath();
+        std::string scriptName = _request.getRequestLine().getUri().substr(cgiConf.length());
+
+        std::cout << scriptName << std::endl;
+        Cgi cgi(scriptName, method);
 		return ;
 	}
     
@@ -332,10 +337,7 @@ std::string	HttpResponse::cleanURI(std::string uri)
 
 bool	HttpResponse::isCGIRequest(const std::string &uri)
 {
-	std::cout << "URI: " << uri << std::endl;
 	std::string extension = getExtension(uri);
-	std::cout << extension << std::endl;
-
 	if (_locationConfig.isCGIExtensionAllowed(extension))
 		return (true);
 	return (false);
