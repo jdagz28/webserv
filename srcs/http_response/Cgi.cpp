@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/13 23:18:08 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/24 12:01:22 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/24 15:08:47 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,7 +95,7 @@ void	Cgi::executeCGI()
 		}
 		std::cout << "Executing CGI script" << std::endl;
 		executeScript(); //! Create Child Process 
-		// parseCGIOutput(); //! Read from pipe
+		parseCGIOutput(); //! Read from pipe
 	}
 	catch(const std::exception &e)
 	{
@@ -165,6 +165,7 @@ void	Cgi::executeScript()
 		char *argv[] = {const_cast<char *>(_path.c_str()), NULL};
 		
 		execve(argv[0], argv, env);
+		delete [] env;
 		exit(1);
 	}
 	else
@@ -183,6 +184,11 @@ void	Cgi::executeScript()
 			buffer[bytesRead] = '\0';
 			ss << buffer;
 		}
+		if (bytesRead == -1)
+		{
+			setStatusCode(INTERNAL_SERVER_ERROR);
+			throw std::runtime_error("Error: Failed to read from pipe");
+		}
 		close (pipe_out[0]);
 
 		// wait for child to finish
@@ -192,4 +198,58 @@ void	Cgi::executeScript()
 		_output = ss.str();
 		std::cout << _output << std::endl;
 	}
+}
+
+void	Cgi::parseCGIOutput()
+{
+	//! Parse headers
+	std::cout << "Parsing CGI Output" << std::endl;
+	std::string keywordCGI = "<html>"; //! Check 
+
+	size_t headerEnd = _output.find(keywordCGI);
+	if (headerEnd == std::string::npos)
+	{
+		setStatusCode(BAD_REQUEST); //! Check status
+		return ; 
+	}
+	std::string headers = _output.substr(0, headerEnd);
+	
+	std::istringstream iss(headers);
+	std::string line;
+	while (std::getline(iss, line))
+	{
+		size_t colonPos = line.find(":");
+		if (colonPos != std::string::npos)
+		{
+			std::string key = line.substr(0, colonPos);
+			std::string value = line.substr(colonPos + 1);
+			trimWhitespaces(key);
+			trimWhitespaces(value);
+			_headers[key] = value;
+		}
+	}
+	_body = _output.substr(headerEnd);
+
+	std::map<std::string, std::string>::iterator it;
+	for (it = _headers.begin(); it != _headers.end(); it++)
+	{
+		std::cout << it->first << ": " << it->second << std::endl;
+	}
+	std::cout << "BODY" << std::endl;
+	std::cout << _body << std::endl;
+}
+
+std::map<std::string, std::string> &Cgi::getHeaders()
+{
+	return (_headers);
+}
+
+std::string &Cgi::getBody()
+{
+	return (_body);
+}
+
+StatusCode	Cgi::getStatusCode()
+{
+	return (_status);
 }

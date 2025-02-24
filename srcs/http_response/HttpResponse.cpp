@@ -86,13 +86,14 @@ void	HttpResponse::execMethod()
 	}
 	if (isCGIRequest(_request.getRequestLine().getUri()))
 	{
-		std::cout << "CGI REQUEST" << std::endl;
         std::string cgiConf = _locationConfig.getPath();
         std::string scriptName = _request.getRequestLine().getUri().substr(cgiConf.length());
 
-        std::cout << scriptName << std::endl;
         Cgi cgi(scriptName, method);
-		return ;
+		setStatusCode(cgi.getStatusCode());
+        _headers = cgi.getHeaders();
+        _body = cgi.getBody();
+        return ;
 	}
     
     switch (checkMethod(method))

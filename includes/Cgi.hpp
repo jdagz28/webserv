@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/13 23:25:12 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/24 00:30:01 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/24 15:02:14 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,12 +21,14 @@
 class Cgi
 {
 	private:
-		std::string 						_scriptName;
-		std::string							_requestMethod;
-		std::map<std::string, std::string> 	_env;
-		std::string 						_output;
-		std::string 						_path;
-		StatusCode							_status;
+		std::string 							_scriptName;
+		std::string								_requestMethod;
+		std::map<std::string, std::string> 		_env;
+		std::string 							_output;
+		std::string 							_path;
+		StatusCode								_status;
+		std::map<std::string, std::string>      _headers;
+		std::string								_body;
 
 		Cgi(const Cgi &copy);
 		Cgi &operator=(const Cgi &copy);
@@ -35,6 +37,7 @@ class Cgi
 		void	executeScript();
 		char	**generateEnv();
 		void	generateFullScriptPath();
+		void	parseCGIOutput();
 
 	public:
 		Cgi();
@@ -45,10 +48,12 @@ class Cgi
 		void	setRequestMethod(const std::string &requestMethod);
 		void 	setStatusCode(StatusCode status);
 
-
 		void 	prepareEnv();
-
 		void	executeCGI();
+
+		std::map<std::string, std::string> &getHeaders();
+		std::string &getBody();
+		StatusCode	getStatusCode();
 };
 
 #endif
