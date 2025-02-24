@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/13 23:18:08 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/24 00:35:47 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/24 12:01:22 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,9 @@
 #include <sys/stat.h>
 #include <cerrno>
 #include <cstring>
+#include <sstream>
+#include <sys/wait.h>
+#include <cstdlib>
 
 Cgi::Cgi()
 {}
@@ -132,14 +135,19 @@ void	Cgi::executeScript()
 	int pipe_in[2];
 	int pipe_out[2];
 	if (pipe(pipe_in) == -1 || pipe(pipe_out) == -1)
+	{
+		setStatusCode(INTERNAL_SERVER_ERROR);
 		throw std::runtime_error("Error: Failed to create pipe");
-
+	}
 	pid_t pid = fork();
 	if (pid == -1)
+	{
+		setStatusCode(INTERNAL_SERVER_ERROR);
 		throw std::runtime_error("Error: Failed to fork process");
-	
+	}
 	if (pid == 0) //! Child Process
 	{
+		std::cout << "Child Process" << std::endl;
 		dup2(pipe_in[0], STDIN_FILENO);
 		dup2(pipe_out[1], STDOUT_FILENO);
 		
@@ -148,14 +156,40 @@ void	Cgi::executeScript()
 
 		char **env = generateEnv();
 		if (env == NULL)
+		{
+			setStatusCode(INTERNAL_SERVER_ERROR);
 			throw std::runtime_error("Error: Failed to generate environment variables");
+		}
+		// std::cout << "Script Path: " << _path << std::endl;
+		//! arguments from request body; parsing
+		char *argv[] = {const_cast<char *>(_path.c_str()), NULL};
 		
-		
-		std::cout << "Char **env" << std::endl;
-		for (int i = 0; env[i] != NULL; i++)
-			std::cout << env[i] << std::endl;
-		std::cout << "End of Char **env" << std::endl;
-		
-		std::cout << "Script Path: " << _path << std::endl;
+		execve(argv[0], argv, env);
+		exit(1);
+	}
+	else
+	{
+		std::cout << "Parent Process" << std::endl;
+		close(pipe_in[0]);
+		close(pipe_out[1]);
+		close(pipe_in[1]);
+
+		// Read child output STDOUT
+		char buffer[1024];
+		std::stringstream ss;
+		ssize_t bytesRead;
+		while ((bytesRead  = read(pipe_out[0], buffer, 1024)) > 0)
+		{
+			buffer[bytesRead] = '\0';
+			ss << buffer;
+		}
+		close (pipe_out[0]);
+
+		// wait for child to finish
+		int status;
+		waitpid(pid, &status, 0);
+	
+		_output = ss.str();
+		std::cout << _output << std::endl;
 	}
 }
