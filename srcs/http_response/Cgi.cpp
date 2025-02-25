@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/13 23:18:08 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/25 14:52:09 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/25 15:12:56 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -266,14 +266,14 @@ char	**Cgi::generateArgs()
 void	Cgi::parseCGIOutput()
 {
 	//! Parse headers
-	std::cout << "Parsing CGI Output" << std::endl;
 	std::string keywordCGI = "<html>"; //! Check 
-
 	size_t headerEnd = _output.find(keywordCGI);
+	if (headerEnd == std::string::npos)
+		headerEnd = _output.find("\n\n");
 	if (headerEnd == std::string::npos)
 	{
 		setStatusCode(BAD_REQUEST); //! Check status
-		return ; 
+		return ;
 	}
 	std::string headers = _output.substr(0, headerEnd);
 	
