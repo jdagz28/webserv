@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/13 23:25:12 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/25 11:09:07 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/25 11:29:14 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@ class Cgi
 		void	generateFullScriptPath();
 		void	parseCGIOutput();
 		void	cleanUpScriptName();
+		char	**generateArgs();
 
 	public:
 		Cgi();

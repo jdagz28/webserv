@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/13 23:18:08 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/25 11:16:24 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/25 11:46:52 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,16 +46,20 @@ Cgi::~Cgi()
 
 void	Cgi::cleanUpScriptName()
 {
-	std::string args = _scriptName.substr(_scriptName.find("?") + 1);
-	std::stringstream iss(args);
-	std::string key;
-	std::string value;
-	while (std::getline(iss, key, '='))
+	if (_scriptName.find("?") != std::string::npos)
 	{
-		std::getline(iss, value, '&');
-		_formData[key] = value;
+		std::string args = _scriptName.substr(_scriptName.find("?") + 1);
+		std::stringstream iss(args);
+		std::string key;
+		std::string value;
+		while (std::getline(iss, key, '='))
+		{
+			std::getline(iss, value, '&');
+			_formData[key] = value;
+		}
+		_scriptName = _scriptName.substr(0, _scriptName.find("?"));
+		_env["QUERY_STRING"] = args;
 	}
-	_scriptName = _scriptName.substr(0, _scriptName.find("?"));
 	// for (std::map<std::string, std::string>::iterator it = _formData.begin(); it != _formData.end(); it++)
 	// {
 	// 	std::cout << it->first << ": " << it->second << std::endl;
@@ -101,6 +105,8 @@ void 	Cgi::prepareEnv()
 	_env["SCRIPT_PATH"] = _path;
 	_env["SERVER_PROTOCOL"] = "HTTP/1.1";
 	_env["UPLOAD_DIR"] = "/website/directory/uploads";
+	if (_env.find("CONTENT_LENGTH") == _env.end())
+		_env["CONTENT_LENGTH"] = "NULL";
 }
 
 void	Cgi::executeCGI()
@@ -173,8 +179,11 @@ void	Cgi::executeScript()
 	if (pid == 0) //! Child Process
 	{
 		std::cout << "Child Process" << std::endl;
-		dup2(pipe_in[0], STDIN_FILENO);
-		dup2(pipe_out[1], STDOUT_FILENO);
+		if (dup2(pipe_in[0], STDIN_FILENO) == -1 || dup2(pipe_out[1], STDOUT_FILENO) == -1)
+		{
+			setStatusCode(INTERNAL_SERVER_ERROR);
+			throw std::runtime_error("Error: Failed to duplicate file descriptor");
+		}
 		
 		close(pipe_in[1]);
 		close(pipe_out[0]);
@@ -185,22 +194,14 @@ void	Cgi::executeScript()
 			setStatusCode(INTERNAL_SERVER_ERROR);
 			throw std::runtime_error("Error: Failed to generate environment variables");
 		}
-		// std::cout << "Script Path: " << _path << std::endl;
-		//! arguments from request body; parsing
-		std::string args;
-		if (!_formData.empty())
-		{
-			std::map<std::string, std::string>::iterator it;
-			for (it = _formData.begin(); it != _formData.end(); it++)
-			{
-				args = it->first + "=" + it->second;
-				if (it != _formData.end())
-					args += " ";
-			}
-		}
-		char *argv[] = {const_cast<char *>(args.c_str()), NULL};
+		char **argv = generateArgs();
 		
-		execve(_path.c_str(), argv, env);
+		if (execve(argv[0], argv, env) == -1)
+		{
+			setStatusCode(INTERNAL_SERVER_ERROR);
+			throw std::runtime_error("Error: Failed to execute script");
+		}
+		delete [] argv;
 		delete [] env;
 		exit(1);
 	}
@@ -229,11 +230,34 @@ void	Cgi::executeScript()
 
 		// wait for child to finish
 		int status;
-		waitpid(pid, &status, 0);
+		if (waitpid(pid, &status, 0) == -1)
+		{
+			setStatusCode(INTERNAL_SERVER_ERROR);
+			throw std::runtime_error("Error: Failed to wait for child process");
+		}
 	
 		_output = ss.str();
 		std::cout << _output << std::endl;
 	}
+}
+
+char	**Cgi::generateArgs()
+{
+	size_t	argCount = _formData.size() + 1;
+	char	**argv = new char*[argCount + 2];
+
+	argv[0] = strdup(_path.c_str());
+	
+	std::map<std::string, std::string>::iterator it;
+	int i = 1;
+	for (it = _formData.begin(); it != _formData.end(); it++)
+	{
+		std::string arg = it->first + "=" + it->second;
+		argv[i] = strdup(arg.c_str());
+		i++;
+	}
+	argv[i] = NULL;
+	return (argv);
 }
 
 void	Cgi::parseCGIOutput()
