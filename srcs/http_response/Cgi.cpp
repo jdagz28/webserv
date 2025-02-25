@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/13 23:18:08 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/25 11:46:52 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/25 14:52:09 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,6 @@ Cgi::Cgi(const std::string &scriptName, const std::string &requestMethod)
 		if (_scriptName.find("?") != std::string::npos)
 			cleanUpScriptName();
 		generateFullScriptPath();
-		std::cout << _path << std::endl; //! DELETE
 		prepareEnv();
 		executeCGI();
 	}
@@ -60,10 +59,6 @@ void	Cgi::cleanUpScriptName()
 		_scriptName = _scriptName.substr(0, _scriptName.find("?"));
 		_env["QUERY_STRING"] = args;
 	}
-	// for (std::map<std::string, std::string>::iterator it = _formData.begin(); it != _formData.end(); it++)
-	// {
-	// 	std::cout << it->first << ": " << it->second << std::endl;
-	// }	//!DELETE
 }
 
 void	Cgi::generateFullScriptPath()
@@ -97,6 +92,22 @@ void 	Cgi::setStatusCode(StatusCode status)
 	_status = status;
 }
 
+std::string	Cgi::generateUploadDir()
+{
+	char cwd[1024];
+	if (getcwd(cwd, sizeof(cwd)) != NULL)
+	{
+		std::string basePath(cwd);
+		std::string fullPath = basePath + "/website/directory/uploads/";
+		return (fullPath);
+	}
+	else
+	{
+		setStatusCode(INTERNAL_SERVER_ERROR);
+		throw std::runtime_error("Error: Failed to get current working directory");
+	}
+}
+
 void 	Cgi::prepareEnv()
 {
 	_env["GATEWAY_INTERFACE"] = "CGI/1.1";
@@ -104,7 +115,7 @@ void 	Cgi::prepareEnv()
 	_env["SCRIPT_FILENAME"] = _scriptName;
 	_env["SCRIPT_PATH"] = _path;
 	_env["SERVER_PROTOCOL"] = "HTTP/1.1";
-	_env["UPLOAD_DIR"] = "/website/directory/uploads";
+	_env["UPLOAD_DIR"] = generateUploadDir();
 	if (_env.find("CONTENT_LENGTH") == _env.end())
 		_env["CONTENT_LENGTH"] = "NULL";
 }
@@ -114,11 +125,7 @@ void	Cgi::executeCGI()
 	try
 	{
 		if (!isValidScript())
-		{
-			std::cout << "Script Invalid" << std::endl; //! DELETE
 			return ;
-		}
-		std::cout << "Executing CGI script" << std::endl;
 		executeScript(); //! Create Child Process 
 		parseCGIOutput(); //! Read from pipe
 	}
@@ -178,7 +185,6 @@ void	Cgi::executeScript()
 	}
 	if (pid == 0) //! Child Process
 	{
-		std::cout << "Child Process" << std::endl;
 		if (dup2(pipe_in[0], STDIN_FILENO) == -1 || dup2(pipe_out[1], STDOUT_FILENO) == -1)
 		{
 			setStatusCode(INTERNAL_SERVER_ERROR);
@@ -207,7 +213,6 @@ void	Cgi::executeScript()
 	}
 	else
 	{
-		std::cout << "Parent Process" << std::endl;
 		close(pipe_in[0]);
 		close(pipe_out[1]);
 		close(pipe_in[1]);
@@ -235,9 +240,7 @@ void	Cgi::executeScript()
 			setStatusCode(INTERNAL_SERVER_ERROR);
 			throw std::runtime_error("Error: Failed to wait for child process");
 		}
-	
 		_output = ss.str();
-		std::cout << _output << std::endl;
 	}
 }
 
@@ -289,14 +292,6 @@ void	Cgi::parseCGIOutput()
 		}
 	}
 	_body = _output.substr(headerEnd);
-
-	std::map<std::string, std::string>::iterator it;
-	for (it = _headers.begin(); it != _headers.end(); it++)
-	{
-		std::cout << it->first << ": " << it->second << std::endl;
-	}
-	std::cout << "BODY" << std::endl;
-	std::cout << _body << std::endl;
 }
 
 std::map<std::string, std::string> &Cgi::getHeaders()
