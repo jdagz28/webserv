@@ -338,8 +338,14 @@ std::string	HttpResponse::cleanURI(std::string uri)
 
 bool	HttpResponse::isCGIRequest(const std::string &uri)
 {
-	std::string extension = getExtension(uri);
-	if (_locationConfig.isCGIExtensionAllowed(extension))
+    std::string extension;
+    if (uri.find("?") != std::string::npos)
+        extension = getExtension(uri.substr(0, uri.find("?")));
+    else
+    {
+        extension = getExtension(uri);
+    }
+    if (_locationConfig.isCGIExtensionAllowed(extension))
 		return (true);
 	return (false);
 }

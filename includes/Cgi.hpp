@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/13 23:25:12 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/24 15:02:14 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/25 11:09:07 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@ class Cgi
 		std::string 							_path;
 		StatusCode								_status;
 		std::map<std::string, std::string>      _headers;
+		std::map<std::string, std::string>	  	_formData;
 		std::string								_body;
 
 		Cgi(const Cgi &copy);
@@ -38,6 +39,7 @@ class Cgi
 		char	**generateEnv();
 		void	generateFullScriptPath();
 		void	parseCGIOutput();
+		void	cleanUpScriptName();
 
 	public:
 		Cgi();
