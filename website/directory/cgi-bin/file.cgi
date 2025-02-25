@@ -3,7 +3,6 @@ import cgi
 import os
 
 # Set the upload directory
-# upload_dir = "/Users/larsbonnefoy/projects/19_Webserv/site/data/uploads"
 upload_dir = os.environ['UPLOAD_DIR']
 if not os.path.exists(upload_dir):
     os.makedirs(upload_dir)
