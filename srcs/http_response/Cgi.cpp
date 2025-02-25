@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/13 23:18:08 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/24 15:08:47 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/25 02:44:20 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,7 +90,6 @@ void	Cgi::executeCGI()
 		if (!isValidScript())
 		{
 			std::cout << "Script Invalid" << std::endl; //! DELETE
-			setStatusCode(BAD_REQUEST); //! Double check Status Code
 			return ;
 		}
 		std::cout << "Executing CGI script" << std::endl;
@@ -109,9 +108,15 @@ bool	Cgi::isValidScript()
 	struct stat 	statbuf;
 
 	if (stat(_path.c_str(), &statbuf) == -1) 
+	{
+		setStatusCode(NOT_FOUND); //! Double check Status Code
 		return (false);
-	if (!(statbuf.st_mode & S_IXUSR)) 
+	}
+	if (!(statbuf.st_mode & S_IXUSR))
+	{
+		setStatusCode(BAD_REQUEST); //! Double check Status Code
 		return (false);
+	}
 	return (true);
 }
 
