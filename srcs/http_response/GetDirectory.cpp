@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 15:15:53 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/11 12:31:31 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/26 12:32:00 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,6 @@ std::string	getTimeStamp(time_t time)
         std::strftime(formatedTime, 30, "%Y-%m-%d %H:%M CET", time_info);
         time_info->tm_hour += 1;
     }
-    
     return (std::string(formatedTime));
 }
 

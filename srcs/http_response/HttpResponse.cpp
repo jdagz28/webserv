@@ -215,7 +215,6 @@ ServerConfig	HttpResponse::checkLocConfigAndRequest()
             return (config);;
         }    
     }
-    std::cout << "ERROR: Server not found" << std::endl;
 
     return (config);
 }
@@ -224,7 +223,7 @@ bool	HttpResponse::isMethodAllowed(const LocationConfig &location, const std::st
 {
     if (!location.isMethodAllowed(requestMethod))
     {
-        setStatusCode(METHOD_NOT_ALLOWED);
+        setStatusCode(NOT_IMPLEMENTED);
         return (false);
     }
     _allowedMethods = location.getAllowedMethods();

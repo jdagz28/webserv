@@ -91,9 +91,9 @@ void    Event::handleEvent(uint32_t events, Logger *log)
 				ev.events = EPOLLOUT;
 				if (epoll_ctl(_epollFD, EPOLL_CTL_MOD, _fd, &ev) == -1)
 				{
-					perror("epoll_ctl: modify to EPOLLOUT");
 					close(_fd);
 					_finished = true;
+					throw std::runtime_error("Error: epoll_ctl failed to modify to EPOLLOUT");
 					return;
 				}
 			}
