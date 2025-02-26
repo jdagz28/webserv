@@ -221,6 +221,11 @@ ServerConfig	HttpResponse::checkLocConfigAndRequest()
 
 bool	HttpResponse::isMethodAllowed(const LocationConfig &location, const std::string &requestMethod)
 {
+	if (location.isDenyMethod(requestMethod))
+	{
+		setStatusCode(METHOD_NOT_ALLOWED);
+		return (false);
+	}
     if (!location.isMethodAllowed(requestMethod))
     {
         setStatusCode(NOT_IMPLEMENTED);

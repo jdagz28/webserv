@@ -44,7 +44,7 @@ int main(int argc, char **argv)
         std::string configPath = getConfigPath(argc, argv);
         
         Config  config(configPath);
-        // printConfigData(config);
+        printConfigData(config);
 
         Server server(config);
         

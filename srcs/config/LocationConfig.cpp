@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/07 23:05:41 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/20 12:51:34 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/26 13:24:22 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -183,4 +183,37 @@ size_t	LocationConfig::getClientMaxBodySize()
             return (static_cast<size_t>(strToInt(directive->second)));
     }
     return (-1);
+}
+
+void	LocationConfig::setDenyMethod(const std::string &method)
+{
+	_denyMethods.push_back(method);
+    std::cout << "Stored deny methods: ";
+    for (size_t i = 0; i < _denyMethods.size(); i++)
+        std::cout << _denyMethods[i] << " ";
+    std::cout << std::endl;
+}
+
+bool	LocationConfig::isDenyMethod(const std::string &method) const
+{
+	if (std::find(_denyMethods.begin(), _denyMethods.end(), "all") != _denyMethods.end())
+	{
+		if (std::find(_allowedMethods.begin(), _allowedMethods.end(), method) == _allowedMethods.end())
+			return (true);
+	}
+		
+	std::vector<std::string>::const_iterator it;
+	for (it = _denyMethods.begin(); it != _denyMethods.end(); it++)
+	{
+		std::cout << *it << std::endl;
+		if (*it == method)
+			return (true);	
+	}
+	return (false);
+}
+
+const std::vector<std::string>	&LocationConfig::getDenyMethods() const
+{
+	std::cout << "Deny methods count: " << _denyMethods.size() << std::endl;
+	return (_denyMethods);
 }
