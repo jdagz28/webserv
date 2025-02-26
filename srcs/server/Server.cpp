@@ -33,7 +33,7 @@ Server::~Server()
 {
     clearSockets();
 	clearClients();
-	if (_eventsQueue > 0)
+	if (_eventsQueue >= 0)
 	{
 		if (close(_eventsQueue) == -1)
 			throw ServerException("Error: Failed to close epoll instance");
