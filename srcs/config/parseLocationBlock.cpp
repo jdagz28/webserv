@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/04 14:50:02 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/26 13:26:36 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/27 09:29:57 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,7 +118,6 @@ void	Config::parseLimitExcept(const std::string &value, std::ifstream &infile, L
 					_error = std::string("invalid value in ") + GREEN + "\"deny\"" + RESET + " directive";
 					throw configException(_error, _configPath, _parsedLine);
 				}
-				std::cout << "Adding deny method: " << values[i] << std::endl; //! DELETE
 				locationConfig.setDenyMethod(values[i]);
 			}
         }
