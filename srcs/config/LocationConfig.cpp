@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/07 23:05:41 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/20 12:51:34 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/27 09:54:30 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,8 @@ LocationConfig::LocationConfig(const LocationConfig &copy)
     : _path(copy.getPath()), 
 		_directives(copy.getDirectives()), 
 		_allowedMethods(copy.getAllowedMethods()), 
-		_cgiExtensions(copy.getCGIExtensions())
+		_cgiExtensions(copy.getCGIExtensions()),
+		_denyMethods(copy.getDenyMethods())
 {}
 
 LocationConfig::~LocationConfig()
@@ -36,6 +37,7 @@ LocationConfig    &LocationConfig::operator=(const LocationConfig &copy)
         _directives = copy.getDirectives();
         _allowedMethods = copy.getAllowedMethods();
         _cgiExtensions = copy.getCGIExtensions();
+		_denyMethods = copy.getDenyMethods();
     }
     return (*this);
 }
@@ -136,7 +138,6 @@ const std::vector<std::string>	&LocationConfig::getCGIExtensions() const
     return (_cgiExtensions);
 }
 
-
 bool	LocationConfig::isMethodAllowed(const std::string &method) const
 {
     if (isLimitExcept() && _allowedMethods.empty())
@@ -183,4 +184,31 @@ size_t	LocationConfig::getClientMaxBodySize()
             return (static_cast<size_t>(strToInt(directive->second)));
     }
     return (-1);
+}
+
+void	LocationConfig::setDenyMethod(const std::string &method)
+{
+	_denyMethods.push_back(method);
+}
+
+bool	LocationConfig::isDenyMethod(const std::string &method) const
+{
+	if (std::find(_denyMethods.begin(), _denyMethods.end(), "all") != _denyMethods.end())
+	{
+		if (std::find(_allowedMethods.begin(), _allowedMethods.end(), method) == _allowedMethods.end())
+			return (true);
+	}
+		
+	std::vector<std::string>::const_iterator it;
+	for (it = _denyMethods.begin(); it != _denyMethods.end(); it++)
+	{
+		if (*it == method)
+			return (true);	
+	}
+	return (false);
+}
+
+const std::vector<std::string>	&LocationConfig::getDenyMethods() const
+{
+	return (_denyMethods);
 }

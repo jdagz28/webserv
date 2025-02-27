@@ -215,18 +215,23 @@ ServerConfig	HttpResponse::checkLocConfigAndRequest()
             return (config);;
         }    
     }
-    std::cout << "ERROR: Server not found" << std::endl;
 
     return (config);
 }
 
 bool	HttpResponse::isMethodAllowed(const LocationConfig &location, const std::string &requestMethod)
 {
-    if (!location.isMethodAllowed(requestMethod))
-    {
-        setStatusCode(METHOD_NOT_ALLOWED);
-        return (false);
-    }
+	if (checkMethod(requestMethod) == ErrorMethod)
+	{
+		setStatusCode(NOT_IMPLEMENTED);
+		return (false);
+	}
+	if (location.isDenyMethod(requestMethod) && !location.isMethodAllowed(requestMethod))
+	{
+		setStatusCode(METHOD_NOT_ALLOWED);
+		return (false);
+	}
+    
     _allowedMethods = location.getAllowedMethods();
     return (true);
 }

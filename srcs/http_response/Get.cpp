@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:05:38 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/11 12:30:53 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/27 10:06:07 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,6 +110,11 @@ void 	HttpResponse::getResourceContent(const std::string &file_path)
         setStatusCode(NOT_FOUND);
         return;
     }
+	if (access(file_path.c_str(), R_OK) != 0)
+    {
+        setStatusCode(FORBIDDEN);
+        return;
+    }
     
     std::ifstream infile(file_path.c_str(), std::ios::binary);
     if (!infile.is_open())
@@ -122,6 +127,11 @@ void 	HttpResponse::getResourceContent(const std::string &file_path)
     infile.seekg(0, std::ios::beg); 
     _body.resize(fileSize);
     infile.read(&_body[0], fileSize); 
+	if (infile.gcount() != fileSize) 
+	{
+		setStatusCode(INTERNAL_SERVER_ERROR);
+		return;
+	}
     infile.close();
     
     if (!isSupportedMedia(file_path))

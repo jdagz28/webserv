@@ -126,8 +126,6 @@ int    Socket::acceptSocket()
     int client_socket = accept(_socketFD, (struct sockaddr*)&client_addr, &client_len);
     if (client_socket == -1)
     {
-        std::cerr << "Error: Failed to accept connection. Errno: " 
-                  << errno << " (" << std::strerror(errno) << ")" << std::endl;
         _socketStatus = -1;
         throw SocketException("Error: Failed to accept connection");
     }

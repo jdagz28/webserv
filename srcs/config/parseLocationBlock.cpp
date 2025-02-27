@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/04 14:50:02 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/11 10:44:38 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/27 09:29:57 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,16 +103,23 @@ void	Config::parseLimitExcept(const std::string &value, std::ifstream &infile, L
             continue ;
         if (token == "}")
             break ;
-        if (openingBrace == 1 && token == "deny;")
+        if (openingBrace == 1 && token == "deny")
         {
             std::string value;
             std::getline(iss, value);
-            trimWhitespaces(value);
-            if (value != "all")
-            {
-                _error = std::string("invalid value in ") + GREEN + "\"deny\"" + RESET + " directive";
-                throw configException(_error, _configPath, _parsedLine);
-            }
+			std::vector<std::string> values = splitBySpaces(value);
+			for (size_t i = 0 ; i < values.size(); i++)
+			{
+				trimWhitespaces(values[i]);	
+				if ((values[i])[values[i].length() - 1] == ';')
+					values[i] = values[i].substr(0, values[i].length() - 1);
+				if (values[i] != "all" && values[i] != "GET" && values[i] != "POST" && values[i] != "DELETE")
+				{
+					_error = std::string("invalid value in ") + GREEN + "\"deny\"" + RESET + " directive";
+					throw configException(_error, _configPath, _parsedLine);
+				}
+				locationConfig.setDenyMethod(values[i]);
+			}
         }
     }
     if (openingBrace != closingBrace)
