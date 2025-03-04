@@ -114,3 +114,29 @@ std::string toLower(const std::string &str)
         lower[i] = std::tolower(static_cast<unsigned char>(str[i]));
     return (lower);
 }
+
+std::string	cleanMessage(const std::string &message)
+{
+	std::string decoded;
+	decoded.reserve(message.size());
+
+	for (size_t i = 0; i < message.size(); i++)
+	{
+		if (message[i] == '%')
+		{
+			if (i + 2 < message.size())
+			{
+				int value = 0;
+				std::istringstream iss(message.substr(i + 1, 2));
+				iss >> std::hex >> value;
+				decoded += static_cast<char>(value);
+				i += 2;
+			}
+		}
+		else if (message[i] == '+')
+			decoded += ' ';
+		else
+			decoded += message[i];
+	}
+	return (decoded);
+}
