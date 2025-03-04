@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/25 12:44:49 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/11 12:28:07 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/04 13:49:41 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -183,7 +183,12 @@ void	HttpRequest::parseRequestBody()
     {
         setStatusCode(BAD_REQUEST);
         return ;
-    }
+	}
+	if (static_cast<size_t>(strToInt(contentLen)) > _maxBodySize)
+	{
+		setStatusCode(PAYLOAD_TOO_LARGE);
+		return ;
+	}
     std::string type = getHeader("content-type");
     if (type.empty())
     {

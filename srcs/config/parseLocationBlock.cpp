@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/04 14:50:02 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/27 09:29:57 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/04 13:51:05 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -197,14 +197,13 @@ void	Config::parseRoot(const std::string &value, LocationConfig &locationConfig)
 
 void	Config::parseClientBodySize(std::string &value, LocationConfig &locationConfig)
 {
-    if (value[value.length() - 1] != 'M' && value[value.length() - 1] != 'm')
-    {
-        _error = std::string("invalid value in ") + GREEN + "\"" + "client_max_body_size" + "\"" + RESET;
-        throw configException(_error, _configPath, _parsedLine);
-    }
-    value = value.substr(0, value.length() - 1);
-    int converted = strToInt(value);
-    if (converted < 0 || converted > 10)
+    if ((value[value.length() - 1] == 'M' || value[value.length() - 1] == 'm'))
+	{
+		value = value.substr(0, value.length() - 1);
+		locationConfig.setMaxBodyMode("M");
+	}
+	int converted = strToInt(value);
+    if (converted <= 0)
     {
         _error = std::string("invalid value in ") + GREEN + "\"" + "client_max_body_size" + "\"" + RESET;
         throw configException(_error, _configPath, _parsedLine);

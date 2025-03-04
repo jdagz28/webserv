@@ -90,8 +90,13 @@ void	HttpResponse::execMethod()
             processRequestGET();
             break ;
         case POST:
-            _request.setMaxBodySize(_locationConfig.getClientMaxBodySize());
+            _request.setMaxBodySize(_locationConfig.getClientMaxBodySize(), _locationConfig.getMaxBodyMode());
             _request.parseRequestBody();
+			if (_request.getStatusCode() != OK)
+			{
+				setStatusCode(_request.getStatusCode());
+				break ;
+			}
 			if (!checkPostLocation())
 				break ; 
 			if (_request.getFormData("_method") == "DELETE")
