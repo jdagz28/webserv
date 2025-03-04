@@ -84,6 +84,10 @@
         </ul>
         <div class="commands-container">
             <div class="command-box">
+                <button class="copy-btn" onclick="copyToClipboard('curl -X POST -H "Content-Type: application/x-www-form-urlencoded" --data "message=BODY IS HERE write " localhost:4242/post-body  ')">Copy</button>
+                    <span class="command-text">curl -X POST -H "Content-Type: application/x-www-form-urlencoded" --data "message=BODY IS HERE write " localhost:4242/post-body  </span>
+            </div>
+            <div class="command-box">
                 <button class="copy-btn" onclick="copyToClipboard('curl -X POST -H "Content-Type: application/x-www-form-urlencoded" -d "q=test" localhost:4242/search')">Copy</button>
                     <span class="command-text">curl -X POST -H "Content-Type: application/x-www-form-urlencoded" -d "q=test" localhost:4242/search</span>
             </div>
