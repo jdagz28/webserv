@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/04 14:50:02 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/03/04 13:51:05 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/04 21:16:55 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -173,11 +173,11 @@ void	Config::parseIndex(const std::string &value, LocationConfig &locationConfig
             throw configException(_error, _configPath, _parsedLine);
         }
     }
-    if (value.substr(value.size() - 5) != ".html")
-    {
-        _error = std::string("invalid value in ") + GREEN + "\"index\"" + RESET + " directive";
-        throw configException(_error, _configPath, _parsedLine);
-    }
+    // if (value.substr(value.size() - 5) != ".html")
+    // {
+    //     _error = std::string("invalid value in ") + GREEN + "\"index\"" + RESET + " directive";
+    //     throw configException(_error, _configPath, _parsedLine);
+    // }
     locationConfig.setDirective("index", value);
 }
 
@@ -203,7 +203,7 @@ void	Config::parseClientBodySize(std::string &value, LocationConfig &locationCon
 		locationConfig.setMaxBodyMode("M");
 	}
 	int converted = strToInt(value);
-    if (converted <= 0)
+    if (converted < 0)
     {
         _error = std::string("invalid value in ") + GREEN + "\"" + "client_max_body_size" + "\"" + RESET;
         throw configException(_error, _configPath, _parsedLine);
