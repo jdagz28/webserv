@@ -80,10 +80,9 @@ void	HttpResponse::execMethod()
         setStatusCode(NOT_FOUND);
         return ;
     }
-    
     if (!isMethodAllowed(_locationConfig, method))
         return ;
-    
+        
     switch (checkMethod(method))
     {
         case GET:
@@ -138,9 +137,18 @@ std::string	HttpResponse::comparePath(const ServerConfig &server, const HttpRequ
         return(std::string());
     std::vector<LocationConfig>::const_iterator location;
 
+    std::string uriExtension = getExtension(target_path);
+
     for (location = locationConfigs.begin(); location != server.getLocationConfig().end(); location++)
     {
         std::string config_location = location->getPath();
+        if (config_location[0] == '.')
+        {
+            std::string cleanLocPath = config_location.substr(1);
+            if (uriExtension == cleanLocPath)
+                return (config_location);
+        }
+
         if (config_location == target_path || (target_path + "/") == config_location)
             return (config_location);
         if (target_path == "/index.html")
@@ -211,6 +219,7 @@ ServerConfig	HttpResponse::checkLocConfigAndRequest()
     for (server = serverConfigs.begin(); server != serverConfigs.end(); server++)
     {
         std::string path = comparePath(*server, _request.getRequestLine());
+
         _serverName = server->checkServerName(requestHost);
         if (port == server->getPort() && _serverName == requestHost)
         {
