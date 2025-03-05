@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/04 14:50:02 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/03/04 21:16:55 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/05 09:31:49 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -307,7 +307,7 @@ void	Config::parseLocationBlock(std::ifstream &infile, LocationConfig &locationC
     int openingBrace = 0;
     int closingBrace = 0;
     
-    while(std::getline(infile, line))
+    while (std::getline(infile, line))
     {
         _parsedLine++;
         trimWhitespaces(line);
@@ -328,6 +328,72 @@ void	Config::parseLocationBlock(std::ifstream &infile, LocationConfig &locationC
     if (openingBrace != closingBrace)
     {
         _error = "mismatch braces in location block";
+        throw configException(_error, _configPath, _parsedLine);
+    }
+}
+
+void	Config::parseExtensionLocation(std::ifstream &infile, LocationConfig &locationConfig)
+{
+	std::string line;
+	int openingBrace = 0;
+	int closingBrace = 0;
+
+	while (std::getline(infile, line))
+	{
+		_parsedLine++;
+		trimWhitespaces(line);
+		if (line.empty() || line[0] == '#')
+			continue ;
+
+		std::istringstream iss(line);
+		std::string token;
+		iss >> token;
+		
+		checkBraces(token, openingBrace, closingBrace);
+		if (token == "{")
+			continue ;
+		if (token == "}")
+			break ;
+		parseExtensionLocationDirective(token, iss, infile, locationConfig);
+	}
+}
+
+bool	Config::validExtensionLocationDirective(const std::string &token)
+{
+	if ( token == "limit_except" || token == "client_max_body_size" || token == "cgi_mode")
+		return (true);
+	return (false);
+}
+
+void	Config::parseExtensionLocationDirective(const std::string &token, std::istringstream &iss, std::ifstream &infile, LocationConfig &locationConfig)
+{
+	if (validExtensionLocationDirective(token))
+    {
+        std::string value;
+        std::getline(iss, value);
+        trimWhitespaces(value);
+        if (token == "limit_except")
+            parseLimitExcept(value,  infile, locationConfig);
+        else
+        {       
+            if (value[value.length() - 1]  != ';')
+            {
+                _error = std::string("missing semicolon at the end of directive ") + GREEN + "\"" + token + "\"" + RESET;
+                throw configException(_error, _configPath, _parsedLine);
+            }
+            value = value.substr(0, value.length() - 1);
+            checkValueNum(token, value);
+            if (token == "client_max_body_size")
+                parseClientBodySize(value, locationConfig);
+            else if (token == "cgi_mode")
+                parseCGIMode(value, locationConfig);
+        }
+		if (!locationConfig.isCGIMode())
+			locationConfig.setDirective("cgi_mode", "on");
+	}
+    else
+    {
+        _error = "invalid directive in location block";
         throw configException(_error, _configPath, _parsedLine);
     }
 }

@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/07 23:05:41 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/03/04 13:41:16 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/05 09:25:45 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -223,4 +223,18 @@ void	LocationConfig::setMaxBodyMode(const std::string &mode)
 const std::string	LocationConfig::getMaxBodyMode() const
 {
 	return (_maxBodyMode);
+}
+
+bool	LocationConfig::isCGIDirectiveSet() const
+{
+	if (_directives.find("cgi_extension") != _directives.end())
+		return (true);
+	return (false);
+}
+
+bool	LocationConfig::isCGIMode() const
+{
+	if (_directives.find("cgi_mode") != _directives.end())
+		return (true);
+	return (false);
 }

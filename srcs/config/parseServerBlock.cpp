@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/02 11:19:31 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/11 10:45:26 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/05 09:35:59 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -169,7 +169,14 @@ void	Config::parseServerDirective(const std::string &token, std::istringstream &
             _error = std::string("duplicate location ") + GREEN + "\"" + value + "\"" + RESET;
             throw configException(_error, _configPath, _parsedLine);
         }
-        parseLocationBlock(infile, locationConfig);
+		if (value[0] == '.')
+		{
+			parseExtensionLocation(infile, locationConfig);
+			locationConfig.setCGIExtension(value);
+			locationConfig.setDirective("cgi_extension", value);
+		}
+		else
+        	parseLocationBlock(infile, locationConfig);
         locationConfig.setPath(value);
         serverConfig.setLocationConfig(locationConfig);
         serverConfig.setLocationPath(value);

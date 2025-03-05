@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 22:38:51 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/03/04 13:39:34 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/05 09:25:23 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,6 +59,8 @@ class LocationConfig
         bool    isPathAlreadySet(const std::string &path) const;
         bool    isLimitExcept() const;
 		bool	isDenyMethod(const std::string &method) const;
+		bool	isCGIDirectiveSet() const;
+		bool	isCGIMode() const;
 };
 
 #endif
