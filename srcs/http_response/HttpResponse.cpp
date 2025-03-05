@@ -119,13 +119,7 @@ static bool	isMatchingPrefix(const std::string &pattern, const std::string &targ
     if (pattern.empty() || target.empty())
         return (false);
     std::string target_prefix = target.substr(0, pattern.length());
-    if (pattern == target_prefix)
-    {
-        if (pattern == "/" && target != "/")
-            return (false);
-        return (true);
-    }
-    return (false);
+    return (pattern == target_prefix);
 }
 
 std::string	HttpResponse::comparePath(const ServerConfig &server, const HttpRequestLine &request)
@@ -139,11 +133,19 @@ std::string	HttpResponse::comparePath(const ServerConfig &server, const HttpRequ
     std::vector<LocationConfig>::const_iterator location;
 
     std::string uriExtension = getExtension(target_path);
+    bool slashAutoIndex = false;
+    bool slash= false;
 
-    for (location = locationConfigs.begin(); location != server.getLocationConfig().end(); location++)
+    for (location = locationConfigs.begin(); location != locationConfigs.end(); location++)
     {
         std::string config_location = location->getPath();
-        if (config_location[0] == '.')
+        if (config_location == "/")
+        {
+            slash = true;
+            slashAutoIndex = _locationConfig.getAutoIndex() == "on";
+            std::cout << "slashAutoIndex: " << slashAutoIndex << std::endl;
+        }
+        if (!config_location.empty() && config_location[0] == '.')
         {
             std::string cleanLocPath = config_location.substr(1);
             if (uriExtension == cleanLocPath)
@@ -158,15 +160,18 @@ std::string	HttpResponse::comparePath(const ServerConfig &server, const HttpRequ
                 path = config_location;
             continue;
         }
-
         if (isMatchingPrefix(config_location, target_path))
 		{
             if (path.empty() || path.length() < config_location.length())
-			{
                 path = config_location;
-				return (path);
-			}
 		}
+    }
+    std::cout << "slash: " << slash << std::endl;
+    std::cout << "slashAutoIndex: " << slashAutoIndex << std::endl;
+    if (slash && slashAutoIndex)
+    {
+        
+        return ("/");
     }
     if (path.empty())
         setStatusCode(NOT_FOUND);
@@ -179,6 +184,7 @@ LocationConfig	HttpResponse::getLocationConfig()
     LocationConfig location;
     
     std::string path = comparePath(_serverConfig, _request.getRequestLine());
+    std::cout << "Returned Path: " << path << std::endl;
     if (path.empty())
         return (location);
     
@@ -190,6 +196,7 @@ LocationConfig	HttpResponse::getLocationConfig()
     {
         if (loc->getPath() == path)
         {
+            std::cout << "Location Path: " << loc->getPath() << std::endl;
             location = *loc;
             return (location);
         }
@@ -219,10 +226,10 @@ ServerConfig	HttpResponse::checkLocConfigAndRequest()
     std::vector<ServerConfig>::const_iterator server;
     for (server = serverConfigs.begin(); server != serverConfigs.end(); server++)
     {
-        std::string path = comparePath(*server, _request.getRequestLine());
         _serverName = server->checkServerName(requestHost);
         if (port == server->getPort() && _serverName == requestHost)
         {
+            std::string path = comparePath(*server, _request.getRequestLine());
             config = *server;
             if (!path.empty())
                 config.setValid();
@@ -254,13 +261,10 @@ std::string	HttpResponse::checkRoot(const std::string &path)
 {
     std::string rootpath;
 
-    std::cout << "Location Path " << _locationConfig.getPath() << std::endl;
     std::string config_location = _locationConfig.getPath();
     if (path.find(config_location) != std::string::npos)
     {
-        std::cout << "Getting the Root Path" << std::endl;
         rootpath = _locationConfig.getRoot();
-        std::cout << "Root Path: " << rootpath << std::endl;
         return (rootpath);
     }
     return (std::string());

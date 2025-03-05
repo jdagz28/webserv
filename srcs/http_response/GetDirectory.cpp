@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 15:15:53 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/03/05 16:59:04 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/05 19:34:27 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,10 +56,33 @@ std::string	getTimeStamp(time_t time)
     return (std::string(formatedTime));
 }
 
+std::string HttpResponse::getParentPath(const std::string &path)
+{
+    std::string root = _locationConfig.getRoot();
+    std::string rootRemoved = path.substr(root.length());
+    if (rootRemoved.empty() || rootRemoved == "/")
+        return "/";
+    if (rootRemoved[0] == '/')
+        rootRemoved = rootRemoved.substr(1);
+    size_t pos = rootRemoved.find_last_of('/');
+    if (pos == std::string::npos)
+        return "";
+    return rootRemoved.substr(0, pos);
+}
+
+std::string HttpResponse::getDirBase()
+{
+    return (_locationConfig.getPath());
+}
+
 void	HttpResponse::generateDirPage(const std::string &path, std::set<FileData> &directories, std::set<FileData> &files)
 {
     _headers["Location"] = _request.getHost() + "/" + path;
     std::ostringstream html;
+
+    std::string dirBase = getDirBase();
+    std::cout << "Dir Base: " << dirBase << std::endl; //! DELETE
+    
     
     html << "<!DOCTYPE html>\r\n";
     html << "<html lang=\"en\">\r\n\r\n";
@@ -75,24 +98,27 @@ void	HttpResponse::generateDirPage(const std::string &path, std::set<FileData> &
     html << "\t<nav class=\"navbar\">\r\n";
     html << "\t\t<ul class=\"nav-list\">\r\n";
     html << "\t\t\t<li class=\"nav-item\"><a href=\"/\">Home</a></li>\r\n";
-    html << "\t\t\t<li class=\"nav-item\"><a href=\"/html/features.html\">Features</a></li>\r\n";
-    html << "\t\t\t<li class=\"nav-item\"><a href=\"/directory\">Directory</a></li>\r\n";
-    html << "\t\t\t<li class=\"nav-item\"><a href=\"/html/search.html\">Search</a></li>\r\n";
-    html << "\t\t\t<li class=\"nav-item\"><a href=\"/html/about.html\">About Us</a></li>\r\n";
+    if (_locationConfig.getRoot() == "website")
+    {
+        html << "\t\t\t<li class=\"nav-item\"><a href=\"/html/features.html\">Features</a></li>\r\n";
+        html << "\t\t\t<li class=\"nav-item\"><a href=\"/directory\">Directory</a></li>\r\n";
+        html << "\t\t\t<li class=\"nav-item\"><a href=\"/html/search.html\">Search</a></li>\r\n";
+        html << "\t\t\t<li class=\"nav-item\"><a href=\"/html/about.html\">About Us</a></li>\r\n";
+    }
+    
     html << "\t\t</ul>\r\n";
     html << "\t</nav>\r\n\r\n";
     html << "\t<div class=\"directory\">\r\n";
     html << "\t\t<h1>Index of " << path << "</h1>\r\n";
 
-    if (!path.empty() && path != "/directory") 
+    if (!path.empty()) 
     {
-        size_t pos = path.find("website/");
-        if (pos != std::string::npos)
-            pos += std::string("website/").length();
-        else
-            pos = 0;
-        std::string parentPath = path.substr(pos, path.find_last_of('/') - pos);
-        html << "\t\t<p><a href=\"http://" << _request.getHost() << "/" << parentPath << "\">⬅️ Move up</a></p>\r\n";
+        std::string parentPath = getParentPath(path);
+        std::cout << "Parent Path: " << parentPath << std::endl; //! DELETE
+        if (!parentPath.empty() && parentPath[0] != '/')
+            parentPath = "/" + parentPath;
+        if (!parentPath.empty())
+            html << "\t\t<p><a href=\"http://" << _request.getHost() << parentPath << "\">⬅️ Move up</a></p>\r\n";
     }
 
     if (path == "website/directory/uploads")
@@ -137,11 +163,15 @@ void	HttpResponse::generateDirPage(const std::string &path, std::set<FileData> &
         html << "\t\t\t</thead>";
         html << "\t\t\t<tbody>\r\n";
 
+        std::string uri = _request.getRequestLine().getUri();
+        if (uri[uri.length() - 1] != '/' || uri.empty())
+            uri += "/";
+
         std::set<FileData>::iterator itDir;
         for (itDir = directories.begin(); itDir != directories.end(); ++itDir)
         {
             html << "\t\t\t<tr>\r\n";
-            html << "\t\t\t\t<td><a href=\"" + _request.getRequestLine().getUri() + "/" + itDir->filename + "/\">" + "📁 " + itDir->filename + "</a></td>\r\n";
+            html << "\t\t\t\t<td><a href=\"" + uri + itDir->filename + "/\">" + "📁 " + itDir->filename + "</a></td>\r\n";
             html << "\t\t\t\t<td>--</td>\r\n";  
             html << "\t\t\t\t<td>" + itDir->lastModified + "</td>\r\n";
             html << "\t\t\t</tr>\r\n";
@@ -157,7 +187,7 @@ void	HttpResponse::generateDirPage(const std::string &path, std::set<FileData> &
                 emoji = "🌐 ";
             else if (extension == "jpg" || extension == "jpeg" || extension == "png" || extension == "bmp" || extension == "gif")
                 emoji = "🖼️ ";
-            html << "\t\t\t\t<td><a href=\"" + _request.getRequestLine().getUri() + "/" + itFiles->filename + "\">" + emoji + itFiles->filename + "</a></td>\r\n";
+            html << "\t\t\t\t<td><a href=\"" + uri + itFiles->filename + "\">" + emoji + itFiles->filename + "</a></td>\r\n";
             html << "\t\t\t\t<td>" + toString(itFiles->size) + " bytes</td>\r\n"; 
             html << "\t\t\t\t<td>" + itFiles->lastModified + "</td>\r\n";
             html << "\t\t\t</tr>\r\n";
@@ -189,11 +219,15 @@ void	HttpResponse::generateDirList(std::string path)
     std::string uri = cleanURI(_request.getRequestLine().getUri());
     // if (path.find(uri) == std::string::npos)
     // {
+    //     std::string dirPath = _locationConfig.getRoot() + path;
+    //     std::cout << "Directory Path: " << dirPath << std::endl;
     //     size_t addPath = uri.find("directory/");
     //     path = path + uri.substr(addPath + 10);
     //     if (path[path.size() - 1] == '/')
     //         path = path.substr(0, path.size() - 1);
     // }
+    path = cleanURI(path);
+    std::cout << "Path: " << path << std::endl;
     dir = opendir(path.c_str());
     if (dir == NULL)
     {
