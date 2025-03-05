@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Cgi.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: romvan-d <romvan-d@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rom1 <rom1@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 19:52:54 by romvan-d          #+#    #+#             */
-/*   Updated: 2025/03/03 18:26:30 by romvan-d         ###   ########.fr       */
+/*   Updated: 2025/03/05 18:18:59 by rom1             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,11 +43,13 @@ Cgi::Cgi(HttpRequestLine & requestLine, HttpRequest & request, std::string path,
 	this->args.push_back("");
 	this->env["REQUEST_METHOD="] = requestLine.getMethod();
 	this->env["UPLOAD_DIR="] = uploadDir;
+	std::string uri = requestLine.getUri();
+	size_t querryPos = uri.find("?");
 	
 	if (requestLine.getMethod() == "GET")
 	{
 		this->whichMethod = 0;
-		this->data = //need the query string;
+		this->data = uri.substr(querryPos + 1);//need the query string;
 		this->env["CONTENT_LENGTH="] = "NULL";
 		this->env["QUERRY_STRING="] = this->data;
 	}
@@ -59,7 +61,7 @@ Cgi::Cgi(HttpRequestLine & requestLine, HttpRequest & request, std::string path,
 		this->env["QUERRY_STRING="] = "NULL";
 	}
 
-	std::map<std::string, std::string> requestHeaderInfos = request.getHeader();
+	std::map<std::string, std::string> requestHeaderInfo = request.getHeader();
 	this->env["CONTENT_TYPE="] = requestHeaderInfo["Content-Type"];
     this->env["HTTP_ACCEPT="] = requestHeaderInfo["Accept"];
     this->env["HTTP_ACCEPT_ENCODING="] = requestHeaderInfo["Accept-Encoding"];
@@ -178,7 +180,7 @@ std::string Cgi::runCgi()
 		if (this->whichMethod == POST)
 		{
 			char const * writingRecipient = this->data.c_str();
-			if (write(fileno(tmpFileWrite), writingRecipient, this->data.length())_ == -1)
+			if (write(fileno(tmpFileWrite), writingRecipient, this->data.length()) == -1)
 			{
 				std::exit(1);
 			}
