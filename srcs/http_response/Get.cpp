@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:05:38 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/27 10:06:07 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/05 16:48:05 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,6 +81,8 @@ void	HttpResponse::getResource(const std::string &target_path)
     std::string indexPath;
         
     std::string uri = cleanURI(_request.getRequestLine().getUri());
+    if (uri == "/")
+        uri = _locationConfig.getIndex();
     if (isSupportedMedia(uri))
     {
         std::string resourceName = extractResourceName(uri);
@@ -147,6 +149,8 @@ void 	HttpResponse::getResourceContent(const std::string &file_path)
 
 std::string	HttpResponse::extractResourceName(const std::string &uri)
 {
+    if (uri == "/")
+        return (_locationConfig.getIndex());
     size_t  lastSlashPos = uri.find_last_of('/');
     if (lastSlashPos != std::string::npos && lastSlashPos + 1 < uri.length())
         return (uri.substr(lastSlashPos + 1));

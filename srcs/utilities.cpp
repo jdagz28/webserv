@@ -140,3 +140,11 @@ std::string	cleanMessage(const std::string &message)
 	}
 	return (decoded);
 }
+
+std::string lastSlash(const std::string &str)
+{
+    size_t lastSlashPos = str.find_last_of('/');
+    if (lastSlashPos != std::string::npos)
+        return (str.substr(0, lastSlashPos + 1));
+    return (std::string());
+}

@@ -80,9 +80,10 @@ void	HttpResponse::execMethod()
         setStatusCode(NOT_FOUND);
         return ;
     }
+
     if (!isMethodAllowed(_locationConfig, method))
         return ;
-        
+
     switch (checkMethod(method))
     {
         case GET:
@@ -219,7 +220,6 @@ ServerConfig	HttpResponse::checkLocConfigAndRequest()
     for (server = serverConfigs.begin(); server != serverConfigs.end(); server++)
     {
         std::string path = comparePath(*server, _request.getRequestLine());
-
         _serverName = server->checkServerName(requestHost);
         if (port == server->getPort() && _serverName == requestHost)
         {
@@ -261,7 +261,7 @@ std::string	HttpResponse::checkRoot(const ServerConfig &server, const std::strin
     for (location = locationConfigs.begin(); location != server.getLocationConfig().end(); location++)
     {
         std::string config_location = location->getPath();
-        if (config_location == path)
+        if (path.find(config_location) != std::string::npos)
         {
             rootpath = location->getRoot();
             return (rootpath);
@@ -272,7 +272,11 @@ std::string	HttpResponse::checkRoot(const ServerConfig &server, const std::strin
 
 std::string	HttpResponse::resolvePath(const ServerConfig &server)
 {
+    std::string uri = _request.getRequestLine().getUri();
+    
     std::string path = comparePath(server, _request.getRequestLine());
+    if (uri.find(path) != std::string::npos && uri.length() > path.length())
+        path = lastSlash(uri);
     if (path.empty())
         return (std::string());
     std::string root = checkRoot(server, path);
@@ -334,6 +338,8 @@ std::string	HttpResponse::getHttpResponse() const
 
 std::string	HttpResponse::cleanURI(std::string uri)
 {
+    if (uri == "/")
+        return (uri);
     while (uri.find("//") != std::string::npos)
         uri.erase(uri.find("//"), 1);
     if (!uri.empty() && uri[uri.size() - 1] == '/')
