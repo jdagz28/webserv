@@ -250,22 +250,18 @@ bool	HttpResponse::isMethodAllowed(const LocationConfig &location, const std::st
     return (true);
 }
 
-std::string	HttpResponse::checkRoot(const ServerConfig &server, const std::string &path)
+std::string	HttpResponse::checkRoot(const std::string &path)
 {
     std::string rootpath;
-    const std::vector<LocationConfig> &locationConfigs = server.getLocationConfig();
-    if (locationConfigs.empty())
-        return (std::string());
-    std::vector<LocationConfig>::const_iterator location;
 
-    for (location = locationConfigs.begin(); location != server.getLocationConfig().end(); location++)
+    std::cout << "Location Path " << _locationConfig.getPath() << std::endl;
+    std::string config_location = _locationConfig.getPath();
+    if (path.find(config_location) != std::string::npos)
     {
-        std::string config_location = location->getPath();
-        if (path.find(config_location) != std::string::npos)
-        {
-            rootpath = location->getRoot();
-            return (rootpath);
-        }
+        std::cout << "Getting the Root Path" << std::endl;
+        rootpath = _locationConfig.getRoot();
+        std::cout << "Root Path: " << rootpath << std::endl;
+        return (rootpath);
     }
     return (std::string());
 }
@@ -279,7 +275,7 @@ std::string	HttpResponse::resolvePath(const ServerConfig &server)
         path = lastSlash(uri);
     if (path.empty())
         return (std::string());
-    std::string root = checkRoot(server, path);
+    std::string root = checkRoot(path);
     if (!root.empty())
         return (root + path);
     else

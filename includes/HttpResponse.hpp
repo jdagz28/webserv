@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:13:31 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/03/04 14:35:48 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/05 17:11:04 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,7 +71,7 @@ class HttpResponse
         
         std::string comparePath(const ServerConfig &server, const HttpRequestLine &request);
         std::string resolvePath(const ServerConfig &server);
-        std::string checkRoot(const ServerConfig &server, const std::string &path);
+        std::string checkRoot(const std::string &path);
         std::string getDirectiveLoc(const std::string &directive);
         
         bool    isSupportedMedia(const std::string &uri);
