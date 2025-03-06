@@ -377,13 +377,23 @@ bool	HttpResponse::isCGIRequest(const std::string &uri)
 
 std::string HttpResponse::resolveCGIPath()
 {
-    if (_locationConfig.getPath()[0] == '.')
-        return ("./website/directory/cgi-bin/");
+    std::string uri = _request.getRequestLine().getUri();
+    std::string scriptName = uri.substr(uri.find_last_of("/") + 1);
+    if (scriptName.find("?") != std::string::npos)
+        scriptName = scriptName.substr(0, scriptName.find("?"));
+    if (_locationConfig.getPath()[0] == '.' && _locationConfig.getRoot().empty())
+        return ("./website/directory/cgi-bin/" + scriptName);
     else
     {
         if (_locationConfig.getRoot().empty())
-            return ("./website/directory/cgi-bin/");
+            return ("./website/directory/cgi-bin/" + scriptName);
         else
-            return (_locationConfig.getRoot() + _locationConfig.getPath());
+        {
+            std::string path = _locationConfig.getRoot() + _locationConfig.getPath();
+            if (path[path.size() - 1] == '/')
+                return (path + scriptName);
+            else
+                return (path + "/" + scriptName);
+        }
     }
 }

@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 17:08:50 by romvan-d          #+#    #+#             */
-/*   Updated: 2025/03/06 10:13:27 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/06 10:47:24 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,7 @@ class Cgi
 		std::vector<std::string> 			args;
 		std::map <std::string, std::string> env;
 		std::string							path;
+		std::string							uploadDir;
 
 		
 		char ** convertEnv(std::map<std::string, std::string> env);
