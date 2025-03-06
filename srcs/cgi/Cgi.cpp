@@ -6,7 +6,7 @@
 /*   By: rom1 <rom1@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 19:52:54 by romvan-d          #+#    #+#             */
-/*   Updated: 2025/03/05 18:18:59 by rom1             ###   ########.fr       */
+/*   Updated: 2025/03/06 11:58:10 by rom1             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,16 +61,15 @@ Cgi::Cgi(HttpRequestLine & requestLine, HttpRequest & request, std::string path,
 		this->env["QUERRY_STRING="] = "NULL";
 	}
 
-	std::map<std::string, std::string> requestHeaderInfo = request.getHeader();
-	this->env["CONTENT_TYPE="] = requestHeaderInfo["Content-Type"];
-    this->env["HTTP_ACCEPT="] = requestHeaderInfo["Accept"];
-    this->env["HTTP_ACCEPT_ENCODING="] = requestHeaderInfo["Accept-Encoding"];
-    this->env["HTTP_ACCEPT_LANGUAGE="] = requestHeaderInfo["Accept-Language"];
+	this->env["CONTENT_TYPE="] = request.getHeader("Content-Type");
+    this->env["HTTP_ACCEPT="] = request.getHeader("Accept");
+    this->env["HTTP_ACCEPT_ENCODING="] = request.getHeader("Accept-Encoding");
+    this->env["HTTP_ACCEPT_LANGUAGE="] = request.getHeader("Accept-Language");
     this->env["PATH_INFO="] = this->path;
     this->env["SERVER_PROTOCOL="] = "HTTP/1.1";
-    this->env["HOST="] = requestHeaderInfo["Host"];
-    this->env["HTTP_USER_AGENT="] = requestHeaderInfo["User-Agent"];
-    this->env["HTTP_CONNECTION="] = requestHeaderInfo["Connection"];
+    this->env["HOST="] = request.getHeader("Host");
+    this->env["HTTP_USER_AGENT="] = request.getHeader("User-Agent");
+    this->env["HTTP_CONNECTION="] = request.getHeader("Connection");
 }
 
 Cgi::Cgi(const Cgi &other) : env(other.env)
