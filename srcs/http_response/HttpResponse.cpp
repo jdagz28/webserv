@@ -143,7 +143,6 @@ std::string	HttpResponse::comparePath(const ServerConfig &server, const HttpRequ
         {
             slash = true;
             slashAutoIndex = _locationConfig.getAutoIndex() == "on";
-            std::cout << "slashAutoIndex: " << slashAutoIndex << std::endl;
         }
         if (!config_location.empty() && config_location[0] == '.')
         {
@@ -166,13 +165,9 @@ std::string	HttpResponse::comparePath(const ServerConfig &server, const HttpRequ
                 path = config_location;
 		}
     }
-    std::cout << "slash: " << slash << std::endl;
-    std::cout << "slashAutoIndex: " << slashAutoIndex << std::endl;
-    if (slash && slashAutoIndex)
-    {
-        
+    
+	if (slash && slashAutoIndex)
         return ("/");
-    }
     if (path.empty())
         setStatusCode(NOT_FOUND);
     return (path);
@@ -184,7 +179,6 @@ LocationConfig	HttpResponse::getLocationConfig()
     LocationConfig location;
     
     std::string path = comparePath(_serverConfig, _request.getRequestLine());
-    std::cout << "Returned Path: " << path << std::endl;
     if (path.empty())
         return (location);
     
@@ -196,7 +190,6 @@ LocationConfig	HttpResponse::getLocationConfig()
     {
         if (loc->getPath() == path)
         {
-            std::cout << "Location Path: " << loc->getPath() << std::endl;
             location = *loc;
             return (location);
         }
@@ -282,8 +275,10 @@ std::string	HttpResponse::resolvePath(const ServerConfig &server)
     std::string root = checkRoot(path);
     if (!root.empty())
         return (root + path);
-    else
-        return (path);
+    else if (root.empty() && _locationConfig.getPath() == "/")
+        return ("." + path);
+	else
+		return (path);
 }
 
 std::string	HttpResponse::getDirectiveLoc(const std::string &directive)

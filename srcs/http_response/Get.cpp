@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:05:38 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/03/05 17:12:25 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/06 01:53:08 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,22 +34,18 @@ void	HttpResponse::processRequestGET()
         setStatusCode(NOT_FOUND);
         return ;
     }
-
-    std::string extension = getExtension(_request.getRequestLine().getUri());
+	std::string extension = getExtension(_request.getRequestLine().getUri());
+	if (isAutoIndex() && extension.empty())
+	{
+        generateDirList(path);
+		return ;
+	}
     if (isDirectory(path))
     {
-        if (path.find("directory") != std::string::npos)
-        {
-            std::string checkPath = verifyPath(path);
-            if (fileExists(checkPath))
-                getResourceContent(checkPath);
-        }
-        if (!extension.empty())
-            getResource(path);
-        else if (isAutoIndex())
-            generateDirList(path);
-        else
-            getResource(path);
+		std::string checkPath = verifyPath(path);
+		if (fileExists(checkPath))
+			getResourceContent(checkPath);
+        getResource(path);
         return ;
     }
     getResource(path);
