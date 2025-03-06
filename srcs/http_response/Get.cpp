@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:05:38 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/03/06 01:53:08 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/06 01:58:40 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,8 +78,14 @@ void	HttpResponse::getResource(const std::string &target_path)
         
     std::string uri = cleanURI(_request.getRequestLine().getUri());
     if (uri == "/")
+	{
         uri = _locationConfig.getIndex();
-    if (isSupportedMedia(uri))
+	}
+	if (!isSupportedMedia(uri))
+	{
+		setStatusCode(UNSUPPORTED_MEDIA_TYPE);
+	}
+    else if (isSupportedMedia(uri))
     {
         std::string resourceName = extractResourceName(uri);
         indexPath = buildResourcePath(target_path, resourceName);
