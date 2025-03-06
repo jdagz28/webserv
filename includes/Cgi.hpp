@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Cgi.hpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: romvan-d <romvan-d@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 17:08:50 by romvan-d          #+#    #+#             */
-/*   Updated: 2025/03/03 18:17:26 by romvan-d         ###   ########.fr       */
+/*   Updated: 2025/03/06 10:13:27 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define CGI_HPP
 
 #include "HttpRequest.hpp"
+#include "HttpRequestLine.hpp"
 #include "LocationConfig.hpp"
 #include <exception>
 #include <map>
@@ -25,7 +26,7 @@ class Cgi
 	public :
 	
 		Cgi();
-		Cgi(HttpRequestLine &requestLine, HttpRequest & request, std::string path, std::string uploadDir);
+		Cgi(const HttpRequestLine &requestLine, const HttpRequest & request, const std::string path, const std::string &uploadDir);
         Cgi(const Cgi &other);
 		~Cgi();
 
@@ -45,7 +46,7 @@ class Cgi
 		std::map <std::string, std::string> env;
 		std::string							path;
 
-
+		
 		char ** convertEnv(std::map<std::string, std::string> env);
 		char ** convertArgs(std::vector<std::string> args);
 		std::string readPipe(int pipeRead);

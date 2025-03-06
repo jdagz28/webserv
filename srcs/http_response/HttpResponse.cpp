@@ -86,6 +86,9 @@ void	HttpResponse::execMethod()
     if (isCGIRequest(_request.getRequestLine().getUri()))
     {
         std::cout << "CGI REQUEST" << std::endl;
+        std::string cgiPath = resolveCGIPath();
+        Cgi cgi(_request.getRequestLine(), _request, cgiPath, UPLOAD_DIR);
+
     }
     
     switch (checkMethod(method))
@@ -370,4 +373,17 @@ bool	HttpResponse::isCGIRequest(const std::string &uri)
     if (_locationConfig.isCGIExtensionAllowed(extension))
         return (true);
     return (false);
+}
+
+std::string HttpResponse::resolveCGIPath()
+{
+    if (_locationConfig.getPath()[0] == '.')
+        return ("./website/directory/cgi-bin/");
+    else
+    {
+        if (_locationConfig.getRoot().empty())
+            return ("./website/directory/cgi-bin/");
+        else
+            return (_locationConfig.getRoot() + _locationConfig.getPath());
+    }
 }

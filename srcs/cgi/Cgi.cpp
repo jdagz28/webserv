@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Cgi.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rom1 <rom1@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 19:52:54 by romvan-d          #+#    #+#             */
-/*   Updated: 2025/03/05 18:18:59 by rom1             ###   ########.fr       */
+/*   Updated: 2025/03/06 10:20:38 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ Cgi::Cgi ()
 
 }
 
-Cgi::Cgi(HttpRequestLine & requestLine, HttpRequest & request, std::string path, std::string uploadDir)
+Cgi::Cgi(const HttpRequestLine & requestLine, const HttpRequest & request, const std::string path, const std::string &uploadDir)
 {
 	this->path = path;
 	this->args.push_back("");
@@ -49,7 +49,8 @@ Cgi::Cgi(HttpRequestLine & requestLine, HttpRequest & request, std::string path,
 	if (requestLine.getMethod() == "GET")
 	{
 		this->whichMethod = 0;
-		this->data = uri.substr(querryPos + 1);//need the query string;
+		if (querryPos != std::string::npos)
+			this->data = uri.substr(querryPos + 1);//need the query string;
 		this->env["CONTENT_LENGTH="] = "NULL";
 		this->env["QUERRY_STRING="] = this->data;
 	}
@@ -61,16 +62,22 @@ Cgi::Cgi(HttpRequestLine & requestLine, HttpRequest & request, std::string path,
 		this->env["QUERRY_STRING="] = "NULL";
 	}
 
-	std::map<std::string, std::string> requestHeaderInfo = request.getHeader();
-	this->env["CONTENT_TYPE="] = requestHeaderInfo["Content-Type"];
-    this->env["HTTP_ACCEPT="] = requestHeaderInfo["Accept"];
-    this->env["HTTP_ACCEPT_ENCODING="] = requestHeaderInfo["Accept-Encoding"];
-    this->env["HTTP_ACCEPT_LANGUAGE="] = requestHeaderInfo["Accept-Language"];
+	// std::map<std::string, std::string> requestHeaderInfo = request.getHeader();
+	this->env["CONTENT_TYPE="] = request.getHeader("content-type"); //requestHeaderInfo["Content-Type"]; 
+    this->env["HTTP_ACCEPT="] = request.getHeader("accept"); //requestHeaderInfo["Accept"];
+    this->env["HTTP_ACCEPT_ENCODING="] = request.getHeader("accept-encoding"); //requestHeaderInfo["Accept-Encoding"];
+    this->env["HTTP_ACCEPT_LANGUAGE="] = request.getHeader("accept-language"); //requestHeaderInfo["Accept-Language"];
     this->env["PATH_INFO="] = this->path;
     this->env["SERVER_PROTOCOL="] = "HTTP/1.1";
-    this->env["HOST="] = requestHeaderInfo["Host"];
-    this->env["HTTP_USER_AGENT="] = requestHeaderInfo["User-Agent"];
-    this->env["HTTP_CONNECTION="] = requestHeaderInfo["Connection"];
+    this->env["HOST="] = request.getHeader("host"); //requestHeaderInfo["Host"];
+    this->env["HTTP_USER_AGENT="] = request.getHeader("user-agent"); //requestHeaderInfo["User-Agent"];
+    this->env["HTTP_CONNECTION="] = request.getHeader("connection"); //requestHeaderInfo["Connection"];
+
+	std::map<std::string, std::string>::const_iterator it;
+	for (it = this->env.begin(); it != this->env.end(); it++)
+	{
+		std::cout << it->first << it->second << std::endl;
+	}
 }
 
 Cgi::Cgi(const Cgi &other) : env(other.env)
@@ -145,7 +152,7 @@ std::string Cgi::readPipe(int pipeRead)
 	std::string output = "";
 	char buffer[BUFFERSIZE];
 	
-	while (readChars = read(pipeRead, buffer, BUFFERSIZE))
+	while ((readChars = read(pipeRead, buffer, BUFFERSIZE)))
 	{
 		if (readChars == -1)
 			throw CgiError();

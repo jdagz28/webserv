@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:13:31 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/03/06 09:31:27 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/06 10:35:42 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 #include <set>
 #include "Config.hpp"
 #include "webserv.hpp"
+#include "Cgi.hpp"
 
 class HttpRequest;
 class ServerConfig;
@@ -55,6 +56,7 @@ class HttpResponse
         std::map<std::string, std::string>      _headers;
         std::string                             _body;
         std::vector<unsigned char>              _responseMsg;
+        Cgi                                     _cgi;
         
         
         HttpResponse(const HttpResponse &copy);
@@ -115,6 +117,7 @@ class HttpResponse
         void    curlDelete();
         
         bool    isCGIRequest(const std::string &uri);
+        std::string resolveCGIPath();
 
     public:
         HttpResponse(HttpRequest &request, const Config &config, int client_socket);
