@@ -88,7 +88,7 @@ void	HttpResponse::execMethod()
         std::cout << "CGI REQUEST" << std::endl;
         std::string cgiPath = resolveCGIPath();
         Cgi cgi(_request.getRequestLine(), _request, cgiPath, UPLOAD_DIR);
-
+        return ;
     }
     
     switch (checkMethod(method))
