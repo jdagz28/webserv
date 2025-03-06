@@ -80,18 +80,23 @@ void	HttpResponse::execMethod()
         setStatusCode(NOT_FOUND);
         return ;
     }
-    
+
     if (!isMethodAllowed(_locationConfig, method))
         return ;
-    
+
     switch (checkMethod(method))
     {
         case GET:
             processRequestGET();
             break ;
         case POST:
-            _request.setMaxBodySize(_locationConfig.getClientMaxBodySize());
+            _request.setMaxBodySize(_locationConfig.getClientMaxBodySize(), _locationConfig.getMaxBodyMode());
             _request.parseRequestBody();
+			if (_request.getStatusCode() != OK)
+			{
+				setStatusCode(_request.getStatusCode());
+				break ;
+			}
 			if (!checkPostLocation())
 				break ; 
 			if (_request.getFormData("_method") == "DELETE")
@@ -114,13 +119,18 @@ static bool	isMatchingPrefix(const std::string &pattern, const std::string &targ
     if (pattern.empty() || target.empty())
         return (false);
     std::string target_prefix = target.substr(0, pattern.length());
-    if (pattern == target_prefix)
-    {
-        if (pattern == "/" && target != "/")
-            return (false);
-        return (true);
-    }
-    return (false);
+	return (pattern == target_prefix);
+}
+
+static int countSlashes(const std::string &path)
+{
+	int count = 0;
+	for (size_t i = 0; i < path.length(); i++)
+	{
+		if (path[i] == '/')
+			count++;
+	}
+	return (count);
 }
 
 std::string	HttpResponse::comparePath(const ServerConfig &server, const HttpRequestLine &request)
@@ -133,27 +143,39 @@ std::string	HttpResponse::comparePath(const ServerConfig &server, const HttpRequ
         return(std::string());
     std::vector<LocationConfig>::const_iterator location;
 
-    for (location = locationConfigs.begin(); location != server.getLocationConfig().end(); location++)
+    std::string uriExtension = getExtension(target_path);
+	int uriSlashCount = countSlashes(target_path);
+    bool slashAutoIndex;
+    bool slash= false;
+
+    for (location = locationConfigs.begin(); location != locationConfigs.end(); location++)
     {
         std::string config_location = location->getPath();
+		if (config_location == "/")
+		{
+			if (config_location == target_path || target_path == "/index.html")
+				return (config_location);
+			slash = true;
+			slashAutoIndex = location->getAutoIndex() == "on";
+			continue ;
+		}
+        if (!config_location.empty() && config_location[0] == '.')
+        {
+            std::string cleanLocPath = config_location.substr(1);
+            if (uriExtension == cleanLocPath && uriSlashCount == 1)
+                return (config_location);
+        }
         if (config_location == target_path || (target_path + "/") == config_location)
             return (config_location);
-        if (target_path == "/index.html")
-        {
-            if (path.empty() || config_location == "/")
-                path = config_location;
-            continue;
-        }
-
+        
         if (isMatchingPrefix(config_location, target_path))
 		{
             if (path.empty() || path.length() < config_location.length())
-			{
-                path = config_location;
-				return (path);
-			}
+				path = config_location;
 		}
     }
+	if (slash && slashAutoIndex)
+        return ("/");
     if (path.empty())
         setStatusCode(NOT_FOUND);
     return (path);
@@ -205,10 +227,10 @@ ServerConfig	HttpResponse::checkLocConfigAndRequest()
     std::vector<ServerConfig>::const_iterator server;
     for (server = serverConfigs.begin(); server != serverConfigs.end(); server++)
     {
-        std::string path = comparePath(*server, _request.getRequestLine());
         _serverName = server->checkServerName(requestHost);
         if (port == server->getPort() && _serverName == requestHost)
         {
+            std::string path = comparePath(*server, _request.getRequestLine());
             config = *server;
             if (!path.empty())
                 config.setValid();
@@ -236,36 +258,35 @@ bool	HttpResponse::isMethodAllowed(const LocationConfig &location, const std::st
     return (true);
 }
 
-std::string	HttpResponse::checkRoot(const ServerConfig &server, const std::string &path)
+std::string	HttpResponse::checkRoot(const std::string &path)
 {
     std::string rootpath;
-    const std::vector<LocationConfig> &locationConfigs = server.getLocationConfig();
-    if (locationConfigs.empty())
-        return (std::string());
-    std::vector<LocationConfig>::const_iterator location;
 
-    for (location = locationConfigs.begin(); location != server.getLocationConfig().end(); location++)
+    std::string config_location = _locationConfig.getPath();
+    if (path.find(config_location) != std::string::npos)
     {
-        std::string config_location = location->getPath();
-        if (config_location == path)
-        {
-            rootpath = location->getRoot();
-            return (rootpath);
-        }
+        rootpath = _locationConfig.getRoot();
+        return (rootpath);
     }
     return (std::string());
 }
 
 std::string	HttpResponse::resolvePath(const ServerConfig &server)
 {
+    std::string uri = _request.getRequestLine().getUri();
+    
     std::string path = comparePath(server, _request.getRequestLine());
+    if (uri.find(path) != std::string::npos && uri.length() > path.length())
+        path = lastSlash(uri);
     if (path.empty())
         return (std::string());
-    std::string root = checkRoot(server, path);
+    std::string root = checkRoot(path);
     if (!root.empty())
         return (root + path);
-    else
-        return (path);
+    else if (root.empty() && _locationConfig.getPath() == "/")
+        return ("." + path);
+	else
+		return (path);
 }
 
 std::string	HttpResponse::getDirectiveLoc(const std::string &directive)
@@ -320,6 +341,8 @@ std::string	HttpResponse::getHttpResponse() const
 
 std::string	HttpResponse::cleanURI(std::string uri)
 {
+    if (uri == "/")
+        return (uri);
     while (uri.find("//") != std::string::npos)
         uri.erase(uri.find("//"), 1);
     if (!uri.empty() && uri[uri.size() - 1] == '/')

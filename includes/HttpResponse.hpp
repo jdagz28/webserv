@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:13:31 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/20 12:27:53 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/06 04:02:12 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,7 +71,7 @@ class HttpResponse
         
         std::string comparePath(const ServerConfig &server, const HttpRequestLine &request);
         std::string resolvePath(const ServerConfig &server);
-        std::string checkRoot(const ServerConfig &server, const std::string &path);
+        std::string checkRoot(const std::string &path);
         std::string getDirectiveLoc(const std::string &directive);
         
         bool    isSupportedMedia(const std::string &uri);
@@ -99,13 +99,16 @@ class HttpResponse
         void    generateDirPage(const std::string &path, std::set<FileData> &directories, std::set<FileData> &files);
         bool    isAutoIndex();
         bool    checkDirIndex();
+        
 
         void    getErrorPage();
-        std::string generateErrorPage(const std::string &status, const std::string &statusMessage);
+        void	generateErrorPage(const std::string &status, const std::string &statusMessage);
 
         void    processRequestPOST();
         void    processImageUpload();
         bool	checkPostLocation();
+		void	processForm();
+		std::string	generatePostMessage(const std::string &message);
 
         void    processRequestDELETE();
         void    deleteFile(const std::string &file);

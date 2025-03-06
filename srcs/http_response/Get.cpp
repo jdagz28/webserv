@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:05:38 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/27 10:06:07 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/06 04:04:12 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,22 +34,18 @@ void	HttpResponse::processRequestGET()
         setStatusCode(NOT_FOUND);
         return ;
     }
-
-    std::string extension = getExtension(_request.getRequestLine().getUri());
+	std::string extension = getExtension(_request.getRequestLine().getUri());
+	if (isAutoIndex() && extension.empty())
+	{
+        generateDirList(path);
+		return ;
+	}
     if (isDirectory(path))
     {
-        if (path.find("directory") != std::string::npos)
-        {
-            std::string checkPath = verifyPath(path);
-            if (fileExists(checkPath))
-                getResourceContent(checkPath);
-        }
-        if (!extension.empty())
-            getResource(path);
-        else if (isAutoIndex())
-            generateDirList(path);
-        else
-            getResource(path);
+		std::string checkPath = verifyPath(path);
+		if (fileExists(checkPath))
+			getResourceContent(checkPath);
+        getResource(path);
         return ;
     }
     getResource(path);
@@ -81,26 +77,16 @@ void	HttpResponse::getResource(const std::string &target_path)
     std::string indexPath;
         
     std::string uri = cleanURI(_request.getRequestLine().getUri());
-    if (isSupportedMedia(uri))
-    {
-        std::string resourceName = extractResourceName(uri);
-        indexPath = buildResourcePath(target_path, resourceName);
-        if (fileExists(indexPath))
-            getResourceContent(indexPath);
-        else
-            setStatusCode(NOT_FOUND);
-    }
-    else
-    {
-        std::string defaultPage = getDirectiveLoc("index");
-        if (defaultPage.empty())
-            setStatusCode(NOT_FOUND);
-        else
-        {
-            indexPath = buildResourcePath(target_path, defaultPage);
-            getResourceContent(indexPath);
-        }
-    }
+    if (uri == "/")
+	{
+        uri = _locationConfig.getIndex();
+	}
+	std::string resourceName = extractResourceName(uri);
+	indexPath = buildResourcePath(target_path, resourceName);
+	if (fileExists(indexPath))
+		getResourceContent(indexPath);
+	else
+		setStatusCode(NOT_FOUND);
 }
 
 void 	HttpResponse::getResourceContent(const std::string &file_path)
@@ -134,19 +120,15 @@ void 	HttpResponse::getResourceContent(const std::string &file_path)
 	}
     infile.close();
     
-    if (!isSupportedMedia(file_path))
-        setStatusCode(UNSUPPORTED_MEDIA_TYPE);
-    else
-    {
-        std::string contentType = getExtension(file_path);
-        addContentTypeHeader(contentType);
-        if (getStatusCode() == INIT)
-            setStatusCode(OK);
-    }
+	std::string contentType = getExtension(file_path);
+	addContentTypeHeader(contentType);
+	setStatusCode(OK);
 }
 
 std::string	HttpResponse::extractResourceName(const std::string &uri)
 {
+    if (uri == "/")
+        return (_locationConfig.getIndex());
     size_t  lastSlashPos = uri.find_last_of('/');
     if (lastSlashPos != std::string::npos && lastSlashPos + 1 < uri.length())
         return (uri.substr(lastSlashPos + 1));

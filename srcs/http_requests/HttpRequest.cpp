@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:18:22 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/20 10:26:45 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/04 13:42:50 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -198,9 +198,12 @@ void	HttpRequest::setClientSocket(int client_socket)
     _client_socket = client_socket;
 }
 
-void	HttpRequest::setMaxBodySize(size_t bodySize)
+void	HttpRequest::setMaxBodySize(size_t bodySize, const std::string &mode)
 {
-    _maxBodySize = bodySize * 1024 * 1024;
+	if (mode == "M")
+    	_maxBodySize = bodySize * 1024 * 1024;
+	else
+		_maxBodySize = bodySize;
 }
 
 const	HttpRequestLine& HttpRequest::getRequestLine() const

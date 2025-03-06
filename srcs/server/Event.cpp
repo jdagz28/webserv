@@ -83,7 +83,6 @@ void    Event::handleEvent(uint32_t events, Logger *log)
 			if (!_request->getRequestLine().getUri().empty() && checkServerName())
 			{
 				log->request(*_request);
-				(void)log;
 				_response = new HttpResponse(*_request, _config, _fd);
 
 				struct epoll_event ev;

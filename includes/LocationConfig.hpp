@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 22:38:51 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/26 12:58:13 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/05 09:25:23 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@ class LocationConfig
         std::vector<std::string>                _allowedMethods;
         std::vector<std::string>                _cgiExtensions;
 		std::vector<std::string>				_denyMethods;
+		std::string 							_maxBodyMode;
      
     public:
         LocationConfig();
@@ -38,6 +39,7 @@ class LocationConfig
         void    setAllowedMethod(const std::string &method);
         void    setCGIExtension(const std::string &extension);
 		void    setDenyMethod(const std::string &method);
+		void    setMaxBodyMode(const std::string &mode);
 
         const std::map<std::string, std::string >	&getDirectives() const;
         const std::string	getPath() const;
@@ -50,13 +52,15 @@ class LocationConfig
         std::string getRedirect()	const;
         size_t getClientMaxBodySize();
 		const std::vector<std::string>	&getDenyMethods() const;
-		
+		const std::string	getMaxBodyMode() const;
 
         bool    isMethodAllowed(const std::string &method) const;
         bool    isRedirect() const;
         bool    isPathAlreadySet(const std::string &path) const;
         bool    isLimitExcept() const;
 		bool	isDenyMethod(const std::string &method) const;
+		bool	isCGIDirectiveSet() const;
+		bool	isCGIMode() const;
 };
 
 #endif
