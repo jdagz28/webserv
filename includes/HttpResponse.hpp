@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:13:31 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/03/06 04:02:12 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/06 09:31:27 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,6 +114,8 @@ class HttpResponse
         void    deleteFile(const std::string &file);
         void    curlDelete();
         
+        bool    isCGIRequest(const std::string &uri);
+
     public:
         HttpResponse(HttpRequest &request, const Config &config, int client_socket);
         ~HttpResponse();

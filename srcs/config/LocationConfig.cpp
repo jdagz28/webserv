@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/07 23:05:41 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/03/06 03:53:04 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/06 09:40:08 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,10 @@ void    LocationConfig::setAllowedMethod(const std::string &method)
 
 void    LocationConfig::setCGIExtension(const std::string &extension)
 {
-    _cgiExtensions.push_back(extension);
+    if (extension[0] == '.')
+        _cgiExtensions.push_back(extension.substr(1));
+    else
+        _cgiExtensions.push_back(extension);
 }
 
 const std::map<std::string, std::string>	&LocationConfig::getDirectives() const
@@ -236,5 +239,18 @@ bool	LocationConfig::isCGIMode() const
 {
 	if (_directives.find("cgi_mode") != _directives.end())
 		return (true);
+	return (false);
+}
+
+bool	LocationConfig::isCGIExtensionAllowed(const std::string &extension) const
+{
+	if (_cgiExtensions.empty())
+		return (false);
+	std::vector<std::string>::const_iterator it;
+	for (it = _cgiExtensions.begin(); it != _cgiExtensions.end(); it++)
+	{
+		if (*it == extension)
+			return (true);
+	}
 	return (false);
 }

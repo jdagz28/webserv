@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 22:38:51 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/03/05 09:25:23 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/06 09:31:44 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,6 +61,7 @@ class LocationConfig
 		bool	isDenyMethod(const std::string &method) const;
 		bool	isCGIDirectiveSet() const;
 		bool	isCGIMode() const;
+        bool	isCGIExtensionAllowed(const std::string &extension) const;
 };
 
 #endif
