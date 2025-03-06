@@ -101,6 +101,8 @@ int	strToInt(const std::string &str);
 bool	isSpace(unsigned char ch);
 std::string	toLower(const std::string &str);
 void	signalHandler(int signum);
+std::string	cleanMessage(const std::string &message);
+std::string lastSlash(const std::string &str);
 
 // MIMETYPES.CPP
 std::string	getMimeType(const std::string &extension);

@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:11:42 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/11 10:12:20 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/04 13:43:12 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,7 @@ class HttpRequest
 
         void    setClientSocket(int client_socket);
         void    setStatusCode(StatusCode status);
-        void    setMaxBodySize(size_t bodySize);
+        void    setMaxBodySize(size_t bodySize, const std::string &mode);
 
         const HttpRequestLine	&getRequestLine() const;
         const std::map<std::string, std::vector<std::string> >	&getHeaders() const;    

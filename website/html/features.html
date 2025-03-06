@@ -38,32 +38,55 @@
                 <li class="features-list"><a href="http://cgi.localhost:2121">Redirect to other server config (cgi.localhost:2121)</a></li>
 
             </ul>
-            <li>Errors</li>
-            <ul>    
-                <li class="features-list"><a href="/asdasd.html">Non existing resource</a></li>
-                <li class="features-list"><a href="/deny">DENY ALL</a></li>
-                <li class="features-list"><a href="/search">Search - Post Only</a></li>
-                <li class="features-list"><a href="/cursus">Non specified location</a></li>
-            </ul>
-            <div class="commands-container">
-                <div class="command-box">
-                    <button class="copy-btn" onclick="copyToClipboard('curl -X POST -H "Content-Type: application/x-www-form-urlencoded" -d "asd=test" localhost:4242/search')">Copy</button>
-                        <span class="command-text">curl -X POST -H "Content-Type: application/x-www-form-urlencoded" -d "asd=test" localhost:4242/search</span>
-            </div>
-            </div>
             <li>Directory listing</li>
             <ul> 
                 <li class="features-list"><a href="/directory/">autoindex</a></li>
+            </ul>
+            <li>Errors</li>
+            <ul>
+                <li class="features-list"><a href="/asdasd.html">Not Found - Non existing resource</a></li>
+                <li class="features-list"><a href="/cursus">Not Found - Non specified location</a></li>
+                <li class="features-list">Not Implemented - Unknown Method</a></li>
+                <div class="commands-container">
+                    <div class="command-box">
+                        <button class="copy-btn" onclick="copyToClipboard('curl localhost:4242 -X ASDASDASD')">Copy</button>
+                            <span class="command-text">curl localhost:4242 -X ASDASDASD</span>
+                    </div>
+                </div>
+                <li>Method Not Allowed</li>
+                <ul>
+                    <li class="features-list"><a href="/deny">DENY ALL</a></li>
+                    <li class="features-list"><a href="/search">Search - Post Only</a></li>
+                </ul>
+                <li class="features-list">Bad Request - Invalid Key</li>
+                <div class="commands-container">
+                    <div class="command-box">
+                        <button class="copy-btn" onclick="copyToClipboard('curl -X POST -H "Content-Type: application/x-www-form-urlencoded" -d "asd=test" localhost:4242/search')">Copy</button>
+                            <span class="command-text">curl -X POST -H "Content-Type: application/x-www-form-urlencoded" -d "asd=test" localhost:4242/search</span>
+                    </div>
+                </div>
+                <li class="features-list"><a href="/html/nopermission.html">Forbidden - No Permission Resource</a></li>
+                <div class="commands-container">
+                    <div class="command-box">
+                        <button class="copy-btn" onclick="copyToClipboard('chmod -r website/html/nopermission.html')">Copy</button>
+                            <span class="command-text">chmod -r website/html/nopermission.html</span>
+                    </div>
+                </div>
             </ul>
         </ul>
         <hr class="dotted">
 
         <h2>POST</h2>
         <ul>
+            <li class="features-list"><a href="/html/textpost.html">Text Post</li>
             <li class="features-list"><a href="/html/search.html">Google Search</a></li>
             <li class="features-list"><a href="/html/upload.html">Image Upload</a></li>
         </ul>
         <div class="commands-container">
+            <div class="command-box">
+                <button class="copy-btn" onclick="copyToClipboard('curl -X POST -H "Content-Type: application/x-www-form-urlencoded" --data "message=BODY IS HERE write " localhost:4242/post-body  ')">Copy</button>
+                    <span class="command-text">curl -X POST -H "Content-Type: application/x-www-form-urlencoded" --data "message=BODY IS HERE write " localhost:4242/post-body  </span>
+            </div>
             <div class="command-box">
                 <button class="copy-btn" onclick="copyToClipboard('curl -X POST -H "Content-Type: application/x-www-form-urlencoded" -d "q=test" localhost:4242/search')">Copy</button>
                     <span class="command-text">curl -X POST -H "Content-Type: application/x-www-form-urlencoded" -d "q=test" localhost:4242/search</span>

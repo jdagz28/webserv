@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/07 01:23:08 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/01/29 11:01:10 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/02/26 13:19:30 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,13 @@ void    printConfigData(const Config &config)
                 std::cout << "\t\t\tValue: " << it->second << std::endl;  
             }
 
-            
+			const std::vector<std::string> &denyMethods = location.getDenyMethods();
+			std::vector<std::string>::const_iterator deny;
+			if (!denyMethods.empty())
+				std::cout << "\t\tDeny Method: " << std::endl;
+			for (deny = denyMethods.begin(); deny != denyMethods.end(); deny++)
+				std::cout << "\t\t\t" << *deny << std::endl;
+			            
             std::map<std::string, std::string>::const_iterator cgi;
             cgi = locationDirectives.find("cgi_mode");
             if (cgi != locationDirectives.end() && cgi->second == "on")

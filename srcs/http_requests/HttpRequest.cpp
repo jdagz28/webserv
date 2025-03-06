@@ -198,9 +198,12 @@ void	HttpRequest::setClientSocket(int client_socket)
     _client_socket = client_socket;
 }
 
-void	HttpRequest::setMaxBodySize(size_t bodySize)
+void	HttpRequest::setMaxBodySize(size_t bodySize, const std::string &mode)
 {
-    _maxBodySize = bodySize * 1024 * 1024;
+	if (mode == "M")
+    	_maxBodySize = bodySize * 1024 * 1024;
+	else
+		_maxBodySize = bodySize;
 }
 
 const	HttpRequestLine& HttpRequest::getRequestLine() const

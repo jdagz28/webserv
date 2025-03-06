@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:57:50 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/20 13:00:42 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/04 14:47:11 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,7 @@ void    HttpResponse::processRequestPOST()
             getRedirectContent();
             return ;
         }
+		processForm();
     }
     else if (_request.isMultiPartFormData())
     {
@@ -141,4 +142,51 @@ bool	HttpResponse::checkPostLocation()
 	}
 	setStatusCode(BAD_REQUEST);
 	return (false);
+}
+
+void	HttpResponse::processForm()
+{
+	std::map<std::string, std::string> formData = _request.getFormData();
+	std::map<std::string, std::string>::iterator it;
+	for (it = formData.begin(); it != formData.end(); it++)
+	{
+		std::string key = it->first;
+		std::string value = it->second;
+		if (key == "message")
+		{
+			std::string message = cleanMessage(value);
+			_body = generatePostMessage(message);
+			setStatusCode(OK);
+			return ;
+		}
+	}
+	setStatusCode(BAD_REQUEST);
+}
+
+std::string	HttpResponse::generatePostMessage(const std::string &message)
+{
+	std::string html = std::string("<!DOCTYPE html>\r\n")
+        + "<html lang=\"en\">\r\n\r\n"
+        + "<head>\r\n"
+        + "\t<meta charset=\"UTF-8\">\r\n"
+        + "\t<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\r\n"
+        + "\t<link rel=\"stylesheet\" href=\"/resources/css/styles.css\">\r\n"
+        + "\t<link rel=\"stylesheet\" href=\"/resources/css/navbar.css\">\r\n"
+        + "\t<title>POST Message</title>\r\n"
+        + "</head>\r\n\r\n"
+        + "<body>\r\n"
+        + "\t<nav class=\"navbar\">\r\n"
+        + "\t\t<ul class=\"nav-list\">\r\n"
+        + "\t\t\t<li class=\"nav-item\"><a href=\"/\">Home</a></li>\r\n"
+        + "\t\t\t<li class=\"nav-item\"><a href=\"/html/features.html\">Features</a></li>\r\n"
+        + "\t\t\t<li class=\"nav-item\"><a href=\"/directory\">Directory</a></li>\r\n"
+        + "\t\t\t<li class=\"nav-item\"><a href=\"/html/search.html\">Search</a></li>\r\n"
+        + "\t\t\t<li class=\"nav-item\"><a href=\"/html/about.html\">About Us</a></li>\r\n"
+        + "\t\t</ul>\r\n"
+        + "\t</nav>\r\n\r\n"
+        + "\t<h1 class=\"landing\">" + message + "</h1>\r\n\r\n"
+        + "</body>\r\n\r\n"
+        + "</html>\r\n";
+
+    return (html);   	
 }

@@ -72,6 +72,10 @@ class Config
         void    parseCGIMode(const std::string &value, LocationConfig &locationConfig);
         void    parseCGIExtensions(const std::string &value, LocationConfig &locationConfig);
         
+		void	parseExtensionLocation(std::ifstream &infile, LocationConfig &locationConfig);
+		bool	validExtensionLocationDirective(const std::string &token);
+		void	parseExtensionLocationDirective(const std::string &token, std::istringstream &iss, std::ifstream &infile, LocationConfig &locationConfig);
+
 
     public:
         Config(const std::string &configPath);

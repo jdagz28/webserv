@@ -12,7 +12,6 @@
 
 #include "Server.hpp"
 #include "webserv.hpp"
-
 #include <iostream>
 #include <algorithm>
 #include <arpa/inet.h> 
@@ -35,7 +34,10 @@ Server::~Server()
     clearSockets();
 	clearClients();
 	if (_eventsQueue >= 0)
-		close(_eventsQueue);
+	{
+		if (close(_eventsQueue) == -1)
+			throw ServerException("Error: Failed to close epoll instance");
+	}
 }
 
 void   Server::clearClients()
@@ -44,8 +46,7 @@ void   Server::clearClients()
     for (it = _clients.begin(); it != _clients.end(); it++)
 	{
 		delete it->second;
-		close(it->first);
-    }
+	}
     _clients.clear();
 }
 
@@ -158,8 +159,9 @@ void    Server::addToEpoll(int epollFD, int fd, uint32_t events)
 
     if (epoll_ctl(epollFD, EPOLL_CTL_ADD, fd, &event) == -1)
     {
-        close(epollFD);
-        throw ServerException("Error: Failed to add fd to epoll instance");
+        if (close(epollFD) == -1)
+			throw ServerException("Error: Failed to close fd that failed to add to epoll instance");
+		throw ServerException("Error: Failed to add fd to epoll instance");
     }
 }
 
@@ -226,10 +228,7 @@ void    Server::runServer()
             }
 			cleanupFinishedEvents();
         }
-		clearClients();
-		clearSockets();
-		close(_eventsQueue);
-    }
+	}
     catch (const std::exception& e)
     {
         _serverStatus = -1;
@@ -244,6 +243,5 @@ int Server::setNonBlocking(int fd)
         return (-1);
     if (fcntl(fd, F_SETFL, flags | O_NONBLOCK) == -1)
         return (-1);
-        
     return (0);
 }

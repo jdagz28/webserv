@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 15:15:53 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/11 12:31:31 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/06 04:01:58 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,6 @@ std::string	getTimeStamp(time_t time)
         std::strftime(formatedTime, 30, "%Y-%m-%d %H:%M CET", time_info);
         time_info->tm_hour += 1;
     }
-    
     return (std::string(formatedTime));
 }
 
@@ -61,40 +60,38 @@ void	HttpResponse::generateDirPage(const std::string &path, std::set<FileData> &
 {
     _headers["Location"] = _request.getHost() + "/" + path;
     std::ostringstream html;
-    
+
+   
     html << "<!DOCTYPE html>\r\n";
     html << "<html lang=\"en\">\r\n\r\n";
     html << "<head>\r\n";
     html << "\t<meta charset=\"UTF-8\">\r\n";
     html << "\t<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\r\n";
-    html << "\t<link rel=\"stylesheet\" href=\"/resources/css/styles.css\">\r\n";
-    html << "\t<link rel=\"stylesheet\" href=\"/resources/css/directory.css\">\r\n";
-    html << "\t<link rel=\"stylesheet\" href=\"/resources/css/navbar.css\">\r\n";
-    html << "\t<title>Index of " << path << "</title>\r\n";
+	if (_locationConfig.getRoot() == "website")
+	{
+		html << "\t<link rel=\"stylesheet\" href=\"/resources/css/styles.css\">\r\n";
+		html << "\t<link rel=\"stylesheet\" href=\"/resources/css/directory.css\">\r\n";
+		html << "\t<link rel=\"stylesheet\" href=\"/resources/css/navbar.css\">\r\n";
+	}
+	html << "\t<title>Index of " << path << "</title>\r\n";
     html << "</head>\r\n\r\n";
     html << "<body>\r\n";
-    html << "\t<nav class=\"navbar\">\r\n";
-    html << "\t\t<ul class=\"nav-list\">\r\n";
-    html << "\t\t\t<li class=\"nav-item\"><a href=\"/\">Home</a></li>\r\n";
-    html << "\t\t\t<li class=\"nav-item\"><a href=\"/html/features.html\">Features</a></li>\r\n";
-    html << "\t\t\t<li class=\"nav-item\"><a href=\"/directory\">Directory</a></li>\r\n";
-    html << "\t\t\t<li class=\"nav-item\"><a href=\"/html/search.html\">Search</a></li>\r\n";
-    html << "\t\t\t<li class=\"nav-item\"><a href=\"/html/about.html\">About Us</a></li>\r\n";
-    html << "\t\t</ul>\r\n";
-    html << "\t</nav>\r\n\r\n";
+    
+    if (_locationConfig.getRoot() == "website")
+    {
+		html << "\t<nav class=\"navbar\">\r\n";
+    	html << "\t\t<ul class=\"nav-list\">\r\n";
+    	html << "\t\t\t<li class=\"nav-item\"><a href=\"/\">Home</a></li>\r\n";
+        html << "\t\t\t<li class=\"nav-item\"><a href=\"/html/features.html\">Features</a></li>\r\n";
+        html << "\t\t\t<li class=\"nav-item\"><a href=\"/directory\">Directory</a></li>\r\n";
+        html << "\t\t\t<li class=\"nav-item\"><a href=\"/html/search.html\">Search</a></li>\r\n";
+        html << "\t\t\t<li class=\"nav-item\"><a href=\"/html/about.html\">About Us</a></li>\r\n";
+		html << "\t\t</ul>\r\n";
+		html << "\t</nav>\r\n\r\n";
+	}
+	
     html << "\t<div class=\"directory\">\r\n";
     html << "\t\t<h1>Index of " << path << "</h1>\r\n";
-
-    if (!path.empty() && path != "/directory") 
-    {
-        size_t pos = path.find("website/");
-        if (pos != std::string::npos)
-            pos += std::string("website/").length();
-        else
-            pos = 0;
-        std::string parentPath = path.substr(pos, path.find_last_of('/') - pos);
-        html << "\t\t<p><a href=\"http://" << _request.getHost() << "/" << parentPath << "\">⬅️ Move up</a></p>\r\n";
-    }
 
     if (path == "website/directory/uploads")
     {
@@ -138,11 +135,15 @@ void	HttpResponse::generateDirPage(const std::string &path, std::set<FileData> &
         html << "\t\t\t</thead>";
         html << "\t\t\t<tbody>\r\n";
 
+        std::string uri = _request.getRequestLine().getUri();
+        if (uri[uri.length() - 1] != '/' || uri.empty())
+            uri += "/";
+
         std::set<FileData>::iterator itDir;
         for (itDir = directories.begin(); itDir != directories.end(); ++itDir)
         {
             html << "\t\t\t<tr>\r\n";
-            html << "\t\t\t\t<td><a href=\"" + _request.getRequestLine().getUri() + "/" + itDir->filename + "/\">" + "📁 " + itDir->filename + "</a></td>\r\n";
+            html << "\t\t\t\t<td><a href=\"" + uri + itDir->filename + "/\">" + "📁 " + itDir->filename + "</a></td>\r\n";
             html << "\t\t\t\t<td>--</td>\r\n";  
             html << "\t\t\t\t<td>" + itDir->lastModified + "</td>\r\n";
             html << "\t\t\t</tr>\r\n";
@@ -158,7 +159,7 @@ void	HttpResponse::generateDirPage(const std::string &path, std::set<FileData> &
                 emoji = "🌐 ";
             else if (extension == "jpg" || extension == "jpeg" || extension == "png" || extension == "bmp" || extension == "gif")
                 emoji = "🖼️ ";
-            html << "\t\t\t\t<td><a href=\"" + _request.getRequestLine().getUri() + "/" + itFiles->filename + "\">" + emoji + itFiles->filename + "</a></td>\r\n";
+            html << "\t\t\t\t<td><a href=\"" + uri + itFiles->filename + "\">" + emoji + itFiles->filename + "</a></td>\r\n";
             html << "\t\t\t\t<td>" + toString(itFiles->size) + " bytes</td>\r\n"; 
             html << "\t\t\t\t<td>" + itFiles->lastModified + "</td>\r\n";
             html << "\t\t\t</tr>\r\n";
@@ -186,13 +187,6 @@ void	HttpResponse::generateDirList(std::string path)
     struct FileData fileInfo;
     
     std::string uri = cleanURI(_request.getRequestLine().getUri());
-    if (path.find(uri) == std::string::npos)
-    {
-        size_t addPath = uri.find("directory/");
-        path = path + uri.substr(addPath + 10);
-        if (path[path.size() - 1] == '/')
-            path = path.substr(0, path.size() - 1);
-    }
     dir = opendir(path.c_str());
     if (dir == NULL)
     {
@@ -234,6 +228,6 @@ void	HttpResponse::generateDirList(std::string path)
         } 
     }
     closedir(dir);
-    
+
     generateDirPage(path, directories, files);
 }
