@@ -119,7 +119,7 @@ static bool	isMatchingPrefix(const std::string &pattern, const std::string &targ
     if (pattern.empty() || target.empty())
         return (false);
     std::string target_prefix = target.substr(0, pattern.length());
-    return (pattern == target_prefix);
+	return (pattern == target_prefix);
 }
 
 static int countSlashes(const std::string &path)
@@ -145,39 +145,35 @@ std::string	HttpResponse::comparePath(const ServerConfig &server, const HttpRequ
 
     std::string uriExtension = getExtension(target_path);
 	int uriSlashCount = countSlashes(target_path);
-    bool slashAutoIndex = false;
+    bool slashAutoIndex;
     bool slash= false;
 
     for (location = locationConfigs.begin(); location != locationConfigs.end(); location++)
     {
         std::string config_location = location->getPath();
-        if (config_location == "/")
-        {
-            slash = true;
-            slashAutoIndex = _locationConfig.getAutoIndex() == "on";
-        }
+		if (config_location == "/")
+		{
+			if (config_location == target_path || target_path == "/index.html")
+				return (config_location);
+			slash = true;
+			slashAutoIndex = location->getAutoIndex() == "on";
+			continue ;
+		}
         if (!config_location.empty() && config_location[0] == '.')
         {
             std::string cleanLocPath = config_location.substr(1);
             if (uriExtension == cleanLocPath && uriSlashCount == 1)
                 return (config_location);
         }
-
         if (config_location == target_path || (target_path + "/") == config_location)
             return (config_location);
-        if (target_path == "/index.html")
-        {
-            if (path.empty() || config_location == "/")
-                path = config_location;
-            continue;
-        }
+        
         if (isMatchingPrefix(config_location, target_path))
 		{
             if (path.empty() || path.length() < config_location.length())
-                path = config_location;
+				path = config_location;
 		}
     }
-    
 	if (slash && slashAutoIndex)
         return ("/");
     if (path.empty())

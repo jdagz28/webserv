@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 15:15:53 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/03/06 01:29:15 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/06 04:01:58 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,20 +56,6 @@ std::string	getTimeStamp(time_t time)
     return (std::string(formatedTime));
 }
 
-std::string HttpResponse::getParentPath(const std::string &path)
-{
-    std::string root = _locationConfig.getRoot();
-    std::string rootRemoved = path.substr(root.length());
-    if (rootRemoved.empty() || rootRemoved == "/")
-        return "/";
-    if (rootRemoved[0] == '/')
-        rootRemoved = rootRemoved.substr(1);
-    size_t pos = rootRemoved.find_last_of('/');
-    if (pos == std::string::npos)
-        return "";
-    return rootRemoved.substr(0, pos);
-}
-
 void	HttpResponse::generateDirPage(const std::string &path, std::set<FileData> &directories, std::set<FileData> &files)
 {
     _headers["Location"] = _request.getHost() + "/" + path;
@@ -81,36 +67,31 @@ void	HttpResponse::generateDirPage(const std::string &path, std::set<FileData> &
     html << "<head>\r\n";
     html << "\t<meta charset=\"UTF-8\">\r\n";
     html << "\t<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\r\n";
-    html << "\t<link rel=\"stylesheet\" href=\"/resources/css/styles.css\">\r\n";
-    html << "\t<link rel=\"stylesheet\" href=\"/resources/css/directory.css\">\r\n";
-    html << "\t<link rel=\"stylesheet\" href=\"/resources/css/navbar.css\">\r\n";
-    html << "\t<title>Index of " << path << "</title>\r\n";
+	if (_locationConfig.getRoot() == "website")
+	{
+		html << "\t<link rel=\"stylesheet\" href=\"/resources/css/styles.css\">\r\n";
+		html << "\t<link rel=\"stylesheet\" href=\"/resources/css/directory.css\">\r\n";
+		html << "\t<link rel=\"stylesheet\" href=\"/resources/css/navbar.css\">\r\n";
+	}
+	html << "\t<title>Index of " << path << "</title>\r\n";
     html << "</head>\r\n\r\n";
     html << "<body>\r\n";
-    html << "\t<nav class=\"navbar\">\r\n";
-    html << "\t\t<ul class=\"nav-list\">\r\n";
-    html << "\t\t\t<li class=\"nav-item\"><a href=\"/\">Home</a></li>\r\n";
+    
     if (_locationConfig.getRoot() == "website")
     {
+		html << "\t<nav class=\"navbar\">\r\n";
+    	html << "\t\t<ul class=\"nav-list\">\r\n";
+    	html << "\t\t\t<li class=\"nav-item\"><a href=\"/\">Home</a></li>\r\n";
         html << "\t\t\t<li class=\"nav-item\"><a href=\"/html/features.html\">Features</a></li>\r\n";
         html << "\t\t\t<li class=\"nav-item\"><a href=\"/directory\">Directory</a></li>\r\n";
         html << "\t\t\t<li class=\"nav-item\"><a href=\"/html/search.html\">Search</a></li>\r\n";
         html << "\t\t\t<li class=\"nav-item\"><a href=\"/html/about.html\">About Us</a></li>\r\n";
-    }
-    
-    html << "\t\t</ul>\r\n";
-    html << "\t</nav>\r\n\r\n";
+		html << "\t\t</ul>\r\n";
+		html << "\t</nav>\r\n\r\n";
+	}
+	
     html << "\t<div class=\"directory\">\r\n";
     html << "\t\t<h1>Index of " << path << "</h1>\r\n";
-
-    if (!path.empty()) 
-    {
-        std::string parentPath = getParentPath(path);
-        if (!parentPath.empty() && parentPath[0] != '/')
-            parentPath = "/" + parentPath;
-        if (!parentPath.empty())
-            html << "\t\t<p><a href=\"http://" << _request.getHost() << parentPath << "\">⬅️ Move up</a></p>\r\n";
-    }
 
     if (path == "website/directory/uploads")
     {

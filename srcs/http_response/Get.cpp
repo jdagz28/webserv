@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:05:38 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/03/06 02:37:44 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/06 04:04:12 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,21 +81,12 @@ void	HttpResponse::getResource(const std::string &target_path)
 	{
         uri = _locationConfig.getIndex();
 	}
-    if (!getDirectiveLoc("index").empty())
-    {
-        std::string defaultPage = getDirectiveLoc("index");
-		indexPath = buildResourcePath(target_path, defaultPage);
+	std::string resourceName = extractResourceName(uri);
+	indexPath = buildResourcePath(target_path, resourceName);
+	if (fileExists(indexPath))
 		getResourceContent(indexPath);
-    }
 	else
-    {
-        std::string resourceName = extractResourceName(uri);
-        indexPath = buildResourcePath(target_path, resourceName);
-        if (fileExists(indexPath))
-            getResourceContent(indexPath);
-        else
-            setStatusCode(NOT_FOUND);
-    }
+		setStatusCode(NOT_FOUND);
 }
 
 void 	HttpResponse::getResourceContent(const std::string &file_path)

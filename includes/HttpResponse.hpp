@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:13:31 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/03/06 01:24:41 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/06 04:02:12 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,11 +99,10 @@ class HttpResponse
         void    generateDirPage(const std::string &path, std::set<FileData> &directories, std::set<FileData> &files);
         bool    isAutoIndex();
         bool    checkDirIndex();
-        std::string getParentPath(const std::string &path);
         
 
         void    getErrorPage();
-        std::string generateErrorPage(const std::string &status, const std::string &statusMessage);
+        void	generateErrorPage(const std::string &status, const std::string &statusMessage);
 
         void    processRequestPOST();
         void    processImageUpload();
