@@ -122,6 +122,17 @@ static bool	isMatchingPrefix(const std::string &pattern, const std::string &targ
     return (pattern == target_prefix);
 }
 
+static int countSlashes(const std::string &path)
+{
+	int count = 0;
+	for (size_t i = 0; i < path.length(); i++)
+	{
+		if (path[i] == '/')
+			count++;
+	}
+	return (count);
+}
+
 std::string	HttpResponse::comparePath(const ServerConfig &server, const HttpRequestLine &request)
 {
     std::string target_path = request.getUri();
@@ -133,6 +144,7 @@ std::string	HttpResponse::comparePath(const ServerConfig &server, const HttpRequ
     std::vector<LocationConfig>::const_iterator location;
 
     std::string uriExtension = getExtension(target_path);
+	int uriSlashCount = countSlashes(target_path);
     bool slashAutoIndex = false;
     bool slash= false;
 
@@ -147,7 +159,7 @@ std::string	HttpResponse::comparePath(const ServerConfig &server, const HttpRequ
         if (!config_location.empty() && config_location[0] == '.')
         {
             std::string cleanLocPath = config_location.substr(1);
-            if (uriExtension == cleanLocPath)
+            if (uriExtension == cleanLocPath && uriSlashCount == 1)
                 return (config_location);
         }
 

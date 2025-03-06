@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:05:38 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/03/06 01:58:40 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/06 02:37:44 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,11 +81,13 @@ void	HttpResponse::getResource(const std::string &target_path)
 	{
         uri = _locationConfig.getIndex();
 	}
-	if (!isSupportedMedia(uri))
-	{
-		setStatusCode(UNSUPPORTED_MEDIA_TYPE);
-	}
-    else if (isSupportedMedia(uri))
+    if (!getDirectiveLoc("index").empty())
+    {
+        std::string defaultPage = getDirectiveLoc("index");
+		indexPath = buildResourcePath(target_path, defaultPage);
+		getResourceContent(indexPath);
+    }
+	else
     {
         std::string resourceName = extractResourceName(uri);
         indexPath = buildResourcePath(target_path, resourceName);
@@ -93,17 +95,6 @@ void	HttpResponse::getResource(const std::string &target_path)
             getResourceContent(indexPath);
         else
             setStatusCode(NOT_FOUND);
-    }
-    else
-    {
-        std::string defaultPage = getDirectiveLoc("index");
-        if (defaultPage.empty())
-            setStatusCode(NOT_FOUND);
-        else
-        {
-            indexPath = buildResourcePath(target_path, defaultPage);
-            getResourceContent(indexPath);
-        }
     }
 }
 
@@ -138,15 +129,9 @@ void 	HttpResponse::getResourceContent(const std::string &file_path)
 	}
     infile.close();
     
-    if (!isSupportedMedia(file_path))
-        setStatusCode(UNSUPPORTED_MEDIA_TYPE);
-    else
-    {
-        std::string contentType = getExtension(file_path);
-        addContentTypeHeader(contentType);
-        if (getStatusCode() == INIT)
-            setStatusCode(OK);
-    }
+	std::string contentType = getExtension(file_path);
+	addContentTypeHeader(contentType);
+	setStatusCode(OK);
 }
 
 std::string	HttpResponse::extractResourceName(const std::string &uri)
