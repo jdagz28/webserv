@@ -95,10 +95,10 @@ void	HttpResponse::execMethod()
                 // std::cout << _request.getHeader("content-type") << std::endl;
                 // std::cout << _request.getHeader("content-length") << std::endl;
                 // _request.printBuffer();
+				_request.parseRequestBody();
                 Cgi cgi(_request.getRequestLine(), _request, cgiPath, UPLOAD_DIR);
-                _request.parseRequestBody();
                 cgi.printMultiFormData();
-
+				std::cout.flush();
             } 
             
             // _body = cgi.runCgi();
