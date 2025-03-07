@@ -88,6 +88,14 @@ void	HttpResponse::execMethod()
         std::cout << "CGI REQUEST" << std::endl;
         std::string cgiPath = resolveCGIPath();
         Cgi cgi(_request.getRequestLine(), _request, cgiPath, UPLOAD_DIR);
+        try
+        {
+            cgi.runCgi();
+        }
+        catch(const std::exception& e)
+        {
+            std::cerr << e.what() << '\n';
+        }
         return ;
     }
     
@@ -389,7 +397,7 @@ std::string HttpResponse::resolveCGIPath()
             return ("./website/directory/cgi-bin/" + scriptName);
         else
         {
-            std::string path = _locationConfig.getRoot() + _locationConfig.getPath();
+            std::string path = "./" + _locationConfig.getRoot() + _locationConfig.getPath();
             if (path[path.size() - 1] == '/')
                 return (path + scriptName);
             else

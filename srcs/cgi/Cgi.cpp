@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 19:52:54 by romvan-d          #+#    #+#             */
-/*   Updated: 2025/03/06 10:20:38 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/07 14:26:49 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,11 +73,11 @@ Cgi::Cgi(const HttpRequestLine & requestLine, const HttpRequest & request, const
     this->env["HTTP_USER_AGENT="] = request.getHeader("user-agent"); //requestHeaderInfo["User-Agent"];
     this->env["HTTP_CONNECTION="] = request.getHeader("connection"); //requestHeaderInfo["Connection"];
 
-	std::map<std::string, std::string>::const_iterator it;
-	for (it = this->env.begin(); it != this->env.end(); it++)
-	{
-		std::cout << it->first << it->second << std::endl;
-	}
+	// std::map<std::string, std::string>::const_iterator it;
+	// for (it = this->env.begin(); it != this->env.end(); it++)
+	// {
+	// 	std::cout << it->first << it->second << std::endl;
+	// }
 }
 
 Cgi::Cgi(const Cgi &other) : env(other.env)
@@ -179,36 +179,53 @@ std::string Cgi::runCgi()
 	}
 	else if (pidCgi == 0)
 	{
-		FILE * tmpFileWrite = std::fopen("/tmp/CgiDataUpload", "w");
-		if (!tmpFileWrite)
-		{
-			std::exit(1);
-		}
-		if (this->whichMethod == POST)
-		{
-			char const * writingRecipient = this->data.c_str();
-			if (write(fileno(tmpFileWrite), writingRecipient, this->data.length()) == -1)
-			{
-				std::exit(1);
-			}
-		}
-		close(fileno(tmpFileWrite));
+		// FILE * tmpFileWrite = std::fopen("/tmp/CgiDataUpload", "w");
+		// if (!tmpFileWrite)
+		// {
+		// 	std::exit(1);
+		// }
+		// if (this->whichMethod == POST)
+		// {
+		// 	char const * writingRecipient = this->data.c_str();
+		// 	if (write(fileno(tmpFileWrite), writingRecipient, this->data.length()) == -1)
+		// 	{
+		// 		std::exit(1);
+		// 	}
+		// }
+		// close(fileno(tmpFileWrite));
 
-		FILE * tmpFileRead = std::fopen("/tmp/CgiDataUpload", "r");
-		dup2(fileno(tmpFileRead), STDIN_FILENO);
-		close(fileno(tmpFileRead));
+		// FILE * tmpFileRead = std::fopen("/tmp/CgiDataUpload", "r");
+		// dup2(fileno(tmpFileRead), STDIN_FILENO);
+		// close(fileno(tmpFileRead));
+
+		dup2(pipeCGI[1], STDOUT_FILENO);
+		close(pipeCGI[0]);
+		close(pipeCGI[1]);
 
 		char **args = convertArgs(this->args);
 		char **env = convertEnv(this->env);
-		size_t lastSlashChar = this->path.find_last_of("/");
-		int ret = chdir(this->path.substr(0, lastSlashChar).c_str());
-		if (ret == -1)
+		// size_t lastSlashChar = this->path.find_last_of("/");
+		// int ret = chdir(this->path.substr(0, lastSlashChar).c_str());
+		// if (ret == -1)
+		// {
+		// 	freeTab(args);
+		// 	freeTab(env);
+		// 	std::exit(1);
+		// }
+		std::cout << "ARGS" << std::endl;
+		for (int i = 0; args[i] != NULL; i++)
 		{
-			freeTab(args);
-			freeTab(env);
-			std::exit(1);
+			std::cout << args[i] << std::endl;
 		}
-		ret = execve(this->path.c_str(), args, env);
+		std::cout << "ENV" << std::endl;
+		for (int i = 0; env[i] != NULL; i++)
+		{
+			std::cout << env[i] << std::endl;
+		}
+		std::cout.flush();
+
+		
+		int ret = execve(this->path.c_str(), args, env);
 		if (ret == -1)
 		{
 			freeTab(args);
@@ -219,6 +236,10 @@ std::string Cgi::runCgi()
 	else
 	{
 		close(pipeCGI[1]);
+		
+		cgiOutput = readPipe(pipeCGI[0]);
+		close(pipeCGI[0]);
+		
 		int status;
 		waitpid(pidCgi, &status, 0);
 		if (WIFEXITED(status))
@@ -230,11 +251,11 @@ std::string Cgi::runCgi()
 				throw CgiError();
 			}
 		}
-		cgiOutput = readPipe(pipeCGI[0]);
-		close(pipeCGI[0]);
+		std::cout << cgiOutput << std::endl;
+		return cgiOutput;
 	}
 	std::remove("/tmp/CgiDataUpload");
-	return cgiOutput;
+	return "cgiOutput";
 }
 
 const char *Cgi::CgiError::what() const throw()
