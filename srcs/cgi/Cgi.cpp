@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 19:52:54 by romvan-d          #+#    #+#             */
-/*   Updated: 2025/03/07 18:48:15 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/07 22:18:51 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,27 +68,19 @@ Cgi::Cgi(const HttpRequestLine & requestLine, const HttpRequest & request, const
 	{
 		this->whichMethod = 1;
 		this->data = body;
-		this->uploadData = request.getMultiFormData();
 		this->env["CONTENT_LENGTH="] = request.getHeader("content-length");
 		this->env["QUERRY_STRING="] = "NULL";
 	}
 
-	// std::map<std::string, std::string> requestHeaderInfo = request.getHeader();
-	this->env["CONTENT_TYPE="] = request.getHeader("content-type"); //requestHeaderInfo["Content-Type"]; 
-    this->env["HTTP_ACCEPT="] = request.getHeader("accept"); //requestHeaderInfo["Accept"];
-    this->env["HTTP_ACCEPT_ENCODING="] = request.getHeader("accept-encoding"); //requestHeaderInfo["Accept-Encoding"];
-    this->env["HTTP_ACCEPT_LANGUAGE="] = request.getHeader("accept-language"); //requestHeaderInfo["Accept-Language"];
+	this->env["CONTENT_TYPE="] = request.getHeader("content-type"); 
+    this->env["HTTP_ACCEPT="] = request.getHeader("accept"); 
+    this->env["HTTP_ACCEPT_ENCODING="] = request.getHeader("accept-encoding"); 
+    this->env["HTTP_ACCEPT_LANGUAGE="] = request.getHeader("accept-language"); 
     this->env["PATH_INFO="] = this->path;
     this->env["SERVER_PROTOCOL="] = "HTTP/1.1";
-    this->env["HOST="] = request.getHeader("host"); //requestHeaderInfo["Host"];
-    this->env["HTTP_USER_AGENT="] = request.getHeader("user-agent"); //requestHeaderInfo["User-Agent"];
-    this->env["HTTP_CONNECTION="] = request.getHeader("connection"); //requestHeaderInfo["Connection"];
-
-	// std::map<std::string, std::string>::const_iterator it;
-	// for (it = this->env.begin(); it != this->env.end(); it++)
-	// {
-	// 	std::cout << it->first << it->second << std::endl;
-	// }
+    this->env["HOST="] = request.getHeader("host"); 
+    this->env["HTTP_USER_AGENT="] = request.getHeader("user-agent"); 
+    this->env["HTTP_CONNECTION="] = request.getHeader("connection"); 
 }
 
 Cgi::Cgi(const Cgi &other) : env(other.env)
@@ -183,6 +175,9 @@ std::string Cgi::readPipe(int pipeRead)
 
 std::string Cgi::runCgi()
 {
+	if (!isValidScript())
+		throw CgiError();
+	
 	int pipeCGI[2];
 	pid_t pidCgi;
 	std::string cgiOutput;
@@ -302,11 +297,13 @@ std::string Cgi::runCgi()
 				throw CgiError();
 			}
 		}
-		std::cout << cgiOutput << std::endl;
-		if (std::remove("./website/directory/uploads/temp.file") == -1)
+		if (std::remove("./website/directory/uploads/temp.file") != 0)
 		{
-			perror("Error deleting file");
-			std::exit(1);
+			if (errno != ENOENT)
+			{
+				setStatusCode(INTERNAL_SERVER_ERROR);
+				return ("");
+			}
 		}
 		setStatusCode(OK);
 		return cgiOutput;
@@ -321,19 +318,19 @@ const char *Cgi::CgiError::what() const throw()
 
 bool	Cgi::isValidScript()
 {
-        struct stat     statbuf;
+	struct stat     statbuf;
 
-        if (stat(path.c_str(), &statbuf) == -1)
-        {
-                setStatusCode(NOT_FOUND); //! Double check Status Code
-                return (false);
-        }
-        if (!(statbuf.st_mode & S_IXUSR))
-        {
-                setStatusCode(FORBIDDEN); //! Double check Status Code
-                return (false);
-        }
-        return (true);
+	if (stat(path.c_str(), &statbuf) == -1)
+	{
+		setStatusCode(NOT_FOUND); //! Double check Status Code
+		return (false);
+	}
+	if (!(statbuf.st_mode & S_IXUSR))
+	{
+		setStatusCode(FORBIDDEN); //! Double check Status Code
+		return (false);
+	}
+	return (true);
 }
 
 void	Cgi::setStatusCode(StatusCode code)
@@ -344,20 +341,6 @@ void	Cgi::setStatusCode(StatusCode code)
 StatusCode	Cgi::getStatusCode() const
 {
 		return (status);
-}
-
-void	Cgi::printMultiFormData()
-{
-	std::map<std::string, MultiFormData>::iterator it;
-	for (it = uploadData.begin(); it != uploadData.end(); it++)
-	{
-		std::cout << it->first << std::endl;
-		for (size_t i = 0; i < it->second.binary.size(); i++)
-		{
-			std::cout << it->second.binary[i];
-		}
-	}
-	std::cout.flush();
 }
 
 void Cgi::printData()
