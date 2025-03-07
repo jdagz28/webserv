@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 19:52:54 by romvan-d          #+#    #+#             */
-/*   Updated: 2025/03/07 15:44:31 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/07 16:13:09 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,8 +67,9 @@ Cgi::Cgi(const HttpRequestLine & requestLine, const HttpRequest & request, const
 	else if (requestLine.getMethod() == "POST")
 	{
 		this->whichMethod = 1;
-		this->data = //need the body + '\0';
-		this->env["CONTENT_LENGTH="] = //"POST BODY SIZE"
+		this->data = "";//need the body + '\0';
+		this->uploadData = request.getMultiFormData();
+		this->env["CONTENT_LENGTH="] = request.getHeader("content-length");
 		this->env["QUERRY_STRING="] = "NULL";
 	}
 
@@ -326,4 +327,18 @@ void	Cgi::setStatusCode(StatusCode code)
 StatusCode	Cgi::getStatusCode() const
 {
 		return (status);
+}
+
+void	Cgi::printMultiFormData()
+{
+	std::map<std::string, MultiFormData>::iterator it;
+	for (it = uploadData.begin(); it != uploadData.end(); it++)
+	{
+		std::cout << it->first << std::endl;
+		for (size_t i = 0; i < it->second.binary.size(); i++)
+		{
+			std::cout << it->second.binary[i];
+		}
+	}
+	std::cout.flush();
 }

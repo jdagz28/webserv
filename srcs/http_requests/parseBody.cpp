@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/25 12:44:49 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/03/04 14:39:38 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/07 15:57:45 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -214,7 +214,7 @@ void	HttpRequest::parseRequestBody()
                     if (_status != OK)
                         return ;
                 }
-				else if (type.find("multipart/form-data") != std::string::npos)
+				else if ((type.find("multipart/form-data") != std::string::npos))
 				{
 					std::string boundary;
 					if (isMultiPartFormData(&boundary)) 

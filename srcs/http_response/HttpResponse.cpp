@@ -87,11 +87,22 @@ void	HttpResponse::execMethod()
     {
         std::cout << "CGI REQUEST" << std::endl;
         std::string cgiPath = resolveCGIPath();
-        Cgi cgi(_request.getRequestLine(), _request, cgiPath, UPLOAD_DIR);
+        // Cgi cgi(_request.getRequestLine(), _request, cgiPath, UPLOAD_DIR);
         try
         {
-            _body = cgi.runCgi();
-            _status = cgi.getStatusCode();
+            if (_request.getRequestLine().getMethod() == "POST")
+            {
+                // std::cout << _request.getHeader("content-type") << std::endl;
+                // std::cout << _request.getHeader("content-length") << std::endl;
+                // _request.printBuffer();
+                Cgi cgi(_request.getRequestLine(), _request, cgiPath, UPLOAD_DIR);
+                _request.parseRequestBody();
+                cgi.printMultiFormData();
+
+            } 
+            
+            // _body = cgi.runCgi();
+            // _status = cgi.getStatusCode();
         }
         catch(const std::exception& e)
         {

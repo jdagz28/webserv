@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:11:42 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/03/04 13:43:12 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/07 16:03:35 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,7 @@ class HttpRequest
         HtmlRequestParseStep                                                _parseStep;
         std::map<std::string, MultiFormData>                                _multiFormData;
         size_t                                                              _maxBodySize;
+        
         
         HttpRequest();
 		
