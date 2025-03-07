@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 19:52:54 by romvan-d          #+#    #+#             */
-/*   Updated: 2025/03/07 14:26:49 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/07 15:14:26 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <sstream>
 
 # define BUFFERSIZE 2048
 static void freeTab(char **tab) {
@@ -40,7 +41,6 @@ Cgi::Cgi ()
 Cgi::Cgi(const HttpRequestLine & requestLine, const HttpRequest & request, const std::string path, const std::string &uploadDir)
 {
 	this->path = path;
-	this->args.push_back("");
 	this->env["REQUEST_METHOD="] = requestLine.getMethod();
 	this->env["UPLOAD_DIR="] = uploadDir;
 	std::string uri = requestLine.getUri();
@@ -53,6 +53,14 @@ Cgi::Cgi(const HttpRequestLine & requestLine, const HttpRequest & request, const
 			this->data = uri.substr(querryPos + 1);//need the query string;
 		this->env["CONTENT_LENGTH="] = "NULL";
 		this->env["QUERRY_STRING="] = this->data;
+		std::stringstream iss(this->data);
+		std::string key;
+		std::string value;
+		while (std::getline(iss, key, '='))
+		{
+			std::getline(iss, value, '&');
+			this->args.push_back(key + "=" + value);
+		}
 	}
 	else if (requestLine.getMethod() == "POST")
 	{
@@ -156,7 +164,7 @@ std::string Cgi::readPipe(int pipeRead)
 	{
 		if (readChars == -1)
 			throw CgiError();
-	output.append(buffer,readChars);
+		output.append(buffer,readChars);
 	}
 	return output;
 }
@@ -168,11 +176,13 @@ std::string Cgi::runCgi()
 	std::string cgiOutput;
 	if (pipe(pipeCGI) == -1)
 	{
+		std::cerr << "pipe error" << std::endl;
 		throw CgiError();
 	}
 	pidCgi = fork();
 	if (pidCgi == -1)
 	{
+		std::cerr << "fork error" << std::endl;
 		close(pipeCGI[0]);
 		close(pipeCGI[1]);
 		throw CgiError();
@@ -198,7 +208,11 @@ std::string Cgi::runCgi()
 		// dup2(fileno(tmpFileRead), STDIN_FILENO);
 		// close(fileno(tmpFileRead));
 
-		dup2(pipeCGI[1], STDOUT_FILENO);
+		if (dup2(pipeCGI[1], STDOUT_FILENO) == -1)
+		{
+			std::cerr << "dup2 error" << std::endl;
+			throw CgiError();
+		}
 		close(pipeCGI[0]);
 		close(pipeCGI[1]);
 
@@ -212,22 +226,23 @@ std::string Cgi::runCgi()
 		// 	freeTab(env);
 		// 	std::exit(1);
 		// }
-		std::cout << "ARGS" << std::endl;
-		for (int i = 0; args[i] != NULL; i++)
-		{
-			std::cout << args[i] << std::endl;
-		}
-		std::cout << "ENV" << std::endl;
-		for (int i = 0; env[i] != NULL; i++)
-		{
-			std::cout << env[i] << std::endl;
-		}
-		std::cout.flush();
+		// std::cout << "ARGS" << std::endl;
+		// for (int i = 0; args[i] != NULL; i++)
+		// {
+		// 	std::cout << args[i] << std::endl;
+		// }
+		// std::cout << "ENV" << std::endl;
+		// for (int i = 0; env[i] != NULL; i++)
+		// {
+		// 	std::cout << env[i] << std::endl;
+		// }
+		// std::cout.flush();
 
 		
 		int ret = execve(this->path.c_str(), args, env);
 		if (ret == -1)
 		{
+			std::cerr << "execve error" << std::endl;
 			freeTab(args);
 			freeTab(env);
 			std::exit(1);
@@ -241,7 +256,12 @@ std::string Cgi::runCgi()
 		close(pipeCGI[0]);
 		
 		int status;
-		waitpid(pidCgi, &status, 0);
+		int res = waitpid(pidCgi, &status, 0);
+		if (res == -1)
+		{
+			std::cerr << "waitpid error" << std::endl;
+			throw CgiError();
+		}
 		if (WIFEXITED(status))
 		{
 			int exitcode = WEXITSTATUS(status);
@@ -255,7 +275,7 @@ std::string Cgi::runCgi()
 		return cgiOutput;
 	}
 	std::remove("/tmp/CgiDataUpload");
-	return "cgiOutput";
+	return "";
 }
 
 const char *Cgi::CgiError::what() const throw()
