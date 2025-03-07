@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 17:08:50 by romvan-d          #+#    #+#             */
-/*   Updated: 2025/03/07 22:13:08 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/07 23:20:26 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ class Cgi
 		~Cgi();
 
 		Cgi &operator=(const Cgi &other);
-		std::string runCgi();
+		void	runCgi();
 		
 		StatusCode getStatusCode() const;
 		void	printData();
@@ -56,7 +56,7 @@ class Cgi
 		
 		char ** convertEnv(std::map<std::string, std::string> env);
 		char ** convertArgs(std::vector<std::string> args);
-		std::string readPipe(int pipeRead);
+		void	readPipe(int pipeRead);
 		bool	isValidScript();
 		void 	setStatusCode(StatusCode coe);
 };

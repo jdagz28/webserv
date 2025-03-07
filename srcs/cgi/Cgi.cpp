@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 19:52:54 by romvan-d          #+#    #+#             */
-/*   Updated: 2025/03/07 22:18:51 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/07 23:32:16 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -153,10 +153,9 @@ char ** Cgi::convertArgs(std::vector<std::string> args)
 	return (argstable);
 }
 
-std::string Cgi::readPipe(int pipeRead)
+void Cgi::readPipe(int pipeRead)
 {
 	int readChars;
-	std::string output = "";
 	char buffer[BUFFERSIZE];
 	
 	while ((readChars = read(pipeRead, buffer, BUFFERSIZE)))
@@ -166,32 +165,28 @@ std::string Cgi::readPipe(int pipeRead)
 			setStatusCode(INTERNAL_SERVER_ERROR);
 			throw CgiError();
 		}
-		output.append(buffer,readChars);
+		cgiOutput.append(buffer,readChars);
 	}
-	std::cout << output << std::endl;
-	std::cout.flush();
-	return output;
+	std::cout << "CGI OUTPUT\n" << cgiOutput << std::endl;
 }
 
-std::string Cgi::runCgi()
+void Cgi::runCgi()
 {
 	if (!isValidScript())
 		throw CgiError();
 	
 	int pipeCGI[2];
 	pid_t pidCgi;
-	std::string cgiOutput;
+	
 	if (pipe(pipeCGI) == -1)
 	{
 		setStatusCode(INTERNAL_SERVER_ERROR);
-		std::cerr << "pipe error" << std::endl;
 		throw CgiError();
 	}
 	pidCgi = fork();
 	if (pidCgi == -1)
 	{
 		setStatusCode(INTERNAL_SERVER_ERROR);
-		std::cerr << "fork error" << std::endl;
 		close(pipeCGI[0]);
 		close(pipeCGI[1]);
 		throw CgiError();
@@ -204,27 +199,25 @@ std::string Cgi::runCgi()
 			FILE * tmpFileWrite = std::fopen("./website/directory/uploads/temp.file", "w");
 			if (!tmpFileWrite)
 			{
-				perror("Error opening file for writing");
-				std::exit(1);
+				setStatusCode(INTERNAL_SERVER_ERROR);
+				throw CgiError();
 			}
 			if (this->whichMethod == POST)
 			{
 				char const * writingRecipient = this->data.c_str();
 				if (write(fileno(tmpFileWrite), writingRecipient, this->data.length()) == -1)
 				{
-					perror("Error writing to file");
-					std::exit(1);
+					setStatusCode(INTERNAL_SERVER_ERROR);
+					throw CgiError();
 				}
-				std::cout << "Write to file" << std::endl;
-				std::cout.flush();
 			}
 			close(fileno(tmpFileWrite));
 
 			FILE * tmpFileRead = std::fopen("./website/directory/uploads/temp.file", "r");
 			if (!tmpFileRead)
 			{
-				perror("Error opening file for reading");
-				std::exit(1);
+				setStatusCode(INTERNAL_SERVER_ERROR);
+				throw CgiError();
 			}
 			dup2(fileno(tmpFileRead), STDIN_FILENO);
 			close(fileno(tmpFileRead));
@@ -233,7 +226,6 @@ std::string Cgi::runCgi()
 		if (dup2(pipeCGI[1], STDOUT_FILENO) == -1)
 		{
 			setStatusCode(INTERNAL_SERVER_ERROR);
-			std::cerr << "dup2 error" << std::endl;
 			throw CgiError();
 		}
 		close(pipeCGI[0]);
@@ -266,17 +258,16 @@ std::string Cgi::runCgi()
 		if (ret == -1)
 		{
 			setStatusCode(INTERNAL_SERVER_ERROR);
-			std::cerr << "execve error" << std::endl;
 			freeTab(args);
 			freeTab(env);
-			std::exit(1);
+			throw CgiError();
 		}
 	}
 	else
 	{
 		close(pipeCGI[1]);
 		
-		cgiOutput = readPipe(pipeCGI[0]);
+		readPipe(pipeCGI[0]);
 		close(pipeCGI[0]);
 		
 		int status;
@@ -284,7 +275,6 @@ std::string Cgi::runCgi()
 		if (res == -1)
 		{
 			setStatusCode(INTERNAL_SERVER_ERROR);
-			std::cerr << "waitpid error" << std::endl;
 			throw CgiError();
 		}
 		if (WIFEXITED(status))
@@ -302,13 +292,11 @@ std::string Cgi::runCgi()
 			if (errno != ENOENT)
 			{
 				setStatusCode(INTERNAL_SERVER_ERROR);
-				return ("");
+				throw CgiError();
 			}
 		}
 		setStatusCode(OK);
-		return cgiOutput;
 	}
-	return "";
 }
 
 const char *Cgi::CgiError::what() const throw()

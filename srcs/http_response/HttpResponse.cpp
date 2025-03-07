@@ -85,39 +85,21 @@ void	HttpResponse::execMethod()
         return ;
     if (isCGIRequest(_request.getRequestLine().getUri()))
     {
-        std::cout << "CGI REQUEST" << std::endl;
         std::string cgiPath = resolveCGIPath();
-        // Cgi cgi(_request.getRequestLine(), _request, cgiPath, UPLOAD_DIR);
+        std::string body;	
+
         try
         {
-            if (_request.getRequestLine().getMethod() == "POST")
-            {
-                // std::cout << _request.getHeader("content-type") << std::endl;
-                // std::cout << _request.getHeader("content-length") << std::endl;
-                // _request.printBuffer();
-				std::string body = _request.getBuffer();
-				_request.parseRequestBody();
-				// std::cout << "BODY: " << body << std::endl;
-                Cgi cgi(_request.getRequestLine(), _request, cgiPath, UPLOAD_DIR, body);
-                // cgi.printMultiFormData();
-				// cgi.printData();
-				std::cout.flush();
-				_body = cgi.runCgi();
-            	_status = cgi.getStatusCode();
-            } 
-            else
-			{
-				Cgi cgi(_request.getRequestLine(), _request, cgiPath, UPLOAD_DIR, std::string());
-                // cgi.printMultiFormData();
-				// cgi.printData();
-				std::cout.flush();
-				_body = cgi.runCgi();
-            	_status = cgi.getStatusCode();
-			}
+			if (_request.getRequestLine().getMethod() == "POST")
+				body = _request.getBuffer();
+
+			Cgi cgi(_request.getRequestLine(), _request, cgiPath, UPLOAD_DIR, body);
+			cgi.runCgi();
+			_status = cgi.getStatusCode();
         }
         catch(const std::exception& e)
         {
-            std::cerr << e.what() << '\n';
+            std::cerr << e.what() << std::endl;
         }
         return ;
     }
