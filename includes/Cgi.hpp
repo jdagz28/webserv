@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 17:08:50 by romvan-d          #+#    #+#             */
-/*   Updated: 2025/03/07 16:09:23 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/07 17:24:25 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ class Cgi
 	public :
 	
 		Cgi();
-		Cgi(const HttpRequestLine &requestLine, const HttpRequest & request, const std::string path, const std::string &uploadDir);
+		Cgi(const HttpRequestLine &requestLine, const HttpRequest & request, const std::string path, const std::string &uploadDir, const std::string &body);
         Cgi(const Cgi &other);
 		~Cgi();
 
@@ -35,6 +35,7 @@ class Cgi
 		
 		StatusCode getStatusCode() const;
 		void	printMultiFormData();
+		void	printData();
 
 		class CgiError : public std::exception
 		{

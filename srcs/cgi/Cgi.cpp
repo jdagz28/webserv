@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 19:52:54 by romvan-d          #+#    #+#             */
-/*   Updated: 2025/03/07 16:36:59 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/07 17:35:22 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ Cgi::Cgi ()
 
 }
 
-Cgi::Cgi(const HttpRequestLine & requestLine, const HttpRequest & request, const std::string path, const std::string &uploadDir)
+Cgi::Cgi(const HttpRequestLine & requestLine, const HttpRequest & request, const std::string path, const std::string &uploadDir, const std::string &body)
 	: status(OK), cgiOutput(""), outputHeaders(), outputBody()
 {
 	this->path = path;
@@ -67,7 +67,7 @@ Cgi::Cgi(const HttpRequestLine & requestLine, const HttpRequest & request, const
 	else if (requestLine.getMethod() == "POST")
 	{
 		this->whichMethod = 1;
-		this->data = "";//need the body + '\0';
+		this->data = body;
 		this->uploadData = request.getMultiFormData();
 		this->env["CONTENT_LENGTH="] = request.getHeader("content-length");
 		this->env["QUERRY_STRING="] = "NULL";
@@ -203,25 +203,30 @@ std::string Cgi::runCgi()
 	}
 	else if (pidCgi == 0)
 	{
-		// FILE * tmpFileWrite = std::fopen("/tmp/CgiDataUpload", "w");
-		// if (!tmpFileWrite)
-		// {
-		// 	std::exit(1);
-		// }
-		// if (this->whichMethod == POST)
-		// {
-		// 	char const * writingRecipient = this->data.c_str();
-		// 	if (write(fileno(tmpFileWrite), writingRecipient, this->data.length()) == -1)
-		// 	{
-		// 		std::exit(1);
-		// 	}
-		// }
-		// close(fileno(tmpFileWrite));
+		if (env["REQUEST_METHOD="] == "POST")
+		{
+			FILE * tmpFileWrite = std::fopen("./tmp/CgiDataUpload", "w");
+			if (!tmpFileWrite)
+			{
+				std::exit(1);
+			}
+			if (this->whichMethod == POST)
+			{
+				char const * writingRecipient = this->data.c_str();
+				if (write(fileno(tmpFileWrite), writingRecipient, this->data.length()) == -1)
+				{
+					std::exit(1);
+				}
+				std::cout << "Write to file" << std::endl;
+				std::cout.flush();
+			}
+			close(fileno(tmpFileWrite));
 
-		// FILE * tmpFileRead = std::fopen("/tmp/CgiDataUpload", "r");
-		// dup2(fileno(tmpFileRead), STDIN_FILENO);
-		// close(fileno(tmpFileRead));
-
+			FILE * tmpFileRead = std::fopen("./tmp/CgiDataUpload", "r");
+			dup2(fileno(tmpFileRead), STDIN_FILENO);
+			close(fileno(tmpFileRead));
+		}
+			
 		if (dup2(pipeCGI[1], STDOUT_FILENO) == -1)
 		{
 			setStatusCode(INTERNAL_SERVER_ERROR);
@@ -246,12 +251,12 @@ std::string Cgi::runCgi()
 		// {
 		// 	std::cout << args[i] << std::endl;
 		// }
-		std::cout << "ENV" << std::endl;
-		for (int i = 0; env[i] != NULL; i++)
-		{
-			std::cout << env[i] << std::endl;
-		}
-		std::cout.flush();
+		// std::cout << "ENV" << std::endl;
+		// for (int i = 0; env[i] != NULL; i++)
+		// {
+		// 	std::cout << env[i] << std::endl;
+		// }
+		// std::cout.flush();
 
 		
 		int ret = execve(this->path.c_str(), args, env);
@@ -293,7 +298,7 @@ std::string Cgi::runCgi()
 		setStatusCode(OK);
 		return cgiOutput;
 	}
-	std::remove("/tmp/CgiDataUpload");
+	// std::remove("/tmp/CgiDataUpload");
 	return "";
 }
 
@@ -341,4 +346,9 @@ void	Cgi::printMultiFormData()
 		}
 	}
 	std::cout.flush();
+}
+
+void Cgi::printData()
+{
+	std::cout << "Data\n" << data << std::endl;
 }

@@ -95,14 +95,25 @@ void	HttpResponse::execMethod()
                 // std::cout << _request.getHeader("content-type") << std::endl;
                 // std::cout << _request.getHeader("content-length") << std::endl;
                 // _request.printBuffer();
+				std::string body = _request.getBuffer();
 				_request.parseRequestBody();
-                Cgi cgi(_request.getRequestLine(), _request, cgiPath, UPLOAD_DIR);
-                cgi.printMultiFormData();
+				// std::cout << "BODY: " << body << std::endl;
+                Cgi cgi(_request.getRequestLine(), _request, cgiPath, UPLOAD_DIR, body);
+                // cgi.printMultiFormData();
+				// cgi.printData();
 				std::cout.flush();
+				_body = cgi.runCgi();
+            	_status = cgi.getStatusCode();
             } 
-            
-            // _body = cgi.runCgi();
-            // _status = cgi.getStatusCode();
+            else
+			{
+				Cgi cgi(_request.getRequestLine(), _request, cgiPath, UPLOAD_DIR, std::string());
+                // cgi.printMultiFormData();
+				// cgi.printData();
+				std::cout.flush();
+				_body = cgi.runCgi();
+            	_status = cgi.getStatusCode();
+			}
         }
         catch(const std::exception& e)
         {

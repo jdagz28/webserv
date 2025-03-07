@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:18:22 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/03/07 16:06:17 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/07 17:22:54 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -384,4 +384,16 @@ void	HttpRequest::reset()
 	_parseStep = REQUEST_INIT;
 	_multiFormData.clear();
 	_maxBodySize = 0;
+}
+
+std::string	HttpRequest::getBuffer() const
+{
+	// std::map<std::string, MultiFormData>::const_iterator it;
+	// for (it = _multiFormData.begin(); it != _multiFormData.end(); it++)
+	// {
+	// 	if (it->first == "file")
+	// 		return (std::string(reinterpret_cast<const char *>(it->second.binary.data()), it->second.binary.size()));	
+	// }
+	// return (std::string());
+	return (std::string(reinterpret_cast<const char *>(_buffer.data()), _buffer.size()));
 }
