@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 19:52:54 by romvan-d          #+#    #+#             */
-/*   Updated: 2025/03/07 23:32:16 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/08 00:38:21 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -167,7 +167,6 @@ void Cgi::readPipe(int pipeRead)
 		}
 		cgiOutput.append(buffer,readChars);
 	}
-	std::cout << "CGI OUTPUT\n" << cgiOutput << std::endl;
 }
 
 void Cgi::runCgi()
@@ -334,4 +333,58 @@ StatusCode	Cgi::getStatusCode() const
 void Cgi::printData()
 {
 	std::cout << "Data\n" << data << std::endl;
+}
+
+void	Cgi::parseCgiOutput() 
+{
+	if (cgiOutput.find("text/html") != std::string::npos)
+	{
+		size_t htmlPos = cgiOutput.find("text/html");
+		if (htmlPos == std::string::npos)
+				outputBody = cgiOutput;
+		else
+		{
+			std::string headers = cgiOutput.substr(0, htmlPos + std::string("text/html").length());
+			outputBody = cgiOutput.substr(htmlPos + std::string("text/html").length());
+			std::stringstream ss(headers);
+			std::string key;
+			std::string value;
+			while (std::getline(ss, key, ':'))
+			{
+				std::getline(ss, value, '\n');
+				outputHeaders[key] = value;
+			}
+		}
+	}
+	else
+	{
+		size_t pos = cgiOutput.find("\n\n");
+		if (pos == std::string::npos)
+			outputBody = cgiOutput;
+		else
+		{
+			std::string headers = cgiOutput.substr(0, pos + 2);
+			outputBody = cgiOutput.substr(pos + 2);
+			std::stringstream ss(headers);
+			std::string key;
+			std::string value;
+			while (std::getline(ss, key, ':'))
+			{
+				std::getline(ss, value, '\n');
+				trimWhitespaces(key);
+				trimWhitespaces(value);
+				outputHeaders[key] = value;
+			}
+		}
+	}
+}
+
+std::map<std::string, std::string> Cgi::getOutputHeaders() const
+{
+	return (outputHeaders);
+}
+
+std::string Cgi::getOutputBody() const
+{
+	return (outputBody);
 }

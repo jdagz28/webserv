@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 17:08:50 by romvan-d          #+#    #+#             */
-/*   Updated: 2025/03/07 23:20:26 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/07 23:46:21 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,8 +32,12 @@ class Cgi
 
 		Cgi &operator=(const Cgi &other);
 		void	runCgi();
+		void	parseCgiOutput();
 		
 		StatusCode getStatusCode() const;
+		std::map<std::string, std::string> getOutputHeaders() const;
+		std::string getOutputBody() const;
+
 		void	printData();
 
 		class CgiError : public std::exception
