@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 19:52:54 by romvan-d          #+#    #+#             */
-/*   Updated: 2025/03/07 17:35:22 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/07 18:48:15 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -205,9 +205,11 @@ std::string Cgi::runCgi()
 	{
 		if (env["REQUEST_METHOD="] == "POST")
 		{
-			FILE * tmpFileWrite = std::fopen("./tmp/CgiDataUpload", "w");
+			std::ofstream tempfile("./website/directory/uploads/temp.file");
+			FILE * tmpFileWrite = std::fopen("./website/directory/uploads/temp.file", "w");
 			if (!tmpFileWrite)
 			{
+				perror("Error opening file for writing");
 				std::exit(1);
 			}
 			if (this->whichMethod == POST)
@@ -215,6 +217,7 @@ std::string Cgi::runCgi()
 				char const * writingRecipient = this->data.c_str();
 				if (write(fileno(tmpFileWrite), writingRecipient, this->data.length()) == -1)
 				{
+					perror("Error writing to file");
 					std::exit(1);
 				}
 				std::cout << "Write to file" << std::endl;
@@ -222,7 +225,12 @@ std::string Cgi::runCgi()
 			}
 			close(fileno(tmpFileWrite));
 
-			FILE * tmpFileRead = std::fopen("./tmp/CgiDataUpload", "r");
+			FILE * tmpFileRead = std::fopen("./website/directory/uploads/temp.file", "r");
+			if (!tmpFileRead)
+			{
+				perror("Error opening file for reading");
+				std::exit(1);
+			}
 			dup2(fileno(tmpFileRead), STDIN_FILENO);
 			close(fileno(tmpFileRead));
 		}
@@ -295,10 +303,14 @@ std::string Cgi::runCgi()
 			}
 		}
 		std::cout << cgiOutput << std::endl;
+		if (std::remove("./website/directory/uploads/temp.file") == -1)
+		{
+			perror("Error deleting file");
+			std::exit(1);
+		}
 		setStatusCode(OK);
 		return cgiOutput;
 	}
-	// std::remove("/tmp/CgiDataUpload");
 	return "";
 }
 
