@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 19:52:54 by romvan-d          #+#    #+#             */
-/*   Updated: 2025/03/07 15:14:26 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/07 15:44:31 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <sstream>
+#include <sys/stat.h>
 
 # define BUFFERSIZE 2048
 static void freeTab(char **tab) {
@@ -39,6 +40,7 @@ Cgi::Cgi ()
 }
 
 Cgi::Cgi(const HttpRequestLine & requestLine, const HttpRequest & request, const std::string path, const std::string &uploadDir)
+	: status(OK), cgiOutput(""), outputHeaders(), outputBody()
 {
 	this->path = path;
 	this->env["REQUEST_METHOD="] = requestLine.getMethod();
@@ -52,7 +54,7 @@ Cgi::Cgi(const HttpRequestLine & requestLine, const HttpRequest & request, const
 		if (querryPos != std::string::npos)
 			this->data = uri.substr(querryPos + 1);//need the query string;
 		this->env["CONTENT_LENGTH="] = "NULL";
-		this->env["QUERRY_STRING="] = this->data;
+		this->env["QUERY_STRING="] = this->data;
 		std::stringstream iss(this->data);
 		std::string key;
 		std::string value;
@@ -111,6 +113,7 @@ char ** Cgi::convertEnv(std::map<std::string, std::string> env)
 
 	if (!envtable)
 	{
+		setStatusCode(INTERNAL_SERVER_ERROR);
 		std::exit(1);
 	}
 	size_t j = 0;
@@ -120,6 +123,7 @@ char ** Cgi::convertEnv(std::map<std::string, std::string> env)
 		envtable[j] = new char[str.length() + 1];
 		if (!envtable[j])
 		{
+			setStatusCode(INTERNAL_SERVER_ERROR);
 			freeTab(envtable);
 			std::exit(1);
 		}
@@ -136,6 +140,7 @@ char ** Cgi::convertArgs(std::vector<std::string> args)
 	char ** argstable = new char*[size + 1];
 	if (!argstable)
 	{
+		setStatusCode(INTERNAL_SERVER_ERROR);
 		std::exit(1);
 	}
 	size_t j = 0;
@@ -144,6 +149,7 @@ char ** Cgi::convertArgs(std::vector<std::string> args)
 		argstable[j] = new char[args[j].length() + 1];
 		if (!argstable[j])
 		{
+			setStatusCode(INTERNAL_SERVER_ERROR);
 			freeTab(argstable);
 			std::exit(1);
 		}
@@ -163,9 +169,14 @@ std::string Cgi::readPipe(int pipeRead)
 	while ((readChars = read(pipeRead, buffer, BUFFERSIZE)))
 	{
 		if (readChars == -1)
+		{
+			setStatusCode(INTERNAL_SERVER_ERROR);
 			throw CgiError();
+		}
 		output.append(buffer,readChars);
 	}
+	std::cout << output << std::endl;
+	std::cout.flush();
 	return output;
 }
 
@@ -176,12 +187,14 @@ std::string Cgi::runCgi()
 	std::string cgiOutput;
 	if (pipe(pipeCGI) == -1)
 	{
+		setStatusCode(INTERNAL_SERVER_ERROR);
 		std::cerr << "pipe error" << std::endl;
 		throw CgiError();
 	}
 	pidCgi = fork();
 	if (pidCgi == -1)
 	{
+		setStatusCode(INTERNAL_SERVER_ERROR);
 		std::cerr << "fork error" << std::endl;
 		close(pipeCGI[0]);
 		close(pipeCGI[1]);
@@ -210,6 +223,7 @@ std::string Cgi::runCgi()
 
 		if (dup2(pipeCGI[1], STDOUT_FILENO) == -1)
 		{
+			setStatusCode(INTERNAL_SERVER_ERROR);
 			std::cerr << "dup2 error" << std::endl;
 			throw CgiError();
 		}
@@ -231,17 +245,18 @@ std::string Cgi::runCgi()
 		// {
 		// 	std::cout << args[i] << std::endl;
 		// }
-		// std::cout << "ENV" << std::endl;
-		// for (int i = 0; env[i] != NULL; i++)
-		// {
-		// 	std::cout << env[i] << std::endl;
-		// }
-		// std::cout.flush();
+		std::cout << "ENV" << std::endl;
+		for (int i = 0; env[i] != NULL; i++)
+		{
+			std::cout << env[i] << std::endl;
+		}
+		std::cout.flush();
 
 		
 		int ret = execve(this->path.c_str(), args, env);
 		if (ret == -1)
 		{
+			setStatusCode(INTERNAL_SERVER_ERROR);
 			std::cerr << "execve error" << std::endl;
 			freeTab(args);
 			freeTab(env);
@@ -259,6 +274,7 @@ std::string Cgi::runCgi()
 		int res = waitpid(pidCgi, &status, 0);
 		if (res == -1)
 		{
+			setStatusCode(INTERNAL_SERVER_ERROR);
 			std::cerr << "waitpid error" << std::endl;
 			throw CgiError();
 		}
@@ -267,11 +283,13 @@ std::string Cgi::runCgi()
 			int exitcode = WEXITSTATUS(status);
 			if (exitcode != 0)
 			{
+				setStatusCode(INTERNAL_SERVER_ERROR);
 				close(pipeCGI[0]);
 				throw CgiError();
 			}
 		}
 		std::cout << cgiOutput << std::endl;
+		setStatusCode(OK);
 		return cgiOutput;
 	}
 	std::remove("/tmp/CgiDataUpload");
@@ -280,5 +298,32 @@ std::string Cgi::runCgi()
 
 const char *Cgi::CgiError::what() const throw()
 {
-        return("Cgi::CgiError : Internal  Error Cgi.");
+    return("Cgi::CgiError : Internal  Error Cgi.");
+}
+
+bool	Cgi::isValidScript()
+{
+        struct stat     statbuf;
+
+        if (stat(path.c_str(), &statbuf) == -1)
+        {
+                setStatusCode(NOT_FOUND); //! Double check Status Code
+                return (false);
+        }
+        if (!(statbuf.st_mode & S_IXUSR))
+        {
+                setStatusCode(FORBIDDEN); //! Double check Status Code
+                return (false);
+        }
+        return (true);
+}
+
+void	Cgi::setStatusCode(StatusCode code)
+{
+		status = code;
+}
+
+StatusCode	Cgi::getStatusCode() const
+{
+		return (status);
 }

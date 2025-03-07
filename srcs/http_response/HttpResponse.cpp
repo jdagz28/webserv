@@ -21,7 +21,7 @@
 #include <sstream>
 
 HttpResponse::HttpResponse(HttpRequest &request, const Config &config, int client_socket)
-    : _request(request), _config(config), _status(INIT), _client_socket(client_socket), _allowedMethods(), _headers(), _body("")
+    : _request(request), _config(config), _status(OK), _client_socket(client_socket), _allowedMethods(), _headers(), _body("")
 {
     if (_request.getStatusCode() !=  OK && _request.getStatusCode() != INIT)
     {
@@ -90,7 +90,8 @@ void	HttpResponse::execMethod()
         Cgi cgi(_request.getRequestLine(), _request, cgiPath, UPLOAD_DIR);
         try
         {
-            cgi.runCgi();
+            _body = cgi.runCgi();
+            _status = cgi.getStatusCode();
         }
         catch(const std::exception& e)
         {
