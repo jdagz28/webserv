@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 19:52:54 by romvan-d          #+#    #+#             */
-/*   Updated: 2025/03/08 00:38:21 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/08 12:57:38 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -295,6 +295,7 @@ void Cgi::runCgi()
 			}
 		}
 		setStatusCode(OK);
+		parseCgiOutput();
 	}
 }
 
@@ -309,12 +310,12 @@ bool	Cgi::isValidScript()
 
 	if (stat(path.c_str(), &statbuf) == -1)
 	{
-		setStatusCode(NOT_FOUND); //! Double check Status Code
+		setStatusCode(BAD_REQUEST); 
 		return (false);
 	}
 	if (!(statbuf.st_mode & S_IXUSR))
 	{
-		setStatusCode(FORBIDDEN); //! Double check Status Code
+		setStatusCode(FORBIDDEN); 
 		return (false);
 	}
 	return (true);

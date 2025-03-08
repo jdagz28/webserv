@@ -95,7 +95,6 @@ void	HttpResponse::execMethod()
 
 			Cgi cgi(_request.getRequestLine(), _request, cgiPath, UPLOAD_DIR, body);
 			cgi.runCgi();
-			cgi.parseCgiOutput();
 			_headers = cgi.getOutputHeaders();
 			_body = cgi.getOutputBody();
 			_status = cgi.getStatusCode();

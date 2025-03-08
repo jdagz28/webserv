@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/02 11:19:31 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/03/05 15:59:33 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/08 13:09:54 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -206,6 +206,8 @@ void	Config::parseServerDirective(const std::string &token, std::istringstream &
         _error = "invalid directive in server block";
         throw configException(_error, _configPath, _parsedLine);
     }
+	if (serverConfig.getServerNames().size() == 0)
+		serverConfig.setServerName("localhost");
 }
 
 void	Config::parseServerBlock(std::ifstream &infile, ServerConfig &serverConfig)
