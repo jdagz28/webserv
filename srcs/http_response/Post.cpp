@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 10:57:50 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/03/04 14:47:11 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/08 23:35:13 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,7 +74,12 @@ void	HttpResponse::processImageUpload()
 {
     std::srand(static_cast<unsigned>(std::time(0)));
     
-    std::string directory = "./website/directory/uploads/";
+	std::string directory;
+	if (_locationConfig.getUploadDir().empty())
+		directory = UPLOAD_DIR;
+	else
+		directory = _locationConfig.getUploadDir();	
+    
     struct stat st;
     if (stat(directory.c_str(), &st) == -1 || !S_ISDIR(st.st_mode))
     {
