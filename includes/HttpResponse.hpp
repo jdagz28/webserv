@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 01:13:31 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/03/06 10:35:42 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/08 14:34:45 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,6 +87,7 @@ class HttpResponse
         std::string generateStatusLine();
         std::string generateHeaderLines();
         std::string getHttpDateGMT();
+        void    addContentTypeHeader();
         void    addContentTypeHeader(const std::string &type);
         void    addKeepAliveHeader();
         void    addAllowHeader();

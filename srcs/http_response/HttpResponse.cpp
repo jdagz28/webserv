@@ -21,7 +21,7 @@
 #include <sstream>
 
 HttpResponse::HttpResponse(HttpRequest &request, const Config &config, int client_socket)
-    : _request(request), _config(config), _status(OK), _client_socket(client_socket), _allowedMethods(), _headers(), _body("")
+    : _request(request), _config(config), _status(INIT), _client_socket(client_socket), _allowedMethods(), _headers(), _body("")
 {
     if (_request.getStatusCode() !=  OK && _request.getStatusCode() != INIT)
     {
@@ -86,14 +86,22 @@ void	HttpResponse::execMethod()
     if (isCGIRequest(_request.getRequestLine().getUri()))
     {
         std::string cgiPath = resolveCGIPath();
-        std::string body;	
+        std::string body;
+        std::string uploadDir = UPLOAD_DIR;
 
         try
         {
 			if (_request.getRequestLine().getMethod() == "POST")
+            {
 				body = _request.getBuffer();
-
-			Cgi cgi(_request.getRequestLine(), _request, cgiPath, UPLOAD_DIR, body);
+                if (!_locationConfig.getUploadDir().empty())
+                    uploadDir = _locationConfig.getUploadDir();
+                _request.parseRequestBody();
+            }
+            // std::cout << "uploadDir: " << uploadDir << std::endl;
+            // std::cout << "body: " << body << std::endl;
+            // std::cout.flush();
+			Cgi cgi(_request.getRequestLine(), _request, cgiPath, uploadDir, body);
 			cgi.runCgi();
 			_headers = cgi.getOutputHeaders();
 			_body = cgi.getOutputBody();

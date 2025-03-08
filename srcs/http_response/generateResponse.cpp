@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:11:06 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/12 11:32:00 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/08 14:35:26 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,8 @@ void	HttpResponse::generateHttpResponse()
         _headers["Content-Length"] = toString(_body.size());
     addKeepAliveHeader();
     addAllowHeader();
+    if (_headers["Content-Type"].empty())
+        addContentTypeHeader();
     
     std::string statusLine = generateStatusLine();
     std::string headerLines = generateHeaderLines();
@@ -132,10 +134,20 @@ std::string	HttpResponse::generateHeaderLines()
 
 void	HttpResponse::addContentTypeHeader(const std::string &type)
 {
-    if (type.empty())
-        _headers["Content-Type"] = "text/html";
+    _headers["Content-Type"] = getMimeType(type);
+}
+
+void	HttpResponse::addContentTypeHeader()
+{
+    std::string extension = getExtension(_request.getRequestLine().getUri());
+    std::string type = getHeader("Content-Type");
+    trimWhitespaces(type);
+    if (!type.empty())
+        _headers["Content-Type"] = type;
+    else if (!extension.empty())
+        _headers["Content-Type"] = getMimeType(extension);
     else
-        _headers["Content-Type"] = getMimeType(type);
+        _headers["Content-Type"] = "text/plain";
 }
 
 std::string	HttpResponse::getHeader(const std::string &header)

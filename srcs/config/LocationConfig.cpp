@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/07 23:05:41 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/03/06 09:40:08 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/08 13:54:23 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -253,4 +253,26 @@ bool	LocationConfig::isCGIExtensionAllowed(const std::string &extension) const
 			return (true);
 	}
 	return (false);
+}
+
+const std::string   LocationConfig::getUploadDir() const
+{
+    std::map<std::string, std::string>::const_iterator directive;
+    for (directive = _directives.begin(); directive != _directives.end(); directive++)
+    {
+        if (directive->first == "upload_dir")
+            return (directive->second);
+    }
+    return (std::string());
+}
+
+const std::string   LocationConfig::getProgram() const
+{
+    std::map<std::string, std::string>::const_iterator directive;
+    for (directive = _directives.begin(); directive != _directives.end(); directive++)
+    {
+        if (directive->first == "program")
+            return (directive->second);
+    }
+    return (std::string());
 }

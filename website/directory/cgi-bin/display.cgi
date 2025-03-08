@@ -55,5 +55,5 @@ if os.path.exists(upload_dir):
 else:
     html_content = generate_empty()
 
-print("Content-type: text/html\n")
+print("Content-Type: text/html\n")
 print(html_content)
