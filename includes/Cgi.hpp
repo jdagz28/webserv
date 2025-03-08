@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 17:08:50 by romvan-d          #+#    #+#             */
-/*   Updated: 2025/03/07 23:46:21 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/08 15:32:36 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,12 +57,14 @@ class Cgi
 		std::string							cgiOutput;
 		std::map<std::string, std::string>	outputHeaders;
 		std::string							outputBody;
+		std::string							tempFile;
 		
 		char ** convertEnv(std::map<std::string, std::string> env);
 		char ** convertArgs(std::vector<std::string> args);
 		void	readPipe(int pipeRead);
 		bool	isValidScript();
 		void 	setStatusCode(StatusCode coe);
+		void	tempFilePath();
 };
 
 #endif

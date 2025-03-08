@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:11:06 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/03/08 14:35:26 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/08 15:37:34 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,8 @@ void	HttpResponse::generateHttpResponse()
 	{
     	_responseMsg.clear();
 	}
+	if (_status == INIT)
+		setStatusCode(BAD_REQUEST);
 	if (_body.empty() && _status != OK)
         getErrorPage();
     

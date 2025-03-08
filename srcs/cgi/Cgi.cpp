@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 19:52:54 by romvan-d          #+#    #+#             */
-/*   Updated: 2025/03/08 12:57:38 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/08 15:49:20 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -194,10 +194,12 @@ void Cgi::runCgi()
 	{
 		if (env["REQUEST_METHOD="] == "POST")
 		{
-			std::ofstream tempfile("./website/directory/uploads/temp.file");
-			FILE * tmpFileWrite = std::fopen("./website/directory/uploads/temp.file", "w");
+			tempFilePath();
+			std::ofstream tempfile(tempFile.c_str());
+			FILE * tmpFileWrite = std::fopen(tempFile.c_str(), "w");
 			if (!tmpFileWrite)
 			{
+				perror("Error opening file");
 				setStatusCode(INTERNAL_SERVER_ERROR);
 				throw CgiError();
 			}
@@ -212,7 +214,7 @@ void Cgi::runCgi()
 			}
 			close(fileno(tmpFileWrite));
 
-			FILE * tmpFileRead = std::fopen("./website/directory/uploads/temp.file", "r");
+			FILE * tmpFileRead = std::fopen(tempFile.c_str(), "r");
 			if (!tmpFileRead)
 			{
 				setStatusCode(INTERNAL_SERVER_ERROR);
@@ -286,7 +288,7 @@ void Cgi::runCgi()
 				throw CgiError();
 			}
 		}
-		if (std::remove("./website/directory/uploads/temp.file") != 0)
+		if (std::remove(tempFile.c_str()) != 0)
 		{
 			if (errno != ENOENT)
 			{
@@ -388,4 +390,22 @@ std::map<std::string, std::string> Cgi::getOutputHeaders() const
 std::string Cgi::getOutputBody() const
 {
 	return (outputBody);
+}
+
+void	Cgi::tempFilePath()
+{
+	if (uploadDir.empty())
+		uploadDir = UPLOAD_DIR;
+	
+	struct stat statbuf;
+
+	if (stat(uploadDir.c_str(), &statbuf) == -1)
+	{
+		setStatusCode(BAD_REQUEST);
+		throw ("Upload directory do not exist");
+	}
+	tempFile = uploadDir;
+	if (tempFile[tempFile.length() - 1] != '/')
+    	tempFile.push_back('/');
+	tempFile += "temp.file";
 }
