@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:11:06 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/03/08 15:37:34 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/08 23:52:24 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -149,7 +149,7 @@ void	HttpResponse::addContentTypeHeader()
     else if (!extension.empty())
         _headers["Content-Type"] = getMimeType(extension);
     else
-        _headers["Content-Type"] = "text/plain";
+        _headers["Content-Type"] = "text/html";
 }
 
 std::string	HttpResponse::getHeader(const std::string &header)

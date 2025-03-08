@@ -98,10 +98,11 @@ void	HttpResponse::execMethod()
                     uploadDir = _locationConfig.getUploadDir();
                 _request.parseRequestBody();
             }
-            // std::cout << "uploadDir: " << uploadDir << std::endl;
-            // std::cout << "body: " << body << std::endl;
-            // std::cout.flush();
-			Cgi cgi(_request.getRequestLine(), _request, cgiPath, uploadDir, body);
+
+			std::string programPath;
+			if (!_locationConfig.getProgram().empty())
+				programPath = _locationConfig.getProgram();
+			Cgi cgi(_request.getRequestLine(), _request, cgiPath, uploadDir, body, programPath);
 			cgi.runCgi();
 			_headers = cgi.getOutputHeaders();
 			_body = cgi.getOutputBody();

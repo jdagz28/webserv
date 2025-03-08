@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 17:08:50 by romvan-d          #+#    #+#             */
-/*   Updated: 2025/03/08 15:32:36 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/09 00:10:46 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,8 @@ class Cgi
 	public :
 	
 		Cgi();
-		Cgi(const HttpRequestLine &requestLine, const HttpRequest & request, const std::string path, const std::string &uploadDir, const std::string &body);
+		Cgi(const HttpRequestLine &requestLine, const HttpRequest & request, const std::string path, 
+				const std::string &uploadDir, const std::string &body, const std::string &programPath);
         Cgi(const Cgi &other);
 		~Cgi();
 
@@ -58,13 +59,15 @@ class Cgi
 		std::map<std::string, std::string>	outputHeaders;
 		std::string							outputBody;
 		std::string							tempFile;
+		std::string							programPath;
 		
 		char ** convertEnv(std::map<std::string, std::string> env);
 		char ** convertArgs(std::vector<std::string> args);
 		void	readPipe(int pipeRead);
-		bool	isValidScript();
+		bool	isValidInterpreterAndScript();
 		void 	setStatusCode(StatusCode coe);
 		void	tempFilePath();
+		void	parseShebangInterpreter();
 };
 
 #endif

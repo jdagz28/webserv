@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/04 14:50:02 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/03/08 13:48:58 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/09 00:17:00 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -424,10 +424,10 @@ void    Config::parseProgram(const std::string &value, LocationConfig &locationC
 {
     for (size_t i = 0; i < value.size(); i++)
     {
-        if (!std::isalnum(value[i]) && value[i] != '/')
-        {
-            if (i == 0 && value[i] == '.')
+		if (i == 0 && value[i] == '.')
                 continue ; 
+        if (!std::isalnum(value[i]) && value[i] != '/' && value[i] != '_')
+        {
             _error = std::string("invalid value in ") + GREEN + "\"program\"" + RESET + " directive";
             throw configException(_error, _configPath, _parsedLine);
         }

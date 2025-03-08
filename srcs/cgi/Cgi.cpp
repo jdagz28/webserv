@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 19:52:54 by romvan-d          #+#    #+#             */
-/*   Updated: 2025/03/08 15:49:20 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/09 00:13:59 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,8 +39,9 @@ Cgi::Cgi ()
 
 }
 
-Cgi::Cgi(const HttpRequestLine & requestLine, const HttpRequest & request, const std::string path, const std::string &uploadDir, const std::string &body)
-	: status(OK), cgiOutput(""), outputHeaders(), outputBody()
+Cgi::Cgi(const HttpRequestLine & requestLine, const HttpRequest & request, const std::string path, const std::string &uploadDir, 
+			const std::string &body, const std::string &programPath)
+	: status(OK), cgiOutput(""), outputBody(""), programPath(programPath)
 {
 	this->path = path;
 	this->env["REQUEST_METHOD="] = requestLine.getMethod();
@@ -55,14 +56,6 @@ Cgi::Cgi(const HttpRequestLine & requestLine, const HttpRequest & request, const
 			this->data = uri.substr(querryPos + 1);//need the query string;
 		this->env["CONTENT_LENGTH="] = "NULL";
 		this->env["QUERY_STRING="] = this->data;
-		std::stringstream iss(this->data);
-		std::string key;
-		std::string value;
-		while (std::getline(iss, key, '='))
-		{
-			std::getline(iss, value, '&');
-			this->args.push_back(key + "=" + value);
-		}
 	}
 	else if (requestLine.getMethod() == "POST")
 	{
@@ -107,7 +100,7 @@ char ** Cgi::convertEnv(std::map<std::string, std::string> env)
 	if (!envtable)
 	{
 		setStatusCode(INTERNAL_SERVER_ERROR);
-		std::exit(1);
+		throw CgiError();
 	}
 	size_t j = 0;
 	for (std::map<std::string, std::string>::iterator i = env.begin(); i != env.end(); ++i)
@@ -118,7 +111,7 @@ char ** Cgi::convertEnv(std::map<std::string, std::string> env)
 		{
 			setStatusCode(INTERNAL_SERVER_ERROR);
 			freeTab(envtable);
-			std::exit(1);
+			throw CgiError();
 		}
 		strcpy(envtable[j], str.c_str());
 		j++;
@@ -130,23 +123,24 @@ char ** Cgi::convertEnv(std::map<std::string, std::string> env)
 char ** Cgi::convertArgs(std::vector<std::string> args)
 {
 	size_t size = args.size();
-	char ** argstable = new char*[size + 1];
+	char ** argstable = new char*[size + 2];
 	if (!argstable)
 	{
 		setStatusCode(INTERNAL_SERVER_ERROR);
-		std::exit(1);
+		throw CgiError();
 	}
 	size_t j = 0;
 	for (std::vector<std::string>::iterator i = args.begin(); i != args.end(); ++i)
 	{
-		argstable[j] = new char[args[j].length() + 1];
+		std::cout << *i << std::endl;
+		argstable[j] = new char[i->length() + 1];
 		if (!argstable[j])
 		{
 			setStatusCode(INTERNAL_SERVER_ERROR);
 			freeTab(argstable);
-			std::exit(1);
+			throw CgiError();
 		}
-		strcpy(argstable[j], args[j].c_str());
+		strcpy(argstable[j], i->c_str()); //! FORBIDDEN FUNCTION
 		j++;
 	}
 	argstable[j] = NULL;
@@ -171,7 +165,7 @@ void Cgi::readPipe(int pipeRead)
 
 void Cgi::runCgi()
 {
-	if (!isValidScript())
+	if (!isValidInterpreterAndScript())
 		throw CgiError();
 	
 	int pipeCGI[2];
@@ -234,28 +228,8 @@ void Cgi::runCgi()
 
 		char **args = convertArgs(this->args);
 		char **env = convertEnv(this->env);
-		// size_t lastSlashChar = this->path.find_last_of("/");
-		// int ret = chdir(this->path.substr(0, lastSlashChar).c_str());
-		// if (ret == -1)
-		// {
-		// 	freeTab(args);
-		// 	freeTab(env);
-		// 	std::exit(1);
-		// }
-		// std::cout << "ARGS" << std::endl;
-		// for (int i = 0; args[i] != NULL; i++)
-		// {
-		// 	std::cout << args[i] << std::endl;
-		// }
-		// std::cout << "ENV" << std::endl;
-		// for (int i = 0; env[i] != NULL; i++)
-		// {
-		// 	std::cout << env[i] << std::endl;
-		// }
-		// std::cout.flush();
-
 		
-		int ret = execve(this->path.c_str(), args, env);
+		int ret = execve(args[0], args, env);
 		if (ret == -1)
 		{
 			setStatusCode(INTERNAL_SERVER_ERROR);
@@ -306,10 +280,18 @@ const char *Cgi::CgiError::what() const throw()
     return("Cgi::CgiError : Internal  Error Cgi.");
 }
 
-bool	Cgi::isValidScript()
+bool	Cgi::isValidInterpreterAndScript()
 {
+	parseShebangInterpreter();
+	
 	struct stat     statbuf;
 
+	if (stat(args[0].c_str(), &statbuf) == -1)
+	{
+		setStatusCode(BAD_REQUEST);
+		return (false);
+	}
+	
 	if (stat(path.c_str(), &statbuf) == -1)
 	{
 		setStatusCode(BAD_REQUEST); 
@@ -402,10 +384,48 @@ void	Cgi::tempFilePath()
 	if (stat(uploadDir.c_str(), &statbuf) == -1)
 	{
 		setStatusCode(BAD_REQUEST);
-		throw ("Upload directory do not exist");
+		throw CgiError();
 	}
 	tempFile = uploadDir;
 	if (tempFile[tempFile.length() - 1] != '/')
     	tempFile.push_back('/');
 	tempFile += "temp.file";
+}
+
+void	Cgi::parseShebangInterpreter()
+{
+	std::ifstream script(path.c_str());
+	if (!script)
+	{
+		setStatusCode(INTERNAL_SERVER_ERROR); // if file cant be open
+		throw CgiError();
+	}	
+	
+	if (!programPath.empty())
+		args.push_back(programPath);
+	else
+	{
+		std::string shebangLine;
+		if (!std::getline(script, shebangLine))
+		{
+			script.close();
+			setStatusCode(INTERNAL_SERVER_ERROR); // if there is no first line
+			throw CgiError();
+		}
+		script.close();
+
+		if (shebangLine[0] != '#' || shebangLine[1] != '!') // check if valid
+		{
+			setStatusCode(INTERNAL_SERVER_ERROR);
+			throw CgiError();
+		}
+
+		shebangLine = shebangLine.substr(2);
+
+		std::istringstream iss(shebangLine);
+		std::string token;
+		while (iss >> token)
+			args.push_back(token);
+	}
+	args.push_back(path);
 }
