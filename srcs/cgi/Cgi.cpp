@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 19:52:54 by romvan-d          #+#    #+#             */
-/*   Updated: 2025/03/09 01:58:41 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/09 02:43:18 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -262,9 +262,8 @@ void Cgi::runCgi()
 			{
 				kill(pidCgi, SIGKILL);
 				setStatusCode(GATEWAY_TIMEOUT);
-				throw CgiError();
+				return ;
 			}
-			usleep(100000);
 		}
 
 		readPipe(pipeCGI[0]);
@@ -272,11 +271,6 @@ void Cgi::runCgi()
 		
 		if (WIFEXITED(status))
 		{
-			if (WTERMSIG(status) == SIGKILL)
-			{
-				setStatusCode(GATEWAY_TIMEOUT);
-				throw CgiError();
-			}
 			int exitcode = WEXITSTATUS(status);
 			if (exitcode != 0)
 			{
@@ -311,15 +305,18 @@ bool	Cgi::isValidInterpreterAndScript()
 
 	if (stat(args[0].c_str(), &statbuf) == -1)
 	{
+		perror("checking argv[0]");
 		setStatusCode(BAD_REQUEST);
 		return (false);
 	}
 	
 	if (stat(path.c_str(), &statbuf) == -1)
 	{
+		perror("script path");
 		setStatusCode(BAD_REQUEST); 
 		return (false);
 	}
+	
 	if (!(statbuf.st_mode & S_IXUSR))
 	{
 		setStatusCode(FORBIDDEN); 

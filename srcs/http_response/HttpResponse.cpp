@@ -107,7 +107,6 @@ void	HttpResponse::execMethod()
                     uploadDir = _locationConfig.getUploadDir();
                 _request.parseRequestBody();
             }
-
 			std::string programPath;
 			if (!_locationConfig.getProgram().empty())
 				programPath = _locationConfig.getProgram();
