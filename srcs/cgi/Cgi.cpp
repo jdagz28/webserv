@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 19:52:54 by romvan-d          #+#    #+#             */
-/*   Updated: 2025/03/09 14:41:34 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/09 21:19:04 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,7 +132,6 @@ char ** Cgi::convertArgs(std::vector<std::string> args)
 	size_t j = 0;
 	for (std::vector<std::string>::iterator i = args.begin(); i != args.end(); ++i)
 	{
-		std::cout << *i << std::endl;
 		argstable[j] = new char[i->length() + 1];
 		if (!argstable[j])
 		{
@@ -332,11 +331,6 @@ StatusCode	Cgi::getStatusCode() const
 		return (status);
 }
 
-void Cgi::printData()
-{
-	std::cout << "Data\n" << data << std::endl;
-}
-
 void	Cgi::parseCgiOutput() 
 {
 	if (cgiOutput.find("text/html") != std::string::npos)
@@ -354,6 +348,9 @@ void	Cgi::parseCgiOutput()
 			while (std::getline(ss, key, ':'))
 			{
 				std::getline(ss, value, '\n');
+				
+				trimWhitespaces(key);
+				trimWhitespaces(value);
 				outputHeaders[key] = value;
 			}
 		}

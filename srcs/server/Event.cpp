@@ -26,6 +26,11 @@ Event::Event(clientFD fd, int epollFD, const Config &config)
 
 Event::~Event()
 {
+	if (_fd != -1)
+	{
+		close(_fd);
+		_fd = -1;
+	}
     delete _request;
     if (_response)
     {

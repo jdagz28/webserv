@@ -1,4 +1,5 @@
-print("Content-Type: text/html\n")
+print("Content-Type: text/html")
+print("")
 print("<html>")
 print("<head><title>CGI Test</title></head>")
 print("<body>")
