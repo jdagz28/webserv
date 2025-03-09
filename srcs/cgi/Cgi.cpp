@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 19:52:54 by romvan-d          #+#    #+#             */
-/*   Updated: 2025/03/09 02:43:18 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/09 21:19:04 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,7 +132,6 @@ char ** Cgi::convertArgs(std::vector<std::string> args)
 	size_t j = 0;
 	for (std::vector<std::string>::iterator i = args.begin(); i != args.end(); ++i)
 	{
-		std::cout << *i << std::endl;
 		argstable[j] = new char[i->length() + 1];
 		if (!argstable[j])
 		{
@@ -193,7 +192,6 @@ void Cgi::runCgi()
 			FILE * tmpFileWrite = std::fopen(tempFile.c_str(), "w");
 			if (!tmpFileWrite)
 			{
-				perror("Error opening file");
 				setStatusCode(INTERNAL_SERVER_ERROR);
 				throw CgiError();
 			}
@@ -305,14 +303,12 @@ bool	Cgi::isValidInterpreterAndScript()
 
 	if (stat(args[0].c_str(), &statbuf) == -1)
 	{
-		perror("checking argv[0]");
 		setStatusCode(BAD_REQUEST);
 		return (false);
 	}
 	
 	if (stat(path.c_str(), &statbuf) == -1)
 	{
-		perror("script path");
 		setStatusCode(BAD_REQUEST); 
 		return (false);
 	}
@@ -335,11 +331,6 @@ StatusCode	Cgi::getStatusCode() const
 		return (status);
 }
 
-void Cgi::printData()
-{
-	std::cout << "Data\n" << data << std::endl;
-}
-
 void	Cgi::parseCgiOutput() 
 {
 	if (cgiOutput.find("text/html") != std::string::npos)
@@ -357,6 +348,9 @@ void	Cgi::parseCgiOutput()
 			while (std::getline(ss, key, ':'))
 			{
 				std::getline(ss, value, '\n');
+				
+				trimWhitespaces(key);
+				trimWhitespaces(value);
 				outputHeaders[key] = value;
 			}
 		}

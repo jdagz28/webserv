@@ -112,7 +112,10 @@ void	HttpResponse::execMethod()
 				programPath = _locationConfig.getProgram();
 			Cgi cgi(_request.getRequestLine(), _request, cgiPath, uploadDir, body, programPath, timeout);
 			cgi.runCgi();
-			_headers = cgi.getOutputHeaders();
+			std::map<std::string, std::string> headers = cgi.getOutputHeaders();
+			std::map<std::string, std::string>::iterator it;
+			for (it = headers.begin(); it != headers.end(); it++)
+				_headers[it->first] = it->second;
 			_body = cgi.getOutputBody();
 			_status = cgi.getStatusCode();
         }

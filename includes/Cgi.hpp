@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 17:08:50 by romvan-d          #+#    #+#             */
-/*   Updated: 2025/03/09 01:12:57 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/09 21:18:31 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,8 +39,6 @@ class Cgi
 		StatusCode getStatusCode() const;
 		std::map<std::string, std::string> getOutputHeaders() const;
 		std::string getOutputBody() const;
-
-		void	printData();
 
 		class CgiError : public std::exception
 		{
