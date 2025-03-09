@@ -22,8 +22,8 @@
 #include <csignal>
 
 #define CRLF "\r\n"
-#define MAX_URI_LENGTH 1000
-#define MAX_HEADER_LENGTH 1000
+#define MAX_URI_LENGTH 100
+#define MAX_HEADER_LENGTH 100
 #define DEFAULT_SERVERNAME "webserv"
 #define LOCALHOST "127.0.0.1"
 #define MAX_CLIENTS 1000
