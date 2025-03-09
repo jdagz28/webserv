@@ -78,32 +78,35 @@ void    Server::initServer()
 void    Server::createSockets()
 {
     std::vector<ServerConfig> servers = _config.getServerConfig();
-	std::set<int> createdPorts;
     std::vector<ServerConfig>::iterator it;
-
+	std::set<int> createdPorts;
+	
     for (it = servers.begin(); it != servers.end(); it++)
     {
-        int itPort = it->getPort();
-		if (createdPorts.find(itPort) != createdPorts.end())
-			continue ; 
-		
-		try
-        {
-            Socket *socket = new Socket(it->getIP(), it->getPort());
-            if (setNonBlocking(socket->getSocketFD()) == -1)
-                throw ServerException("Error: Failed to set master socket to non-blocking mode");
-            socket->bindSocket();
-            socket->listenSocket();
+		std::vector <int> ports = it->getPort();
+		std::vector<int>::iterator itPort;
+		for (itPort = ports.begin(); itPort != ports.end(); itPort++)
+		{
+			if (createdPorts.find(*itPort) != createdPorts.end())
+				continue ; 
+			try
+			{
+				Socket *socket = new Socket(it->getIP(), *itPort);
+				if (setNonBlocking(socket->getSocketFD()) == -1)
+					throw ServerException("Error: Failed to set master socket to non-blocking mode");
+				socket->bindSocket();
+				socket->listenSocket();
 
-            _monitoredFDs[socket->getSocketFD()] = socket;
-            _masterFDs.push_back(socket->getSocketFD());
-			createdPorts.insert(itPort);
-        }
-        catch(const std::exception& e)
-        {
-            _serverStatus = -1;
-            std::cerr << e.what() << std::endl;
-        }
+				_monitoredFDs[socket->getSocketFD()] = socket;
+				_masterFDs.push_back(socket->getSocketFD());
+				createdPorts.insert(*itPort);
+			}
+			catch(const std::exception& e)
+			{
+				_serverStatus = -1;
+				std::cerr << e.what() << std::endl;
+			}
+		}
     }
 }
 

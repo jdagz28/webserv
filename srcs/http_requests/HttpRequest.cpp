@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:18:22 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/03/07 22:13:53 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/09 22:45:31 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -270,6 +270,15 @@ const std::string	HttpRequest::getHeader(const std::string &field) const
 const std::map<std::string, std::string>	&HttpRequest::getFormData() const
 {
     return (_formData);
+}
+
+int	HttpRequest::getPort() const
+{
+	std::string host = getHost();
+	size_t pos = host.find(":");
+	if (pos == std::string::npos)
+		return (-1);
+	return (strToInt(host.substr(pos + 1)));	
 }
 
 bool	HttpRequest::isSupportedMediaPOST()

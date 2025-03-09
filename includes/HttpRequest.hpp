@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:11:42 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/03/07 16:58:11 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/09 22:45:58 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,6 +82,7 @@ class HttpRequest
 		size_t 	expectedTotalBytes();
 		size_t	getBufferSize() const;
 		std::string	getBuffer() const;
+		int	getPort() const;
 
         bool    isConnectionClosed() const;
         bool    isMultiPartFormData(std::string *boundary);
