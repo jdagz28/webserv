@@ -32,12 +32,16 @@ void Logger::checkConfig(const Config &config)
 
     for (it = servers.begin(); it != servers.end(); ++it)
     {
-        int port = it->getPort();
-        if (printedPorts.find(port) == printedPorts.end())
-        {
-            printedPorts.insert(port);
-            listening(port, &message, config);
-        }
+        std::vector<int> ports = it->getPort();
+		std::vector<int>::iterator port;
+		for (port = ports.begin(); port != ports.end(); ++port)
+		{
+			if (printedPorts.find(*port) == printedPorts.end())
+			{
+				printedPorts.insert(*port);
+				listening(*port, &message, config);
+			}
+		}
     }
     std::string closing = "==========================================\n";
     std::cout << closing;
@@ -51,7 +55,7 @@ void Logger::listening(int port, std::string *message, const Config &config)
     std::vector<ServerConfig>::iterator it;
     for (it = servers.begin(); it != servers.end(); it++)
     {
-        if (it->getPort() == port)
+        if (it->isServerPort(port))
         {
             std::string serverName;
             std::vector<std::string> names = it->getServerNames();

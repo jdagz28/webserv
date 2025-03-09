@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:18:22 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/03/07 22:13:53 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/10 00:27:22 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,24 +131,21 @@ void	HttpRequest::requestToBuffer()
     const size_t tempBufferSize = 1024;
     std::vector<unsigned char> tempBuffer(tempBufferSize);
     ssize_t bytesRead = 0;
-	bool dataRead = false;
     
 	while (true)
 	{
 		bytesRead = recv(_client_socket, &tempBuffer[0], tempBufferSize, 0);
 		if (bytesRead > 0)
-		{
 			_buffer.insert(_buffer.end(), tempBuffer.begin(), tempBuffer.begin() + bytesRead);
-			dataRead = true;
-		}
 		else if (bytesRead == 0)
 			break;
 		else
 		{
-			if (!dataRead)
-				throw::std::runtime_error("Error: reading from socket");
-			break ; 
+			_buffer.clear();
+			throw std::runtime_error("Error: reading from socket");
 		}
+		if (static_cast<size_t>(bytesRead) < tempBufferSize)
+			break;
 	}
 }
 
@@ -270,6 +267,15 @@ const std::string	HttpRequest::getHeader(const std::string &field) const
 const std::map<std::string, std::string>	&HttpRequest::getFormData() const
 {
     return (_formData);
+}
+
+int	HttpRequest::getPort() const
+{
+	std::string host = getHost();
+	size_t pos = host.find(":");
+	if (pos == std::string::npos)
+		return (-1);
+	return (strToInt(host.substr(pos + 1)));	
 }
 
 bool	HttpRequest::isSupportedMediaPOST()
