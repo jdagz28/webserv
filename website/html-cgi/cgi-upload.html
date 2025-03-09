@@ -4,9 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="resources/css/styles.css">
+    <link rel="stylesheet" href="../resources/css/styles.css">
+    <link rel="stylesheet" href="../resources/css/upload.css">
     <link rel="stylesheet" href="../resources/css/navbar.css">
-    <title>Homepage</title>
+    <title>Image Upload</title>
 </head>
 
 <body>
@@ -20,8 +21,13 @@
         </ul>
     </nav>
 
-    <h1 class="landing">CGI</h1>
-
+    <div class="container">
+        <form method="POST" class="form" action="/directory/cgi-bin/file.cgi" enctype="multipart/form-data">
+            <input class="file-upload-wrapper" name="file" type="file">
+            <input  class="file-upload-sbutton" name="submit_name" type="submit" value="upload">
+        </form>
+    </div>
+    
 </body>
 
-</html>
+</html>s
