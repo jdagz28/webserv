@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:11:06 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/03/08 23:52:24 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/09 13:00:48 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,11 +55,12 @@ void	HttpResponse::generateHttpResponse()
 std::string	HttpResponse::getHttpDateGMT()
 {
     std::time_t now = std::time(NULL);
-    std::tm *gmt_tm = std::gmtime(&now);
+    std::tm tm_result;
+	gmtime_r(&now, &tm_result);
     
     const int kDateBufSize = 1024;
     char date[kDateBufSize];
-    std::strftime(date, sizeof(date), "%a, %d %b %Y %H:%M:%S GMT", gmt_tm);
+    std::strftime(date, sizeof(date), "%a, %d %b %Y %H:%M:%S GMT", &tm_result);
     
     return (std::string(date));
 }

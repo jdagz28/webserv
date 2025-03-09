@@ -80,7 +80,7 @@ void    Socket::createSocket()
 
 void    Socket::initAddressInfo()
 {   
-    bzero(&_addressInfo, sizeof(_addressInfo));
+    std::memset(&_addressInfo, 0, sizeof(_addressInfo));
     _addressInfo.sin_family = AF_INET;
     _addressInfo.sin_port = htons(_port);
 
