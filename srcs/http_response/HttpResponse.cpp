@@ -357,15 +357,15 @@ void	HttpResponse::sendResponse()
 
     if (_responseMsg.empty())
 	{
-        throw(std::runtime_error("Error: empty response"));
+        throw std::runtime_error("Error: empty response");
 	}
 	while (totalSent < responseSize)
 	{
 		ssize_t bytesSent = send(_client_socket, _responseMsg.data(), _responseMsg.size(), 0);
-		if (bytesSent < 0)
-			throw(std::runtime_error("Error: sending response"));
+		if (bytesSent == -1)
+			throw std::runtime_error("Error: sending response");
 		if (bytesSent == 0)
-			throw(std::runtime_error("Error: connection closed while sending"));
+			throw std::runtime_error("Error: connection closed while sending");
 		totalSent += bytesSent;
 	}
     _responseMsg.clear();
