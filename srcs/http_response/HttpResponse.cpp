@@ -87,8 +87,11 @@ void	HttpResponse::execMethod()
     {
         std::string cgiPath = resolveCGIPath();
         std::string body;
-        std::string uploadDir = UPLOAD_DIR;
-
+        std::string uploadDir;
+		if (!_locationConfig.getUploadDir().empty())
+			uploadDir = _locationConfig.getUploadDir();
+		else
+			uploadDir = UPLOAD_DIR;
         try
         {
 			int timeout = 40;
@@ -103,8 +106,6 @@ void	HttpResponse::execMethod()
 			if (_request.getRequestLine().getMethod() == "POST")
             {
 				body = _request.getBuffer();
-                if (!_locationConfig.getUploadDir().empty())
-                    uploadDir = _locationConfig.getUploadDir();
                 _request.parseRequestBody();
             }
 			std::string programPath;
