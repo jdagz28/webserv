@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/04 14:50:02 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/03/05 09:31:49 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/09 01:53:52 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -252,7 +252,8 @@ void	Config::checkValueNum(const std::string &token, const std::string &value)
 bool	Config::validLocationDirective(const std::string &token)
 {
     if (token == "root" || token == "index" || token == "autoindex" || token == "return" || token == "limit_except" 
-        || token == "types" || token == "client_max_body_size" || token == "cgi_mode" || token == "cgi_extension")
+        || token == "types" || token == "client_max_body_size" || token == "cgi_mode" || token == "cgi_extension" 
+        || token == "upload_dir" || token == "cgi_timeout")
         return (true);
     return (false);   
 }
@@ -291,6 +292,10 @@ void	Config::parseLocationDirective(const std::string &token, std::istringstream
                 parseCGIMode(value, locationConfig);
             else if (token == "cgi_extension")
                 parseCGIExtensions(value, locationConfig);
+            else if (token == "upload_dir")
+                parseUploadDir(value, locationConfig);
+			else if (token == "cgi_timeout")
+				parseCgiTimeout(value, locationConfig);
         }
     }
     else
@@ -360,7 +365,7 @@ void	Config::parseExtensionLocation(std::ifstream &infile, LocationConfig &locat
 
 bool	Config::validExtensionLocationDirective(const std::string &token)
 {
-	if ( token == "limit_except" || token == "client_max_body_size" || token == "cgi_mode")
+	if ( token == "limit_except" || token == "client_max_body_size" || token == "cgi_mode" || token == "upload_dir" || token == "program" || token == "cgi_timeout")
 		return (true);
 	return (false);
 }
@@ -387,6 +392,12 @@ void	Config::parseExtensionLocationDirective(const std::string &token, std::istr
                 parseClientBodySize(value, locationConfig);
             else if (token == "cgi_mode")
                 parseCGIMode(value, locationConfig);
+            else if (token == "upload_dir")
+                parseUploadDir(value, locationConfig);
+            else if (token == "program")
+                parseProgram(value, locationConfig);
+			else if (token == "cgi_timeout")
+				parseCgiTimeout(value, locationConfig);
         }
 		if (!locationConfig.isCGIMode())
 			locationConfig.setDirective("cgi_mode", "on");
@@ -396,4 +407,51 @@ void	Config::parseExtensionLocationDirective(const std::string &token, std::istr
         _error = "invalid directive in location block";
         throw configException(_error, _configPath, _parsedLine);
     }
+}
+
+void    Config::parseUploadDir(const std::string &value, LocationConfig &locationConfig)
+{
+    for (size_t i = 0; i < value.size(); i++)
+    {
+        if (i == 0 && value[i] == '.')
+            continue ; 
+        if (!std::isalnum(value[i]) && value[i] != '/')
+        {
+            _error = std::string("invalid value in ") + GREEN + "\"upload_dir\"" + RESET + " directive";
+            throw configException(_error, _configPath, _parsedLine);
+        }
+    }
+    locationConfig.setDirective("upload_dir", value);
+}
+
+void    Config::parseProgram(const std::string &value, LocationConfig &locationConfig)
+{
+    for (size_t i = 0; i < value.size(); i++)
+    {
+		if (i == 0 && value[i] == '.')
+                continue ; 
+        if (!std::isalnum(value[i]) && value[i] != '/' && value[i] != '_')
+        {
+            _error = std::string("invalid value in ") + GREEN + "\"program\"" + RESET + " directive";
+            throw configException(_error, _configPath, _parsedLine);
+        }
+    }
+    locationConfig.setDirective("program", value);
+}
+
+void	Config::parseCgiTimeout(const std::string &value, LocationConfig &locationConfig)
+{
+	if (value[value.length() - 1] != 's')
+	{
+		_error = std::string("invalid value in ") + GREEN + "\"cgi_timeout\"" + RESET + " directive";
+		throw configException(_error, _configPath, _parsedLine);
+	}
+	std::string check = value.substr(0, value.length() - 1);
+	int converted = strToInt(check);
+    if (converted <= 0 || converted >= 60)
+    {
+        _error = std::string("invalid value in ") + GREEN + "\"" + "cgi_timeout" + "\"" + RESET;
+        throw configException(_error, _configPath, _parsedLine);
+    }
+	locationConfig.setDirective("cgi_timeout", check);
 }

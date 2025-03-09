@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/25 12:42:30 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/11 12:28:52 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/09 13:16:45 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,7 @@ void	HttpRequest::parseRequestLine(const std::string &line)
             setStatusCode(BAD_REQUEST);
             return ;
         }
+
         if (uri.length() > MAX_URI_LENGTH)
         {
             setStatusCode(URI_TOO_LONG);

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 import os
 import sys
 import urllib.parse
@@ -15,6 +14,7 @@ else:
 params = urllib.parse.parse_qs(request_body)
 print("Content-Type: text/html")
 print("")
+print("<html>")
 print("<h1>Addition Results</h1>")
 try:
     num1 = int(params["num1"][0])
@@ -24,3 +24,4 @@ except:
     print("into numbers (integers).</output>")
     raise SystemExit(1)
 print("<output>{0} + {1} = {2}</output>".format(num1, num2, num1 + num2))
+print("</html>")

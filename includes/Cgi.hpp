@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Cgi.hpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: romvan-d <romvan-d@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 17:08:50 by romvan-d          #+#    #+#             */
-/*   Updated: 2025/03/03 18:17:26 by romvan-d         ###   ########.fr       */
+/*   Updated: 2025/03/09 01:12:57 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define CGI_HPP
 
 #include "HttpRequest.hpp"
+#include "HttpRequestLine.hpp"
 #include "LocationConfig.hpp"
 #include <exception>
 #include <map>
@@ -25,12 +26,21 @@ class Cgi
 	public :
 	
 		Cgi();
-		Cgi(HttpRequestLine &requestLine, HttpRequest & request, std::string path, std::string uploadDir);
+		Cgi(const HttpRequestLine &requestLine, const HttpRequest & request, const std::string path, 
+				const std::string &uploadDir, const std::string &body, const std::string &programPath,
+				int timeout);
         Cgi(const Cgi &other);
 		~Cgi();
 
 		Cgi &operator=(const Cgi &other);
-		std::string runCgi();
+		void	runCgi();
+		void	parseCgiOutput();
+		
+		StatusCode getStatusCode() const;
+		std::map<std::string, std::string> getOutputHeaders() const;
+		std::string getOutputBody() const;
+
+		void	printData();
 
 		class CgiError : public std::exception
 		{
@@ -44,12 +54,22 @@ class Cgi
 		std::vector<std::string> 			args;
 		std::map <std::string, std::string> env;
 		std::string							path;
-
-
+		std::string							uploadDir;
+		StatusCode							status;
+		std::string							cgiOutput;
+		std::map<std::string, std::string>	outputHeaders;
+		std::string							outputBody;
+		std::string							tempFile;
+		std::string							programPath;
+		unsigned int						timeout;
+		
 		char ** convertEnv(std::map<std::string, std::string> env);
 		char ** convertArgs(std::vector<std::string> args);
-		std::string readPipe(int pipeRead);
-
+		void	readPipe(int pipeRead);
+		bool	isValidInterpreterAndScript();
+		void 	setStatusCode(StatusCode coe);
+		void	tempFilePath();
+		void	parseShebangInterpreter();
 };
 
 #endif

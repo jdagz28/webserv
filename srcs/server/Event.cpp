@@ -80,21 +80,17 @@ void    Event::handleEvent(uint32_t events, Logger *log)
 			if (_request->getStatusCode() == OK)
 				_request->parseHttpRequest();
 						
-			if (!_request->getRequestLine().getUri().empty() && checkServerName())
-			{
-				log->request(*_request);
-				_response = new HttpResponse(*_request, _config, _fd);
+			log->request(*_request);
+			_response = new HttpResponse(*_request, _config, _fd);
 
-				struct epoll_event ev;
-				ev.data.fd = _fd;
-				ev.events = EPOLLOUT;
-				if (epoll_ctl(_epollFD, EPOLL_CTL_MOD, _fd, &ev) == -1)
-				{
-					close(_fd);
-					_finished = true;
-					throw std::runtime_error("Error: epoll_ctl failed to modify to EPOLLOUT");
-					return;
-				}
+			struct epoll_event ev;
+			ev.data.fd = _fd;
+			ev.events = EPOLLOUT;
+			if (epoll_ctl(_epollFD, EPOLL_CTL_MOD, _fd, &ev) == -1)
+			{
+				close(_fd);
+				throw std::runtime_error("Error: epoll_ctl failed to modify to EPOLLOUT");
+				return;
 			}
 		}
 

@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 01:04:16 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/11 12:33:55 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/09 02:20:31 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,6 +64,8 @@ std::string	getStatusReason(StatusCode code)
             return "Bad Gateway";
         case SERVICE_UNAVAILABLE:
             return "Service Unavailable";
+		case GATEWAY_TIMEOUT:
+			return "Gateway Timeout";
         case INIT:
             return "Status Init";
  

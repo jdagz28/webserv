@@ -6,7 +6,7 @@
 #    By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/05 02:06:08 by jdagoy            #+#    #+#              #
-#    Updated: 2025/02/03 13:28:44 by jdagoy           ###   ########.fr        #
+#    Updated: 2025/03/06 10:34:54 by jdagoy           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -32,7 +32,8 @@ HEADER_LIST			:= webserv.hpp \
 						Logger.hpp \
 						Server.hpp\
 						Socket.hpp\
-						Event.hpp
+						Event.hpp\
+						Cgi.hpp
 HEADER_FILES		:= $(addprefix $(INC_DIR), $(HEADER_LIST))
 
 
@@ -88,6 +89,11 @@ HTTPRESPONSE_SRCS	:= HttpResponse.cpp \
 HTTPRESPONSE_OBJS_LIST := $(patsubst %.cpp, %.o, $(HTTPRESPONSE_SRCS))
 HTTPRESPONSE_OBJS	:= $(addprefix $(OBJ_DIR), $(HTTPRESPONSE_OBJS_LIST))
 
+CGI_DIR				:= $(SRC_DIR)cgi/
+CGI_SRCS			:= Cgi.cpp
+CGI_OBJS_LIST 		:= $(patsubst %.cpp, %.o, $(CGI_SRCS))
+CGI_OBJS			:= $(addprefix $(OBJ_DIR), $(CGI_OBJS_LIST))
+
 LOGGER_DIR			:= $(SRC_DIR)logger/
 LOGGER_SRCS			:= Logger.cpp
 LOGGER_OBJS_LIST 	:= $(patsubst %.cpp, %.o, $(LOGGER_SRCS))
@@ -116,12 +122,15 @@ $(OBJ_DIR)%.o: $(HTTPREQUEST_DIR)%.cpp $(HEADER_FILES)
 
 $(OBJ_DIR)%.o: $(HTTPRESPONSE_DIR)%.cpp $(HEADER_FILES)
 	$(CXX) $(CXXFLAGS) -c $(INCLUDES) $< -o $@
+	
+$(OBJ_DIR)%.o: $(CGI_DIR)%.cpp $(HEADER_FILES)
+	$(CXX) $(CXXFLAGS) -c $(INCLUDES) $< -o $@
 
 $(OBJ_DIR)%.o: $(LOGGER_DIR)%.cpp $(HEADER_FILES)
 	$(CXX) $(CXXFLAGS) -c $(INCLUDES) $< -o $@
 
-$(NAME): $(OBJ_DIR) $(OBJS) $(CONFIG_OBJS) $(SERVER_OBJS) $(DEBUG_OBJS) $(HTTPREQUEST_OBJS) $(HTTPRESPONSE_OBJS) $(LOGGER_OBJS)
-	$(CXX) $(CXXFLAGS) $(OBJS) $(CONFIG_OBJS) $(SERVER_OBJS) $(DEBUG_OBJS) $(HTTPREQUEST_OBJS)  $(HTTPRESPONSE_OBJS) $(LOGGER_OBJS) -o $(NAME)
+$(NAME): $(OBJ_DIR) $(OBJS) $(CONFIG_OBJS) $(SERVER_OBJS) $(DEBUG_OBJS) $(HTTPREQUEST_OBJS) $(HTTPRESPONSE_OBJS) $(CGI_OBJS) $(LOGGER_OBJS)
+	$(CXX) $(CXXFLAGS) $(OBJS) $(CONFIG_OBJS) $(SERVER_OBJS) $(DEBUG_OBJS) $(HTTPREQUEST_OBJS)  $(HTTPRESPONSE_OBJS) $(CGI_OBJS) $(LOGGER_OBJS) -o $(NAME)
 
 clean:
 	$(RM) $(OBJ_DIR)

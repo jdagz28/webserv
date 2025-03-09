@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:11:06 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/12 11:32:00 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/09 13:00:48 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,8 @@ void	HttpResponse::generateHttpResponse()
 	{
     	_responseMsg.clear();
 	}
+	if (_status == INIT)
+		setStatusCode(BAD_REQUEST);
 	if (_body.empty() && _status != OK)
         getErrorPage();
     
@@ -35,6 +37,8 @@ void	HttpResponse::generateHttpResponse()
         _headers["Content-Length"] = toString(_body.size());
     addKeepAliveHeader();
     addAllowHeader();
+    if (_headers["Content-Type"].empty())
+        addContentTypeHeader();
     
     std::string statusLine = generateStatusLine();
     std::string headerLines = generateHeaderLines();
@@ -51,11 +55,12 @@ void	HttpResponse::generateHttpResponse()
 std::string	HttpResponse::getHttpDateGMT()
 {
     std::time_t now = std::time(NULL);
-    std::tm *gmt_tm = std::gmtime(&now);
+    std::tm tm_result;
+	gmtime_r(&now, &tm_result);
     
     const int kDateBufSize = 1024;
     char date[kDateBufSize];
-    std::strftime(date, sizeof(date), "%a, %d %b %Y %H:%M:%S GMT", gmt_tm);
+    std::strftime(date, sizeof(date), "%a, %d %b %Y %H:%M:%S GMT", &tm_result);
     
     return (std::string(date));
 }
@@ -132,10 +137,20 @@ std::string	HttpResponse::generateHeaderLines()
 
 void	HttpResponse::addContentTypeHeader(const std::string &type)
 {
-    if (type.empty())
-        _headers["Content-Type"] = "text/html";
+    _headers["Content-Type"] = getMimeType(type);
+}
+
+void	HttpResponse::addContentTypeHeader()
+{
+    std::string extension = getExtension(_request.getRequestLine().getUri());
+    std::string type = getHeader("Content-Type");
+    trimWhitespaces(type);
+    if (!type.empty())
+        _headers["Content-Type"] = type;
+    else if (!extension.empty())
+        _headers["Content-Type"] = getMimeType(extension);
     else
-        _headers["Content-Type"] = getMimeType(type);
+        _headers["Content-Type"] = "text/html";
 }
 
 std::string	HttpResponse::getHeader(const std::string &header)

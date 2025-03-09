@@ -22,7 +22,7 @@ if file_item.filename:
     with open(file_path, "wb") as file:
         file.write(file_item.file.read())
 
-    print("Content-type:text/html\r\n")
+    print("Content-Type:text/html\r\n")
     print("<html>")
     print("<head>")
     print("<title>File Upload</title>")
@@ -32,7 +32,7 @@ if file_item.filename:
     print("</body>")
     print("</html>")
 else:
-    print("Content-type:text/html\r\n")
+    print("Content-Type:text/html\r\n")
     print("<html>")
     print("<head>")
     print("<title>File Upload</title>")

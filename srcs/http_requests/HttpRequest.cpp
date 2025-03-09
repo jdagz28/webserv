@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpRequest.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: romvan-d <romvan-d@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 02:18:22 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/02/25 18:44:14 by romvan-d         ###   ########.fr       */
+/*   Updated: 2025/03/07 22:13:53 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -384,4 +384,9 @@ void	HttpRequest::reset()
 	_parseStep = REQUEST_INIT;
 	_multiFormData.clear();
 	_maxBodySize = 0;
+}
+
+std::string	HttpRequest::getBuffer() const
+{
+	return (std::string(reinterpret_cast<const char *>(_buffer.data()), _buffer.size()));
 }

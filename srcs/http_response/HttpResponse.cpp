@@ -83,7 +83,46 @@ void	HttpResponse::execMethod()
 
     if (!isMethodAllowed(_locationConfig, method))
         return ;
+    if (isCGIRequest(_request.getRequestLine().getUri()))
+    {
+        std::string cgiPath = resolveCGIPath();
+        std::string body;
+        std::string uploadDir = UPLOAD_DIR;
 
+        try
+        {
+			int timeout = 40;
+			if (!_locationConfig.getCgiTimeout().empty())
+				timeout = strToInt(_locationConfig.getCgiTimeout());
+			if (timeout == -1)
+			{
+				setStatusCode(INTERNAL_SERVER_ERROR);
+				return ;
+			}
+
+			if (_request.getRequestLine().getMethod() == "POST")
+            {
+				body = _request.getBuffer();
+                if (!_locationConfig.getUploadDir().empty())
+                    uploadDir = _locationConfig.getUploadDir();
+                _request.parseRequestBody();
+            }
+			std::string programPath;
+			if (!_locationConfig.getProgram().empty())
+				programPath = _locationConfig.getProgram();
+			Cgi cgi(_request.getRequestLine(), _request, cgiPath, uploadDir, body, programPath, timeout);
+			cgi.runCgi();
+			_headers = cgi.getOutputHeaders();
+			_body = cgi.getOutputBody();
+			_status = cgi.getStatusCode();
+        }
+        catch(const std::exception& e)
+        {
+            std::cerr << e.what() << std::endl;
+        }
+        return ;
+    }
+    
     switch (checkMethod(method))
     {
         case GET:
@@ -350,4 +389,43 @@ std::string	HttpResponse::cleanURI(std::string uri)
     if (uri[0] == '/')
         uri = uri.substr(1);
     return (uri);
+}
+
+bool	HttpResponse::isCGIRequest(const std::string &uri)
+{
+    std::string extension;
+    
+    if (uri.find("?") != std::string::npos)
+        extension = getExtension(uri.substr(0, uri.find("?")));
+    else
+    {
+        extension = getExtension(uri);
+    }
+
+    if (_locationConfig.isCGIExtensionAllowed(extension))
+        return (true);
+    return (false);
+}
+
+std::string HttpResponse::resolveCGIPath()
+{
+    std::string uri = _request.getRequestLine().getUri();
+    std::string scriptName = uri.substr(uri.find_last_of("/") + 1);
+    if (scriptName.find("?") != std::string::npos)
+        scriptName = scriptName.substr(0, scriptName.find("?"));
+    if (_locationConfig.getPath()[0] == '.' && _locationConfig.getRoot().empty())
+        return ("./website/directory/cgi-bin/" + scriptName);
+    else
+    {
+        if (_locationConfig.getRoot().empty())
+            return ("./website/directory/cgi-bin/" + scriptName);
+        else
+        {
+            std::string path = "./" + _locationConfig.getRoot() + _locationConfig.getPath();
+            if (path[path.size() - 1] == '/')
+                return (path + scriptName);
+            else
+                return (path + "/" + scriptName);
+        }
+    }
 }

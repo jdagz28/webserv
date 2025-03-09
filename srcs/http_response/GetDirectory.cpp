@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 15:15:53 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/03/06 04:01:58 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/09 01:27:31 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -175,6 +175,7 @@ void	HttpResponse::generateDirPage(const std::string &path, std::set<FileData> &
     
     _body = html.str();
     setStatusCode(OK);
+	_headers["Content-Type"] = "text/html";
 }
 
 void	HttpResponse::generateDirList(std::string path)

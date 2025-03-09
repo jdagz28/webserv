@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/25 12:44:49 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/03/04 14:39:38 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/07 16:43:49 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,7 +129,7 @@ void	HttpRequest::parseBinary(const std::string &boundary, MultiFormData *form)
         if (boundaryIt == _buffer.end())
         {
             form->binary.insert(form->binary.end(), _buffer.begin(), _buffer.end());
-            if (form->binary.size() > _maxBodySize)
+            if (form->binary.size() > _maxBodySize && _maxBodySize != 0)
             {
                 setStatusCode(PAYLOAD_TOO_LARGE);
                 return ;
@@ -138,7 +138,7 @@ void	HttpRequest::parseBinary(const std::string &boundary, MultiFormData *form)
             break;
         }
         form->binary.insert(form->binary.end(), _buffer.begin(), boundaryIt);
-		if (form->binary.size() > _maxBodySize)
+		if (form->binary.size() > _maxBodySize && _maxBodySize != 0)
 		{
 			setStatusCode(PAYLOAD_TOO_LARGE);
 			return ;
@@ -184,7 +184,7 @@ void	HttpRequest::parseRequestBody()
         setStatusCode(BAD_REQUEST);
         return ;
 	}
-	if (static_cast<size_t>(strToInt(contentLen)) > _maxBodySize)
+	if (static_cast<size_t>(strToInt(contentLen)) > _maxBodySize && _maxBodySize != 0)
 	{
 		setStatusCode(PAYLOAD_TOO_LARGE);
 		return ;
@@ -214,7 +214,7 @@ void	HttpRequest::parseRequestBody()
                     if (_status != OK)
                         return ;
                 }
-				else if (type.find("multipart/form-data") != std::string::npos)
+				else if ((type.find("multipart/form-data") != std::string::npos))
 				{
 					std::string boundary;
 					if (isMultiPartFormData(&boundary)) 

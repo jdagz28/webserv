@@ -75,7 +75,9 @@ class Config
 		void	parseExtensionLocation(std::ifstream &infile, LocationConfig &locationConfig);
 		bool	validExtensionLocationDirective(const std::string &token);
 		void	parseExtensionLocationDirective(const std::string &token, std::istringstream &iss, std::ifstream &infile, LocationConfig &locationConfig);
-
+        void	parseUploadDir(const std::string &value, LocationConfig &locationConfig);
+        void    parseProgram(const std::string &value, LocationConfig &locationConfig);
+		void	parseCgiTimeout(const std::string &value, LocationConfig &locationConfig);
 
     public:
         Config(const std::string &configPath);

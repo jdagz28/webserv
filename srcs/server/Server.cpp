@@ -24,7 +24,7 @@ Server::Server(const Config &config)
     : _serverStatus(0), _config(config), _masterFDs(), _monitoredFDs(), _clients(), _log()
 {
     _log.checkConfig(config);
-    _eventsQueue = epoll_create1(0);
+    _eventsQueue = epoll_create(1);
     if (_eventsQueue == -1)
         throw ServerException("Error: Failed to create epoll instance");
 }
@@ -153,7 +153,7 @@ void    Server::checkForNewConnections(clientFD newClient)
 void    Server::addToEpoll(int epollFD, int fd, uint32_t events)
 {
     struct epoll_event event;
-    bzero(&event, sizeof(event));
+    std::memset(&event, 0, sizeof(event));
     event.data.fd = fd;
     event.events = events;
 
@@ -177,8 +177,6 @@ void    Server::handleEvent(clientFD fd, uint32_t eventFlags)
     }
     else if (_clients.find(fd) != _clients.end())
         _clients[fd]->handleEvent(eventFlags, &_log);
-    else
-        throw ServerException("Error: FD not found in _monitoredFDs or _clients");
 }
 
 void	Server::cleanupFinishedEvents() 
