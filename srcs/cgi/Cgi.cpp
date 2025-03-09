@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 19:52:54 by romvan-d          #+#    #+#             */
-/*   Updated: 2025/03/09 02:43:18 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/09 14:41:34 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -193,7 +193,6 @@ void Cgi::runCgi()
 			FILE * tmpFileWrite = std::fopen(tempFile.c_str(), "w");
 			if (!tmpFileWrite)
 			{
-				perror("Error opening file");
 				setStatusCode(INTERNAL_SERVER_ERROR);
 				throw CgiError();
 			}
@@ -305,14 +304,12 @@ bool	Cgi::isValidInterpreterAndScript()
 
 	if (stat(args[0].c_str(), &statbuf) == -1)
 	{
-		perror("checking argv[0]");
 		setStatusCode(BAD_REQUEST);
 		return (false);
 	}
 	
 	if (stat(path.c_str(), &statbuf) == -1)
 	{
-		perror("script path");
 		setStatusCode(BAD_REQUEST); 
 		return (false);
 	}
