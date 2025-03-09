@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 22:50:55 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/03/06 03:54:39 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/09 01:33:37 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ void	HttpResponse::generateErrorPage(const std::string &status, const std::strin
     html << "</head>\r\n\r\n";
     html << "<body>\r\n";
     
-	if (_locationConfig.getRoot() == "website")
+	if (_locationConfig.getRoot() == "website" && _serverConfig.getPort() == 4242)
 	{
 		html << "\t<nav class=\"navbar\">\r\n";
 		html << "\t\t<ul class=\"nav-list\">\r\n";
@@ -66,7 +66,8 @@ void	HttpResponse::generateErrorPage(const std::string &status, const std::strin
     html << "</body>\r\n\r\n";
     html << "</html>\r\n";
 
-    _body = html.str();   
+    _body = html.str(); 
+	_headers["Content-Type"] = "text/html";
 }
 
 

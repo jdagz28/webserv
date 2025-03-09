@@ -177,8 +177,6 @@ void    Server::handleEvent(clientFD fd, uint32_t eventFlags)
     }
     else if (_clients.find(fd) != _clients.end())
         _clients[fd]->handleEvent(eventFlags, &_log);
-    else
-        throw ServerException("Error: FD not found in _monitoredFDs or _clients");
 }
 
 void	Server::cleanupFinishedEvents() 

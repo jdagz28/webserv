@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/04 14:50:02 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/03/09 00:42:45 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/09 01:53:52 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -448,10 +448,10 @@ void	Config::parseCgiTimeout(const std::string &value, LocationConfig &locationC
 	}
 	std::string check = value.substr(0, value.length() - 1);
 	int converted = strToInt(check);
-    if (converted <= 0 || converted >= 20)
+    if (converted <= 0 || converted >= 60)
     {
         _error = std::string("invalid value in ") + GREEN + "\"" + "cgi_timeout" + "\"" + RESET;
         throw configException(_error, _configPath, _parsedLine);
     }
-	locationConfig.setDirective("cgi_timeout", value);
+	locationConfig.setDirective("cgi_timeout", check);
 }

@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 19:52:54 by romvan-d          #+#    #+#             */
-/*   Updated: 2025/03/09 00:13:59 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/09 01:58:41 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,8 +40,8 @@ Cgi::Cgi ()
 }
 
 Cgi::Cgi(const HttpRequestLine & requestLine, const HttpRequest & request, const std::string path, const std::string &uploadDir, 
-			const std::string &body, const std::string &programPath)
-	: status(OK), cgiOutput(""), outputBody(""), programPath(programPath)
+			const std::string &body, const std::string &programPath, int timeout)
+	: status(OK), cgiOutput(""), outputBody(""), programPath(programPath), timeout(timeout)
 {
 	this->path = path;
 	this->env["REQUEST_METHOD="] = requestLine.getMethod();
@@ -241,19 +241,42 @@ void Cgi::runCgi()
 	else
 	{
 		close(pipeCGI[1]);
+				
+		time_t start = time(NULL);		
+		int status;
+		int res;
 		
+		while (true)
+		{
+			res = waitpid(pidCgi, &status, WNOHANG);
+			if (res == -1)
+			{
+				if (errno == EINTR)
+            		continue;
+				setStatusCode(INTERNAL_SERVER_ERROR);
+				throw CgiError();
+			}
+			else if (res == pidCgi)
+				break ; 
+			if (time(NULL) - start >= timeout)
+			{
+				kill(pidCgi, SIGKILL);
+				setStatusCode(GATEWAY_TIMEOUT);
+				throw CgiError();
+			}
+			usleep(100000);
+		}
+
 		readPipe(pipeCGI[0]);
 		close(pipeCGI[0]);
 		
-		int status;
-		int res = waitpid(pidCgi, &status, 0);
-		if (res == -1)
-		{
-			setStatusCode(INTERNAL_SERVER_ERROR);
-			throw CgiError();
-		}
 		if (WIFEXITED(status))
 		{
+			if (WTERMSIG(status) == SIGKILL)
+			{
+				setStatusCode(GATEWAY_TIMEOUT);
+				throw CgiError();
+			}
 			int exitcode = WEXITSTATUS(status);
 			if (exitcode != 0)
 			{
@@ -397,7 +420,7 @@ void	Cgi::parseShebangInterpreter()
 	std::ifstream script(path.c_str());
 	if (!script)
 	{
-		setStatusCode(INTERNAL_SERVER_ERROR); // if file cant be open
+		setStatusCode(INTERNAL_SERVER_ERROR); 
 		throw CgiError();
 	}	
 	
@@ -409,12 +432,12 @@ void	Cgi::parseShebangInterpreter()
 		if (!std::getline(script, shebangLine))
 		{
 			script.close();
-			setStatusCode(INTERNAL_SERVER_ERROR); // if there is no first line
+			setStatusCode(INTERNAL_SERVER_ERROR);
 			throw CgiError();
 		}
 		script.close();
 
-		if (shebangLine[0] != '#' || shebangLine[1] != '!') // check if valid
+		if (shebangLine[0] != '#' || shebangLine[1] != '!') 
 		{
 			setStatusCode(INTERNAL_SERVER_ERROR);
 			throw CgiError();

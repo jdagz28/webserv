@@ -91,6 +91,15 @@ void	HttpResponse::execMethod()
 
         try
         {
+			int timeout = 40;
+			if (!_locationConfig.getCgiTimeout().empty())
+				timeout = strToInt(_locationConfig.getCgiTimeout());
+			if (timeout == -1)
+			{
+				setStatusCode(INTERNAL_SERVER_ERROR);
+				return ;
+			}
+
 			if (_request.getRequestLine().getMethod() == "POST")
             {
 				body = _request.getBuffer();
@@ -102,7 +111,7 @@ void	HttpResponse::execMethod()
 			std::string programPath;
 			if (!_locationConfig.getProgram().empty())
 				programPath = _locationConfig.getProgram();
-			Cgi cgi(_request.getRequestLine(), _request, cgiPath, uploadDir, body, programPath);
+			Cgi cgi(_request.getRequestLine(), _request, cgiPath, uploadDir, body, programPath, timeout);
 			cgi.runCgi();
 			_headers = cgi.getOutputHeaders();
 			_body = cgi.getOutputBody();

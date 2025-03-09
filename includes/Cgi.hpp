@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 17:08:50 by romvan-d          #+#    #+#             */
-/*   Updated: 2025/03/09 00:10:46 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/09 01:12:57 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,8 @@ class Cgi
 	
 		Cgi();
 		Cgi(const HttpRequestLine &requestLine, const HttpRequest & request, const std::string path, 
-				const std::string &uploadDir, const std::string &body, const std::string &programPath);
+				const std::string &uploadDir, const std::string &body, const std::string &programPath,
+				int timeout);
         Cgi(const Cgi &other);
 		~Cgi();
 
@@ -60,6 +61,7 @@ class Cgi
 		std::string							outputBody;
 		std::string							tempFile;
 		std::string							programPath;
+		unsigned int						timeout;
 		
 		char ** convertEnv(std::map<std::string, std::string> env);
 		char ** convertArgs(std::vector<std::string> args);

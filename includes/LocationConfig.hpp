@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/06 22:38:51 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/03/08 13:52:07 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/09 01:12:04 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,7 @@ class LocationConfig
 		const std::string	getMaxBodyMode() const;
         const std::string   getUploadDir() const;
         const std::string   getProgram() const;
+		std::string	getCgiTimeout() const;
 
         bool    isMethodAllowed(const std::string &method) const;
         bool    isRedirect() const;
