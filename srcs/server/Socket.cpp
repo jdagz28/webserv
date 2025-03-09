@@ -22,7 +22,6 @@ Socket::Socket(const std::string &ip, int port)
 {
     try
     {
-        initSocket();
         createSocket();
     }
     catch(const std::exception &e)
