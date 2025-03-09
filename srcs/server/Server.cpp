@@ -23,6 +23,7 @@
 Server::Server(const Config &config) 
     : _serverStatus(0), _config(config), _masterFDs(), _monitoredFDs(), _clients(), _log()
 {
+	validateConfigPorts();	
     _log.checkConfig(config);
     _eventsQueue = epoll_create(1);
     if (_eventsQueue == -1)
@@ -79,16 +80,13 @@ void    Server::createSockets()
 {
     std::vector<ServerConfig> servers = _config.getServerConfig();
     std::vector<ServerConfig>::iterator it;
-	std::set<int> createdPorts;
-	
+
     for (it = servers.begin(); it != servers.end(); it++)
     {
 		std::vector <int> ports = it->getPort();
 		std::vector<int>::iterator itPort;
 		for (itPort = ports.begin(); itPort != ports.end(); itPort++)
 		{
-			if (createdPorts.find(*itPort) != createdPorts.end())
-				continue ; 
 			try
 			{
 				Socket *socket = new Socket(it->getIP(), *itPort);
@@ -99,7 +97,6 @@ void    Server::createSockets()
 
 				_monitoredFDs[socket->getSocketFD()] = socket;
 				_masterFDs.push_back(socket->getSocketFD());
-				createdPorts.insert(*itPort);
 			}
 			catch(const std::exception& e)
 			{
@@ -176,7 +173,6 @@ void    Server::handleEvent(clientFD fd, uint32_t eventFlags)
 
         checkForNewConnections(newClient);                
         addToEpoll(_eventsQueue, newClient, EPOLLIN);
-        // _log.acceptedConnection(_monitoredFDs[fd]->getAddressInfo(), ntohs(_monitoredFDs[fd]->getAddressInfo().sin_port));
     }
     else if (_clients.find(fd) != _clients.end())
         _clients[fd]->handleEvent(eventFlags, &_log);
@@ -245,4 +241,25 @@ int Server::setNonBlocking(int fd)
     if (fcntl(fd, F_SETFL, flags | O_NONBLOCK) == -1)
         return (-1);
     return (0);
+}
+
+
+void	Server::validateConfigPorts()
+{
+	std::vector<ServerConfig> servers = _config.getServerConfig();
+	std::vector<ServerConfig>::iterator it;
+	std::vector<int> ports;
+	std::vector<int>::iterator itPort;
+	std::vector<int> allPorts;
+
+	for (it = servers.begin(); it != servers.end(); it++)
+	{
+		ports = it->getPort();
+		for (itPort = ports.begin(); itPort != ports.end(); itPort++)
+		{
+			if (std::find(allPorts.begin(), allPorts.end(), *itPort) != allPorts.end())
+				throw ServerException("Error: Duplicate port number in configuration file");
+			allPorts.push_back(*itPort);
+		}
+	}
 }
