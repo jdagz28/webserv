@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 19:52:54 by romvan-d          #+#    #+#             */
-/*   Updated: 2025/03/10 00:44:14 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/10 01:32:47 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ Cgi::Cgi ()
 
 Cgi::Cgi(const HttpRequestLine & requestLine, const HttpRequest & request, const std::string path, const std::string &uploadDir, 
 			const std::string &body, const std::string &programPath, int timeout)
-	: status(OK), cgiOutput(""), outputBody(""), programPath(programPath), timeout(timeout)
+	: uploadDir(uploadDir), status(OK), cgiOutput(""), outputBody(""), programPath(programPath), timeout(timeout)
 {
 	this->path = path;
 	this->env["REQUEST_METHOD="] = requestLine.getMethod();
@@ -167,7 +167,9 @@ void Cgi::runCgi()
 {
 	if (!isValidInterpreterAndScript())
 		throw CgiError();
-	
+	tempFilePath();
+	std::ofstream tempfile(tempFile.c_str());
+		
 	int pipeCGI[2];
 	pid_t pidCgi;
 	
@@ -188,8 +190,6 @@ void Cgi::runCgi()
 	{
 		if (env["REQUEST_METHOD="] == "POST")
 		{
-			tempFilePath();
-			std::ofstream tempfile(tempFile.c_str());
 			FILE * tmpFileWrite = std::fopen(tempFile.c_str(), "w");
 			if (!tmpFileWrite)
 			{
@@ -278,8 +278,11 @@ void Cgi::runCgi()
 				throw CgiError();
 			}
 		}
+		std::cout << tempFile << std::endl;
+		std::cout.flush();
 		if (std::remove(tempFile.c_str()) != 0)
 		{
+			perror("Error deleting file");
 			if (errno != ENOENT)
 			{
 				setStatusCode(INTERNAL_SERVER_ERROR);
@@ -391,9 +394,6 @@ std::string Cgi::getOutputBody() const
 
 void	Cgi::tempFilePath()
 {
-	if (uploadDir.empty())
-		uploadDir = UPLOAD_DIR;
-	
 	struct stat statbuf;
 
 	if (stat(uploadDir.c_str(), &statbuf) == -1)
