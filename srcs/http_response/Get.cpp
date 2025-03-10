@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:05:38 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/03/06 04:04:12 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/10 14:03:07 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,7 +122,8 @@ void 	HttpResponse::getResourceContent(const std::string &file_path)
     
 	std::string contentType = getExtension(file_path);
 	addContentTypeHeader(contentType);
-	setStatusCode(OK);
+	if (!(getStatusCode() >= 400 && getStatusCode() < 600))
+		setStatusCode(OK);
 }
 
 std::string	HttpResponse::extractResourceName(const std::string &uri)
