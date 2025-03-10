@@ -24,7 +24,7 @@ class ServerConfig
     private:
         std::map<std::string, std::vector<std::string> >    _directives;
         std::string                                         _ip;
-        std::vector<int>                                    _port;
+        int                                                 _port;
         std::vector<std::string>                            _serverName;
         std::vector<LocationConfig>                         _locationConfig;
         std::map<int, std::string>                          _errorPages;
@@ -47,7 +47,7 @@ class ServerConfig
         void    setValid();
 
         const std::map<std::string, std::vector<std::string> >	&getDirectives() const;
-        std::vector<int>	getPort() const;
+        int	getPort() const;
         const std::string	getIP() const;
         std::vector<std::string>	getServerNames() const;
         std::string	checkServerName(const std::string &requestHost) const;
@@ -56,7 +56,6 @@ class ServerConfig
         const std::string	getErrorPage(int status) const;
         bool    isPathAlreadySet(const std::string &path) const;
         bool    isValid() const;
-		bool	isServerPort(int port) const;
 };
 
 #endif

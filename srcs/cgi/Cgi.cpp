@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 19:52:54 by romvan-d          #+#    #+#             */
-/*   Updated: 2025/03/10 00:44:14 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/09 21:19:04 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,8 +24,7 @@
 #include <sys/stat.h>
 
 # define BUFFERSIZE 2048
-static void freeTab(char **tab) 
-{
+static void freeTab(char **tab) {
     size_t i = 0;
 
     while (tab[i] != NULL) {
@@ -54,7 +53,7 @@ Cgi::Cgi(const HttpRequestLine & requestLine, const HttpRequest & request, const
 	{
 		this->whichMethod = 0;
 		if (querryPos != std::string::npos)
-			this->data = uri.substr(querryPos + 1);
+			this->data = uri.substr(querryPos + 1);//need the query string;
 		this->env["CONTENT_LENGTH="] = "NULL";
 		this->env["QUERY_STRING="] = this->data;
 	}
@@ -140,7 +139,7 @@ char ** Cgi::convertArgs(std::vector<std::string> args)
 			freeTab(argstable);
 			throw CgiError();
 		}
-		strcpy(argstable[j], i->c_str());
+		strcpy(argstable[j], i->c_str()); //! FORBIDDEN FUNCTION
 		j++;
 	}
 	argstable[j] = NULL;

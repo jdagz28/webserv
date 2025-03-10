@@ -14,7 +14,7 @@
 #include <cstdlib>
 
 ServerConfig::ServerConfig()
-    : _valid(false)
+    : _port(-1), _valid(false)
 {}
 
 ServerConfig::ServerConfig(const ServerConfig &copy)
@@ -53,7 +53,7 @@ void   ServerConfig::setDirective(const std::string &directive, const std::strin
 
 void    ServerConfig::setPort(int port)
 {
-    _port.push_back(port);
+    _port = port;
 }
 
 void    ServerConfig::setIP(const std::string &ip)
@@ -92,20 +92,9 @@ const std::map<std::string, std::vector<std::string> >	&ServerConfig::getDirecti
     return (_directives);
 }
 
-std::vector<int>	ServerConfig::getPort() const
+int	ServerConfig::getPort() const
 {
     return (_port);
-}
-
-bool	ServerConfig::isServerPort(int port) const
-{
-	std::vector<int>::const_iterator it;
-	for (it = _port.begin(); it != _port.end(); it++)
-	{
-		if (*it == port)
-			return (true);
-	}
-	return (false);
 }
 
 const std::string	ServerConfig::getIP() const

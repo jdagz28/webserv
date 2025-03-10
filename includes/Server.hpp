@@ -53,7 +53,6 @@ class Server
         void    addToEpoll(int epollFD, int fd, uint32_t events);
         void    handleEvent(clientFD fd, uint32_t eventFlags);
 		void    cleanupFinishedEvents();
-		void	validateConfigPorts();
 
     public:
         Server(const Config &config);

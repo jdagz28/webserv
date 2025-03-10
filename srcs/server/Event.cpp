@@ -49,7 +49,7 @@ bool    Event::checkServerName()
     std::vector<ServerConfig>::const_iterator server;
     for (server = servers.begin(); server != servers.end(); server++)
     {
-        if (server->isServerPort(port))
+        if (server->getPort() == port)
         {
             std::vector<std::string> serverNames = server->getServerNames();
             std::vector<std::string>::const_iterator serverName;
@@ -84,21 +84,18 @@ void    Event::handleEvent(uint32_t events, Logger *log)
 
 			if (_request->getStatusCode() == OK)
 				_request->parseHttpRequest();
+						
+			log->request(*_request);
+			_response = new HttpResponse(*_request, _config, _fd);
 
-			if (checkServerName()|| (_request->getStatusCode() >= 400 && _request->getStatusCode() < 500))
+			struct epoll_event ev;
+			ev.data.fd = _fd;
+			ev.events = EPOLLOUT;
+			if (epoll_ctl(_epollFD, EPOLL_CTL_MOD, _fd, &ev) == -1)
 			{
-				log->request(*_request);
-				_response = new HttpResponse(*_request, _config, _fd);
-
-				struct epoll_event ev;
-				ev.data.fd = _fd;
-				ev.events = EPOLLOUT;
-				if (epoll_ctl(_epollFD, EPOLL_CTL_MOD, _fd, &ev) == -1)
-				{
-					close(_fd);
-					throw std::runtime_error("Error: epoll_ctl failed to modify to EPOLLOUT");
-					return;
-				}
+				close(_fd);
+				throw std::runtime_error("Error: epoll_ctl failed to modify to EPOLLOUT");
+				return;
 			}
 		}
 
