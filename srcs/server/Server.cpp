@@ -185,6 +185,7 @@ void	Server::cleanupFinishedEvents()
 	{
 		if (it->second->isFinished())
 		{
+			epoll_ctl(_eventsQueue, EPOLL_CTL_DEL, it->first, NULL);
             delete it->second;
 			_clients.erase(it++);
 		}
