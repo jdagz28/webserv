@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 15:15:53 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/03/09 01:27:31 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/10 14:38:50 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,7 +93,7 @@ void	HttpResponse::generateDirPage(const std::string &path, std::set<FileData> &
     html << "\t<div class=\"directory\">\r\n";
     html << "\t\t<h1>Index of " << path << "</h1>\r\n";
 
-    if (path == "website/directory/uploads")
+    if (path == "website/directory/uploads" || path == "website/directory/uploads/")
     {
         html << "\t\t<form method=\"POST\" action=\"/directory/uploads\">\r\n";
         html << "\t\t<input type=\"hidden\" name=\"_method\" value=\"DELETE\">\r\n";
