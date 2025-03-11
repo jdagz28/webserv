@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 01:05:38 by jdagoy            #+#    #+#             */
-/*   Updated: 2025/03/10 14:03:07 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/11 14:50:36 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,11 +77,11 @@ void	HttpResponse::getResource(const std::string &target_path)
     std::string indexPath;
         
     std::string uri = cleanURI(_request.getRequestLine().getUri());
-    if (uri == "/")
-	{
-        uri = _locationConfig.getIndex();
-	}
-	std::string resourceName = extractResourceName(uri);
+	std::string resourceName; 
+	if (!_locationConfig.getIndex().empty() && getExtension(_request.getRequestLine().getUri()).empty())
+		resourceName = _locationConfig.getIndex();
+	else
+		resourceName = extractResourceName(uri);
 	indexPath = buildResourcePath(target_path, resourceName);
 	if (fileExists(indexPath))
 		getResourceContent(indexPath);
