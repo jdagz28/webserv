@@ -6,7 +6,7 @@
 /*   By: jdagoy <jdagoy@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 19:52:54 by romvan-d          #+#    #+#             */
-/*   Updated: 2025/03/10 01:32:47 by jdagoy           ###   ########.fr       */
+/*   Updated: 2025/03/11 15:04:08 by jdagoy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -168,7 +168,6 @@ void Cgi::runCgi()
 	if (!isValidInterpreterAndScript())
 		throw CgiError();
 	tempFilePath();
-	std::ofstream tempfile(tempFile.c_str());
 		
 	int pipeCGI[2];
 	pid_t pidCgi;
@@ -190,6 +189,7 @@ void Cgi::runCgi()
 	{
 		if (env["REQUEST_METHOD="] == "POST")
 		{
+			std::ofstream tempfile(tempFile.c_str());
 			FILE * tmpFileWrite = std::fopen(tempFile.c_str(), "w");
 			if (!tmpFileWrite)
 			{
